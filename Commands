@@ -1,0 +1,3 @@
+npx create-next-app@latest architecture-studio
+npm install motion lucide-react
+npm install gsap
