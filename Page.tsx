@@ -10,11 +10,21 @@ export default function Home() {
           </div>
 
           <nav className="hidden items-center gap-8 text-xs uppercase tracking-[0.25em] md:flex">
-            <a href="#work">Work</a>
-            <a href="#studio">Studio</a>
-            <a href="#services">Services</a>
-            <a href="#contact">Contact</a>
-          </nav>
+  {["Work", "Studio", "Services", "Contact"].map((item) => (
+    <a
+      key={item}
+      href={`#${item.toLowerCase()}`}
+      className="relative group"
+    >
+      <span className="transition duration-300 group-hover:text-black/60 group-hover:drop-shadow-[0_2px_6px_rgba(0,0,0,0.15)]">
+        {item}
+      </span>
+
+      {/* underline effect */}
+      <span className="absolute left-0 -bottom-1 h-[1px] w-0 bg-black transition-all duration-300 group-hover:w-full"></span>
+    </a>
+  ))}
+</nav>
 
           <button className="md:hidden">
             <Menu size={24} />
