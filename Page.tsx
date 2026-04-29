@@ -10,7 +10,8 @@ export default function Home() {
   const leftRotate = useTransform(scrollYProgress, [0, 0.18], [0, -78]);
   const rightRotate = useTransform(scrollYProgress, [0, 0.18], [0, 78]);
   const windowScale = useTransform(scrollYProgress, [0, 0.24], [1, 2.8]);
-  const windowOpacity = useTransform(scrollYProgress, [0.2, 0.28], [1, 0]);
+  const windowOpacity = useTransform(scrollYProgress, [0.2, 0.28, 0.65, 0.68], [1, 1, 1, 0]);
+  const windowExitX = useTransform(scrollYProgress, [0.48, 0.68], ["0vw", "-156vw"]);
   const scrollTextOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
 
   // SEGMENT 2: landing page
@@ -23,7 +24,7 @@ export default function Home() {
   const landingY = useTransform(scrollYProgress, [0.22, 0.32], [80, 0]);
 
   // SEGMENT 3: selected work slides from right
-  const workX = useTransform(scrollYProgress, [0.5, 0.68], ["100%", "0%"]);
+  const workX = useTransform(scrollYProgress, [0.5, 0.68], ["100vw", "0vw"]);
   const workOpacity = useTransform(scrollYProgress, [0.5, 0.62], [0, 1]);
 
   return (
@@ -64,7 +65,7 @@ export default function Home() {
 
           {/* SEGMENT 1: WELCOME WINDOW */}
           <motion.div
-            style={{ scale: windowScale, opacity: windowOpacity }}
+            style={{ scale: windowScale, opacity: windowOpacity, x: windowExitX }}
             className="absolute inset-0 z-30 flex items-center justify-center"
           >
             <div className="relative h-[65vh] w-[78vw] max-w-5xl rounded-[18px] border-[14px] border-[#2b2118] bg-[#1d1712] shadow-[0_40px_120px_rgba(0,0,0,0.45)] [perspective:1400px]">
@@ -138,7 +139,7 @@ export default function Home() {
           <motion.section
             id="work"
             style={{ x: workX, opacity: workOpacity }}
-            className="absolute inset-0 z-20 flex items-center bg-white px-6"
+            className="absolute inset-0 z-40 flex items-center bg-white px-6"
           >
             <div className="mx-auto max-w-7xl">
               <p className="text-xs uppercase tracking-[0.4em] text-neutral-500">
