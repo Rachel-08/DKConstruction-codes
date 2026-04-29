@@ -1,0 +1,75 @@
+"use client";
+
+import { motion, MotionValue } from "motion/react";
+
+type WelcomeWindowProps = {
+  leftRotate: MotionValue<number>;
+  rightRotate: MotionValue<number>;
+  windowScale: MotionValue<number>;
+  windowOpacity: MotionValue<number>;
+  windowExitX: MotionValue<string>;
+  scrollTextOpacity: MotionValue<number>;
+};
+
+export default function WelcomeWindow({
+  leftRotate,
+  rightRotate,
+  windowScale,
+  windowOpacity,
+  windowExitX,
+  scrollTextOpacity,
+}: WelcomeWindowProps) {
+  return (
+    <>
+      <motion.div
+        style={{
+          scale: windowScale,
+          opacity: windowOpacity,
+          x: windowExitX,
+        }}
+        className="absolute inset-0 z-30 flex items-center justify-center"
+      >
+        <div className="relative h-[65vh] w-[78vw] max-w-5xl rounded-[18px] border-[14px] border-[#2b2118] bg-[#1d1712] shadow-[0_40px_120px_rgba(0,0,0,0.45)] [perspective:1400px]">
+          <img
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
+            alt="Architecture view"
+            className="absolute inset-0 h-full w-full rounded-[4px] object-cover"
+          />
+
+          <div className="absolute inset-0 bg-black/10" />
+
+          <div className="absolute left-1/2 top-0 z-20 h-full w-[12px] -translate-x-1/2 bg-[#2b2118]" />
+
+          <motion.div
+            style={{
+              rotateY: leftRotate,
+              transformOrigin: "left center",
+            }}
+            className="absolute left-0 top-0 z-30 h-full w-1/2 border-r-[6px] border-[#2b2118] bg-[#120f0c]/80 backdrop-blur-[3px]"
+          >
+            <div className="absolute inset-5 border border-white/25" />
+            <div className="absolute inset-10 border border-white/10" />
+          </motion.div>
+
+          <motion.div
+            style={{
+              rotateY: rightRotate,
+              transformOrigin: "right center",
+            }}
+            className="absolute right-0 top-0 z-30 h-full w-1/2 border-l-[6px] border-[#2b2118] bg-[#120f0c]/80 backdrop-blur-[3px]"
+          >
+            <div className="absolute inset-5 border border-white/25" />
+            <div className="absolute inset-10 border border-white/10" />
+          </motion.div>
+        </div>
+      </motion.div>
+
+      <motion.p
+        style={{ opacity: scrollTextOpacity }}
+        className="absolute bottom-10 left-1/2 z-40 -translate-x-1/2 text-xs uppercase tracking-[0.35em] text-black/60"
+      >
+        Scroll to enter
+      </motion.p>
+    </>
+  );
+}
