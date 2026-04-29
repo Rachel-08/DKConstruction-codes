@@ -10,8 +10,8 @@ export default function Home() {
   const leftRotate = useTransform(scrollYProgress, [0, 0.18], [0, -78]);
   const rightRotate = useTransform(scrollYProgress, [0, 0.18], [0, 78]);
   const windowScale = useTransform(scrollYProgress, [0, 0.24], [1, 2.8]);
-  const windowOpacity = useTransform(scrollYProgress, [0.2, 0.28, 0.65, 0.68], [1, 1, 1, 0]);
-  const windowExitX = useTransform(scrollYProgress, [0.48, 0.68], ["0vw", "-156vw"]);
+  const windowOpacity = useTransform(scrollYProgress, [0.2, 0.28], [1, 0]);
+  const windowExitX = useTransform(scrollYProgress, [0.48, 0.68], ["0vw", "-158vw"]);
   const scrollTextOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
 
   // SEGMENT 2: landing page
