@@ -1,8 +1,9 @@
 "use client";
 
-import { motion, MotionValue } from "motion/react";
+import { motion } from "motion/react";
+import type { MotionValue } from "motion";
 
-type WelcomeWindowProps = {
+type Props = {
   leftRotate: MotionValue<number>;
   rightRotate: MotionValue<number>;
   windowScale: MotionValue<number>;
@@ -18,55 +19,83 @@ export default function WelcomeWindow({
   windowOpacity,
   windowExitX,
   scrollTextOpacity,
-}: WelcomeWindowProps) {
+}: Props) {
   return (
     <>
+      {/* FULL SCREEN ARCHITECTURAL WALL */}
       <motion.div
         style={{
           scale: windowScale,
           opacity: windowOpacity,
           x: windowExitX,
         }}
-        className="absolute inset-0 z-30 flex items-center justify-center"
+        className="absolute inset-0 z-30 flex items-center justify-center bg-[#eae4d8]"
       >
-        <div className="relative h-[65vh] w-[78vw] max-w-5xl rounded-[18px] border-[14px] border-[#2b2118] bg-[#1d1712] shadow-[0_40px_120px_rgba(0,0,0,0.45)] [perspective:1400px]">
+        {/* WALL / NICHE */}
+        <div className="relative h-full w-full flex items-center justify-center">
+          
+          {/* OUTSIDE VIEW */}
           <img
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
-            alt="Architecture view"
-            className="absolute inset-0 h-full w-full rounded-[4px] object-cover"
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2000&auto=format&fit=crop"
+            className="absolute inset-0 h-full w-full object-cover"
           />
 
-          <div className="absolute inset-0 bg-black/10" />
+          {/* SOFT LIGHT OVERLAY */}
+          <div className="absolute inset-0 bg-white/10" />
 
-          <div className="absolute left-1/2 top-0 z-20 h-full w-[12px] -translate-x-1/2 bg-[#2b2118]" />
+          {/* WINDOW FRAME */}
+          <div className="relative h-[80vh] w-[80vw] max-w-6xl border-[16px] border-[#2b2118] shadow-[0_60px_160px_rgba(0,0,0,0.45)] overflow-hidden [perspective:1600px]">
+            
+            {/* GLASS */}
+            <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]" />
 
-          <motion.div
-            style={{
-              rotateY: leftRotate,
-              transformOrigin: "left center",
-            }}
-            className="absolute left-0 top-0 z-30 h-full w-1/2 border-r-[6px] border-[#2b2118] bg-[#120f0c]/80 backdrop-blur-[3px]"
-          >
-            <div className="absolute inset-5 border border-white/25" />
-            <div className="absolute inset-10 border border-white/10" />
-          </motion.div>
+            {/* CENTER FRAME LINE */}
+            <div className="absolute left-1/2 top-0 z-20 h-full w-[10px] -translate-x-1/2 bg-[#2b2118]" />
 
-          <motion.div
-            style={{
-              rotateY: rightRotate,
-              transformOrigin: "right center",
-            }}
-            className="absolute right-0 top-0 z-30 h-full w-1/2 border-l-[6px] border-[#2b2118] bg-[#120f0c]/80 backdrop-blur-[3px]"
-          >
-            <div className="absolute inset-5 border border-white/25" />
-            <div className="absolute inset-10 border border-white/10" />
-          </motion.div>
+            {/* LEFT PANEL */}
+            <motion.div
+              style={{
+                rotateY: leftRotate,
+                transformOrigin: "left center",
+              }}
+              className="absolute left-0 top-0 z-30 h-full w-1/2 bg-[#120f0c]/80 backdrop-blur-md"
+            >
+              <div className="absolute inset-6 border border-white/20" />
+            </motion.div>
+
+            {/* RIGHT PANEL */}
+            <motion.div
+              style={{
+                rotateY: rightRotate,
+                transformOrigin: "right center",
+              }}
+              className="absolute right-0 top-0 z-30 h-full w-1/2 bg-[#120f0c]/80 backdrop-blur-md"
+            >
+              <div className="absolute inset-6 border border-white/20" />
+            </motion.div>
+
+            {/* CURTAINS */}
+            <motion.div
+              style={{
+                x: leftRotate, // reuse motion feel
+              }}
+              className="absolute left-0 top-0 z-40 h-full w-1/2 bg-[#d8d1c5] origin-left"
+            />
+
+            <motion.div
+              style={{
+                x: rightRotate,
+              }}
+              className="absolute right-0 top-0 z-40 h-full w-1/2 bg-[#d8d1c5] origin-right"
+            />
+          </div>
         </div>
       </motion.div>
 
+      {/* SCROLL TEXT */}
       <motion.p
         style={{ opacity: scrollTextOpacity }}
-        className="absolute bottom-10 left-1/2 z-40 -translate-x-1/2 text-xs uppercase tracking-[0.35em] text-black/60"
+        className="pointer-events-none absolute bottom-10 left-1/2 z-40 -translate-x-1/2 text-xs uppercase tracking-[0.35em] text-black/60"
       >
         Scroll to enter
       </motion.p>
