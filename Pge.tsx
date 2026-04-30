@@ -3,46 +3,9 @@
 import { useScroll, useTransform } from "motion/react";
 import Navbar from "@/components/Navbar";
 import WelcomeWindowSection from "@/components/sections/WelcomeWindowSection";
-
+// import StudioLanding from "@/components/StudioLanding";
 export default function Home() {
   const { scrollYProgress } = useScroll();
-
-  // // SEGMENT 1: window opening
-  // const leftRotate = useTransform(scrollYProgress, [0, 0.18], [0, -78]);
-  // const rightRotate = useTransform(scrollYProgress, [0, 0.18], [0, 78]);
-
-  // const windowScale = useTransform(scrollYProgress, [0, 0.24], [1, 2.8]);
-
-  // const windowOpacity = useTransform(
-  //   scrollYProgress,
-  //   [0.2, 0.28],
-  //   [1, 0]
-  // );
-
-  // const windowExitX = useTransform(
-  //   scrollYProgress,
-  //   [0.48, 0.68],
-  //   ["0vw", "-158vw"]
-  // );
-
-  // const scrollTextOpacity = useTransform(
-  //   scrollYProgress,
-  //   [0, 0.03, 0.04],
-  //   [1, 1, 0]
-  // );
-
-  // SEGMENT 2: landing page (still inside page for now)
-  const landingOpacity = useTransform(
-    scrollYProgress,
-    [0.22, 0.32, 0.48, 0.58],
-    [0, 1, 1, 0]
-  );
-
-  const landingY = useTransform(
-    scrollYProgress,
-    [0.22, 0.32],
-    [80, 0]
-  );
 
   // SEGMENT 3: selected work
   const workX = useTransform(scrollYProgress, [0.5, 0.68], ["110vw", "0vw"]);
@@ -66,5 +29,6 @@ export default function Home() {
     <main className="relative overflow-x-hiddenbg-[#f5f2eb] text-black">
       <WelcomeWindowSection/>
        <Navbar/>
+        {/* <StudioLanding/> */}
     </main>
           );}
