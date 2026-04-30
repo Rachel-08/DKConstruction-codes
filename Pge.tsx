@@ -3,10 +3,6 @@
 import { useScroll, useTransform } from "motion/react";
 import Navbar from "@/components/Navbar";
 import WelcomeWindowSection from "@/components/sections/WelcomeWindowSection";
-// import StudioLanding from "@/components/StudioLanding";
-// import SelectedWork from "@/components/SelectedWork";
-// import About from "@/components/About";
-// import ContactSection from "@/components/Contact";
 
 export default function Home() {
   const { scrollYProgress } = useScroll();
@@ -67,7 +63,7 @@ export default function Home() {
   const contactY = useTransform(scrollYProgress, [0.98, 1], [100, 0]);
 
   return (
-    <main className="bg-[#f5f2eb] text-black">
+    <main className="relative overflow-x-hiddenbg-[#f5f2eb] text-black">
       <WelcomeWindowSection/>
        <Navbar/>
     </main>
