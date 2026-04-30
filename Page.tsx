@@ -3,6 +3,10 @@
 import { useScroll, useTransform } from "motion/react";
 import Navbar from "@/components/Navbar";
 import WelcomeWindow from "@/components/WelcomeWindow";
+import StudioLanding from "@/components/StudioLanding";
+import SelectedWork from "@/components/SelectedWork";
+import About from "@/components/About";
+import ContactSection from "@/components/Contact";
 
 export default function Home() {
   const { scrollYProgress } = useScroll();
@@ -27,8 +31,8 @@ export default function Home() {
 
   const scrollTextOpacity = useTransform(
     scrollYProgress,
-    [0, 0.12],
-    [1, 0]
+    [0, 0.03, 0.04],
+    [1, 1, 0]
   );
 
   // SEGMENT 2: landing page (still inside page for now)
@@ -44,9 +48,27 @@ export default function Home() {
     [80, 0]
   );
 
+  // SEGMENT 3: selected work
+  const workX = useTransform(scrollYProgress, [0.5, 0.68], ["110vw", "0vw"]);
+  const workOpacity = useTransform(scrollYProgress, [0.5, 0.62, 0.98, 0.99], [0, 1,1,0]);
+  const workHeadingY = useTransform(scrollYProgress, [0.68, 0.82], [0, -260]);
+  const workHeadingScale = useTransform(scrollYProgress, [0.68, 0.82], [1, 0.6]);
+  const workHeadingX = useTransform(scrollYProgress, [0.68, 0.82], [0, -250]);
+  const carouselX = useTransform(scrollYProgress, [0.89, 0.94], ["25vw", "-95vw"]);
+  const carouselOpacity = useTransform(scrollYProgress, [0.78, 0.82, 0.94], [0, 1, 1]);
+  
+
+  // SEGMENT 4: about
+  const studioOpacity = useTransform(scrollYProgress, [0.94, 0.96, 0.99], [0, 1, 1]);
+  const studioY = useTransform(scrollYProgress, [0.94, 0.96, 0.99], [150, 150, 0]);
+
+  // SEGMENT 5: contact
+  const contactOpacity = useTransform(scrollYProgress, [0.98, 1], [0, 1]);
+  const contactY = useTransform(scrollYProgress, [0.98, 1], [100, 0]);
+
   return (
     <main className="bg-[#f5f2eb] text-black">
-      <section className="relative h-[520vh]">
+      <section className="relative h-[900vh]">
         <div className="sticky top-0 h-screen overflow-hidden bg-[#f5f2eb]">
           
           {/* NAVBAR */}
@@ -60,38 +82,31 @@ export default function Home() {
             windowOpacity={windowOpacity}
             windowExitX={windowExitX}
             scrollTextOpacity={scrollTextOpacity}
+            // curtainOpacity={curtainOpacity}
+            // curtainLeftIndex={curtainLeftIndex}
+            // curtainRightIndex={curtainRightIndex}
           />
 
-          {/* BREAK 1 */}
+          {/* SEGMENT 2: STUDIO LANDING */}
+          <StudioLanding landingOpacity={landingOpacity} landingY={landingY} />
 
-          {/* SEGMENT 2: STUDIO LANDING (still inline for now) */}
-          <div
-            className="absolute inset-0 z-10 flex items-center justify-center px-6 pt-24"
-            style={{
-              opacity: landingOpacity,
-              transform: `translateY(${landingY}px)`,
-            }}
-          >
-            <div className="text-center">
-              <p className="mb-6 text-xs uppercase tracking-[0.45em] text-neutral-500">
-                Welcome to
-              </p>
+          {/* SEGMENT 3: SELECTED WORK */}
+          <SelectedWork
+            workX={workX}
+            workOpacity={workOpacity}
+            workHeadingY={workHeadingY}
+            workHeadingScale={workHeadingScale}
+            workHeadingX={workHeadingX}
+            carouselX={carouselX}
+            carouselOpacity={carouselOpacity}
+          />
 
-              <h1 className="font-serif text-6xl italic tracking-[-0.06em] md:text-9xl">
-                Aurea Studio
-              </h1>
+          {/* SEGMENT 4: ABOUT */}
+          <About studioOpacity={studioOpacity} studioY={studioY} />
 
-              <p className="mx-auto mt-8 max-w-xl text-lg leading-8 text-neutral-600">
-                A modern architecture studio designing spaces with light,
-                silence, proportion and timeless form.
-              </p>
-            </div>
+          {/* SEGMENT 5: CONTACT */}
+          <ContactSection contactOpacity={contactOpacity} contactY={contactY} />
           </div>
-
-          {/* BREAK 2 */}
-
-        </div>
-      </section>
+          </section>
     </main>
-  );
-          }
+          );}
