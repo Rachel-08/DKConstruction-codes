@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, MotionValue } from "motion/react";
+import { motion, type MotionValue } from "motion/react";
 
 type WelcomeWindowProps = {
   leftRotate: MotionValue<number>;
@@ -20,56 +20,64 @@ export default function WelcomeWindow({
   scrollTextOpacity,
 }: WelcomeWindowProps) {
   return (
-    <>
+    <section className="pointer-events-none absolute inset-0 z-[80]">
+      {/* WINDOW INTRO */}
       <motion.div
         style={{
           scale: windowScale,
           opacity: windowOpacity,
           x: windowExitX,
         }}
-        className="absolute inset-0 z-30 flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center"
       >
-        <div className="relative h-[65vh] w-[78vw] max-w-5xl rounded-[18px] border-[14px] border-[#2b2118] bg-[#1d1712] shadow-[0_40px_120px_rgba(0,0,0,0.45)] [perspective:1400px]">
+        <div className="relative h-[58vh] w-[84vw] max-w-5xl overflow-hidden rounded-[18px] border-[12px] border-[#2b2118] bg-[#1d1712] shadow-[0_40px_120px_rgba(0,0,0,0.45)] [perspective:1400px] md:h-[65vh] md:w-[78vw] md:border-[14px]">
+          {/* BACKGROUND VIEW */}
           <img
             src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
             alt="Architecture view"
-            className="absolute inset-0 h-full w-full rounded-[4px] object-cover"
+            draggable={false}
+            className="absolute inset-0 h-full w-full select-none rounded-[4px] object-cover"
           />
 
+          {/* SOFT DARK OVERLAY */}
           <div className="absolute inset-0 bg-black/10" />
 
-          <div className="absolute left-1/2 top-0 z-20 h-full w-[12px] -translate-x-1/2 bg-[#2b2118]" />
+          {/* CENTER FRAME */}
+          <div className="absolute left-1/2 top-0 z-[20] h-full w-[10px] -translate-x-1/2 bg-[#2b2118] md:w-[12px]" />
 
+          {/* LEFT WINDOW PANEL */}
           <motion.div
             style={{
               rotateY: leftRotate,
               transformOrigin: "left center",
             }}
-            className="absolute left-0 top-0 z-30 h-full w-1/2 border-r-[6px] border-[#2b2118] bg-[#120f0c]/80 backdrop-blur-[3px]"
+            className="absolute left-0 top-0 z-[30] h-full w-1/2 border-r-[5px] border-[#2b2118] bg-[#120f0c]/80 backdrop-blur-[3px] md:border-r-[6px]"
           >
-            <div className="absolute inset-5 border border-white/25" />
-            <div className="absolute inset-10 border border-white/10" />
+            <div className="absolute inset-4 border border-white/25 md:inset-5" />
+            <div className="absolute inset-8 border border-white/10 md:inset-10" />
           </motion.div>
 
+          {/* RIGHT WINDOW PANEL */}
           <motion.div
             style={{
               rotateY: rightRotate,
               transformOrigin: "right center",
             }}
-            className="absolute right-0 top-0 z-30 h-full w-1/2 border-l-[6px] border-[#2b2118] bg-[#120f0c]/80 backdrop-blur-[3px]"
+            className="absolute right-0 top-0 z-[30] h-full w-1/2 border-l-[5px] border-[#2b2118] bg-[#120f0c]/80 backdrop-blur-[3px] md:border-l-[6px]"
           >
-            <div className="absolute inset-5 border border-white/25" />
-            <div className="absolute inset-10 border border-white/10" />
+            <div className="absolute inset-4 border border-white/25 md:inset-5" />
+            <div className="absolute inset-8 border border-white/10 md:inset-10" />
           </motion.div>
         </div>
       </motion.div>
 
+      {/* SCROLL TEXT */}
       <motion.p
         style={{ opacity: scrollTextOpacity }}
-        className="pointer-events-none absolute bottom-10 left-1/2 z-5 -translate-x-1/2 text-xs uppercase tracking-[0.35em] text-black/60"
+        className="absolute bottom-8 left-1/2 z-[90] -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] text-black/60 md:bottom-10 md:text-xs"
       >
         Scroll to enter
       </motion.p>
-    </>
+    </section>
   );
 }
