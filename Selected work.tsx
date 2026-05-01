@@ -1,7 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
-import type { MotionValue } from "motion";
+import { motion, type MotionValue } from "motion/react";
 import { projects } from "@/data/projects";
 
 type SelectedWorkProps = {
@@ -26,9 +25,13 @@ export default function SelectedWork({
   return (
     <motion.section
       id="work"
-      style={{ x: workX, opacity: workOpacity }}
-      className="absolute inset-0 z-40 overflow-hidden bg-white px-6"
+      style={{
+        x: workX,
+        opacity: workOpacity,
+      }}
+      className="pointer-events-auto absolute inset-0 z-[40] overflow-hidden bg-[#f5f2eb] px-6"
     >
+      {/* HEADING */}
       <motion.div
         style={{
           y: workHeadingY,
@@ -36,7 +39,7 @@ export default function SelectedWork({
           x: workHeadingX,
           transformOrigin: "left top",
         }}
-        className="absolute left-1/2 top-1/2 max-w-5xl -translate-x-1/2 -translate-y-1/2"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-[45] max-w-5xl -translate-x-1/2 -translate-y-1/2"
       >
         <p className="text-xs uppercase tracking-[0.4em] text-neutral-500">
           Selected Work
@@ -49,20 +52,25 @@ export default function SelectedWork({
         <div className="mt-10 h-[1px] w-full bg-black/20" />
       </motion.div>
 
+      {/* CAROUSEL */}
       <motion.div
-        style={{ x: carouselX, opacity: carouselOpacity }}
-        className="absolute bottom-16 left-0 flex gap-8 px-10"
+        style={{
+          x: carouselX,
+          opacity: carouselOpacity,
+        }}
+        className="pointer-events-auto absolute bottom-14 left-0 z-[60] flex gap-8 px-6 md:bottom-16 md:px-10"
       >
         {projects.map((project, index) => (
-          <div
+          <article
             key={project.title}
-            className="w-[72vw] shrink-0 md:w-[38vw]"
+            className="group pointer-events-auto w-[76vw] shrink-0 md:w-[38vw]"
           >
-            <div className="h-[52vh] overflow-hidden rounded-[32px] border border-black/10 bg-neutral-100">
+            <div className="pointer-events-auto h-[48vh] overflow-hidden rounded-[28px] border border-black/10 bg-neutral-100 md:h-[52vh] md:rounded-[32px]">
               <img
                 src={project.image}
                 alt={project.title}
-                className="h-full w-full object-cover grayscale transition duration-700 hover:scale-105 hover:grayscale-0"
+                draggable={false}
+                className="h-full w-full select-none object-cover grayscale transition duration-700 ease-out group-hover:scale-105 group-hover:grayscale-0"
               />
             </div>
 
@@ -81,7 +89,7 @@ export default function SelectedWork({
                 View
               </span>
             </div>
-          </div>
+          </article>
         ))}
       </motion.div>
     </motion.section>
