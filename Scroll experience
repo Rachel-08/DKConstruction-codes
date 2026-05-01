@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import { useScroll, useTransform } from "motion/react";
+import { useState, useRef, use } from "react";
+import { useScroll, useTransform, useMotionValueEvent } from "motion/react";
 
 import Navbar from "@/components/Navbar";
 import WelcomeWindow from "@/components/WelcomeWindow";
@@ -12,12 +12,54 @@ import ContactSection from "@/components/Contact";
 
 export default function ScrollExperience() {
   const containerRef = useRef<HTMLElement | null>(null);
+  const [showNavbar, setShowNavbar] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
+  const [activeSegment, setActiveSegment] = useState<
+  "intro" | "landing" | "work" | "about" | "contact">("intro");
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest < 0.22) {
+      setActiveSegment("intro");
+    } else if (latest >= 0.22 && latest < 0.54) {
+      setActiveSegment("landing");
+    } else if (latest >= 0.54 && latest < 0.82) {
+      setActiveSegment("work");
+    }   else if (latest >= 0.82 && latest < 0.98) {
+        setActiveSegment("about");
+    } else {
+        setActiveSegment("contact");
+    }
+});
+
+useMotionValueEvent(scrollYProgress, "change", (latest) => {
+  const previous = scrollYProgress.getPrevious() ?? 0;
+
+  const isScrollingDown = latest > previous;
+  const isScrollingUp = latest < previous;
+
+  if(latest < 0.22){
+    setShowNavbar(false);
+    return;
+  }
+  if(isScrollingDown){
+    setShowNavbar(false);
+  }
+
+  if(isScrollingUp){
+    setShowNavbar(true);
+  }
+});
+
+const isIntroActive = activeSegment === "intro";
+const isLandingActive = activeSegment === "landing";
+const isWorkActive = activeSegment === "work";
+const isAboutActive = activeSegment === "about";
+const isContactActive = activeSegment === "contact";
   /**
    * MASTER TIMELINE
    *
@@ -46,7 +88,7 @@ export default function ScrollExperience() {
   const navY = useTransform(
     scrollYProgress,
     [0.22, 0.3],
-    [-40, 0]
+    ["-40vw", "0vw"]
   );
 
   // ----------------------------------------
@@ -80,7 +122,7 @@ export default function ScrollExperience() {
   const windowExitX = useTransform(
     scrollYProgress,
     [0.4, 0.52],
-    ["0vw", "-120vw"]
+    ["0vw", "-140vw"]
   );
 
   const scrollTextOpacity = useTransform(
@@ -102,13 +144,13 @@ export default function ScrollExperience() {
   const landingY = useTransform(
     scrollYProgress,
     [0.24, 0.36],
-    [120, 0]
+    ["120vw", "0vw"]
   );
 
   const landingExitX = useTransform(
     scrollYProgress,
     [0.4, 0.52],
-    ["0vw", "-110vw"]
+    ["0vw", "-140vw"]
   );
 
   // ----------------------------------------
@@ -117,44 +159,50 @@ export default function ScrollExperience() {
 
   const workX = useTransform(
     scrollYProgress,
-    [0.5, 0.64],
-    ["110vw", "0vw"]
+    [0.32, 0.54],
+    ["120vw", "0vw"]
   );
 
   const workOpacity = useTransform(
     scrollYProgress,
-    [0.48, 0.56, 0.88, 0.92],
+    [0.36, 0.44, 0.88, 0.94],
     [0, 1, 1, 0]
   );
 
   const workHeadingY = useTransform(
     scrollYProgress,
-    [0.64, 0.72],
-    [0, -260]
+    [0.58, 0.68],
+    ["0vw", "-16vw"]
   );
 
   const workHeadingScale = useTransform(
     scrollYProgress,
-    [0.64, 0.72],
-    [1, 0.6]
+    [0.58, 0.68],
+    [1, 0.45]
   );
 
   const workHeadingX = useTransform(
     scrollYProgress,
-    [0.64, 0.72],
-    [0, -250]
+    [0.58, 0.68],
+    ["0vw", "-14vw"]
   );
 
   const carouselOpacity = useTransform(
     scrollYProgress,
-    [0.7, 0.78, 0.88],
-    [0, 1, 1]
+    [0.68, 0.7, 0.82, 0.88],
+    [0, 1, 1, 0]
   );
 
   const carouselX = useTransform(
     scrollYProgress,
-    [0.78, 0.88],
+    [0.7, 0.82],
     ["25vw", "-95vw"]
+  );
+
+  const workExitY = useTransform(
+    scrollYProgress,
+    [0.82, 0.92],
+    ["0vh", "-95vh"]
   );
 
   // ----------------------------------------
@@ -163,21 +211,21 @@ export default function ScrollExperience() {
 
   const aboutOpacity = useTransform(
     scrollYProgress,
-    [0.86, 0.9, 0.94],
-    [0, 1, 1]
+    [0.82, 0.92],
+    [0, 1]
   );
 
   const aboutY = useTransform(
     scrollYProgress,
-    [0.86, 0.92],
-    [180, 0]
+    [0.82, 0.9],
+    ["80vw", "0vw"]
   );
 
-  const aboutExitY = useTransform(
-    scrollYProgress,
-    [0.93, 0.97],
-    [0, -120]
-  );
+//   const aboutExitY = useTransform(
+//     scrollYProgress,
+//     [0.95, 0.97],
+//     [0, -20]
+//   );
 
   // ----------------------------------------
   // SEGMENT 5: CONTACT
@@ -185,26 +233,27 @@ export default function ScrollExperience() {
 
   const contactOpacity = useTransform(
     scrollYProgress,
-    [0.94, 0.98],
+    [0.98, 1],
     [0, 1]
   );
 
   const contactY = useTransform(
     scrollYProgress,
-    [0.94, 0.98],
-    [180, 0]
+    [0.98, 1],
+    ["260vw", "0vw"]
   );
 
   return (
     <section
       id="top"
       ref={containerRef}
-      className="relative h-[1100vh] bg-[#f5f2eb]"
+      className="relative h-[1150vh] bg-[#f5f2eb] md:h-[1200vh] xl:h-[1300vh] 2xl:h-[1400vh]"
     >
-      <div className="sticky top-0 h-screen overflow-hidden bg-[#f5f2eb]">
-        <Navbar navOpacity={navOpacity} navY={navY} />
+      <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
+        <Navbar showNavbar={showNavbar}/>
 
         <WelcomeWindow
+        isActive={isIntroActive}
           leftRotate={leftRotate}
           rightRotate={rightRotate}
           windowScale={windowScale}
@@ -214,12 +263,14 @@ export default function ScrollExperience() {
         />
 
         <StudioLanding
+        isActive={isLandingActive}
           landingOpacity={landingOpacity}
           landingY={landingY}
           landingExitX={landingExitX}
         />
 
         <SelectedWork
+        isActive={isWorkActive}
           workX={workX}
           workOpacity={workOpacity}
           workHeadingY={workHeadingY}
@@ -227,15 +278,18 @@ export default function ScrollExperience() {
           workHeadingX={workHeadingX}
           carouselX={carouselX}
           carouselOpacity={carouselOpacity}
+            workExitY={workExitY}
         />
 
         <About
+        isActive={isAboutActive}
           aboutOpacity={aboutOpacity}
           aboutY={aboutY}
-          aboutExitY={aboutExitY}
+        //   aboutExitY={aboutExitY}
         />
 
         <ContactSection
+        isActive={isContactActive}
           contactOpacity={contactOpacity}
           contactY={contactY}
         />
