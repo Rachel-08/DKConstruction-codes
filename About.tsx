@@ -8,16 +8,16 @@ type Props = {
   studioY: MotionValue<number>;
 };
 
-export default function StudioSection({
+export default function About({
   studioOpacity,
   studioY,
 }: Props) {
   return (
     <motion.section
       style={{ opacity: studioOpacity, y: studioY }}
-      className="absolute inset-0 z-30 flex items-center bg-white px-6"
+      className="pointer-events-none absolute inset-0 z-[60] flex items-center bg-white px-6"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-16 md:grid-cols-2">
+      <div className="pointer-events-auto mx-auto grid max-w-7xl grid-cols-1 gap-16 md:grid-cols-2">
 
         {/* TEXT */}
         <div>
@@ -30,6 +30,11 @@ export default function StudioSection({
           </h2>
 
           <p className="mt-8 max-w-md text-lg leading-8 text-neutral-600">
+            Our approach blends architecture, light and materiality to create
+            environments that are both functional and emotionally refined.
+            Every project is treated as a unique spatial experience.Our approach blends architecture, light and materiality to create
+            environments that are both functional and emotionally refined.
+            Every project is treated as a unique spatial experience.
             Our approach blends architecture, light and materiality to create
             environments that are both functional and emotionally refined.
             Every project is treated as a unique spatial experience.
