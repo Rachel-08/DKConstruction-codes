@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import type { MotionValue } from "motion";
-import { Instagram, Linkedin, Mail, Phone } from "lucide-react";
+import {Mail, Phone } from "lucide-react";
 
 type Props = {
   contactOpacity: MotionValue<number>;
@@ -16,12 +16,12 @@ export default function ContactSection({
   return (
     <motion.section
       style={{ opacity: contactOpacity, y: contactY }}
-      className="absolute inset-0 z-[70] flex items-center bg-black px-6 text-white"
+      className="pointer-events-none absolute inset-0 z-[70] flex items-center bg-black px-6 text-white"
     >
       {/* SUBTLE FADE OVERLAY */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/90 to-transparent" />
 
-      <div className="relative mx-auto max-w-7xl">
+      <div className=" pointer-events-auto relative mx-auto max-w-7xl">
         
         {/* TOP LABEL */}
         <p className="text-xs uppercase tracking-[0.4em] text-neutral-400">
@@ -55,7 +55,7 @@ export default function ContactSection({
           {/* SOCIAL ICONS */}
           <div className="flex items-center gap-6">
 
-            <a
+            {/* <a
               href="https://instagram.com"
               target="_blank"
               className="group"
@@ -75,7 +75,7 @@ export default function ContactSection({
                 size={20}
                 className="transition duration-300 group-hover:scale-110 group-hover:text-white/60"
               />
-            </a>
+            </a> */}
 
             <a
               href="https://wa.me/911234567890"
