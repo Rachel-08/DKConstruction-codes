@@ -1,10 +1,9 @@
 "use client";
 
-import { motion } from "motion/react";
-import type { MotionValue } from "motion";
-import {Mail, Phone } from "lucide-react";
+import { motion, type MotionValue } from "motion/react";
+import { Mail, Phone } from "lucide-react";
 
-type Props = {
+type ContactSectionProps = {
   contactOpacity: MotionValue<number>;
   contactY: MotionValue<number>;
 };
@@ -12,74 +11,51 @@ type Props = {
 export default function ContactSection({
   contactOpacity,
   contactY,
-}: Props) {
+}: ContactSectionProps) {
   return (
     <motion.section
-      style={{ opacity: contactOpacity, y: contactY }}
-      className="pointer-events-none absolute inset-0 z-[70] flex items-center bg-black px-6 text-white"
+      style={{
+        opacity: contactOpacity,
+        y: contactY,
+      }}
+      className="pointer-events-none absolute inset-0 z-[75] flex items-center bg-black px-6 text-white"
     >
       {/* SUBTLE FADE OVERLAY */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/90 to-transparent" />
 
-      <div className=" pointer-events-auto relative mx-auto max-w-7xl">
-        
-        {/* TOP LABEL */}
+      {/* CONTACT CONTENT */}
+      <div className="pointer-events-auto relative mx-auto w-full max-w-7xl">
         <p className="text-xs uppercase tracking-[0.4em] text-neutral-400">
           Contact
         </p>
 
-        {/* MAIN HEADING */}
-        <h2 className="mt-6 font-serif text-5xl leading-tight md:text-7xl">
+        <h2 className="mt-6 max-w-4xl font-serif text-5xl leading-tight tracking-[-0.05em] md:text-7xl">
           Let’s build something timeless together.
         </h2>
 
-        {/* DESCRIPTION */}
-        <p className="mt-8 max-w-md text-lg leading-8 text-neutral-400">
-          Reach out to discuss your project, collaboration, or ideas.
-          We’d love to hear from you.
+        <p className="mt-8 max-w-md text-base leading-8 text-neutral-400 md:text-lg">
+          Reach out to discuss your project, collaboration, or ideas. We’d love
+          to hear from you.
         </p>
 
-        {/* CTA + CONTACT */}
         <div className="mt-12 flex flex-col gap-8">
-
-          {/* BUTTON */}
-          <button className="w-fit border border-white px-10 py-4 text-xs uppercase tracking-[0.3em] transition hover:bg-white hover:text-black">
+          <a
+            href="mailto:hello@aureastudio.com"
+            className="w-fit border border-white px-10 py-4 text-xs uppercase tracking-[0.3em] transition duration-300 hover:bg-white hover:text-black"
+          >
             Get in touch
-          </button>
+          </a>
 
-          {/* EMAIL */}
           <div className="text-sm text-neutral-400">
             hello@aureastudio.com
           </div>
 
-          {/* SOCIAL ICONS */}
           <div className="flex items-center gap-6">
-
-            {/* <a
-              href="https://instagram.com"
-              target="_blank"
-              className="group"
-            >
-              <Instagram
-                size={20}
-                className="transition duration-300 group-hover:scale-110 group-hover:text-white/60"
-              />
-            </a>
-
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              className="group"
-            >
-              <Linkedin
-                size={20}
-                className="transition duration-300 group-hover:scale-110 group-hover:text-white/60"
-              />
-            </a> */}
-
             <a
               href="https://wa.me/911234567890"
               target="_blank"
+              rel="noreferrer"
+              aria-label="Contact on WhatsApp"
               className="group"
             >
               <Phone
@@ -90,6 +66,7 @@ export default function ContactSection({
 
             <a
               href="mailto:hello@aureastudio.com"
+              aria-label="Send email"
               className="group"
             >
               <Mail
@@ -97,10 +74,8 @@ export default function ContactSection({
                 className="transition duration-300 group-hover:scale-110 group-hover:text-white/60"
               />
             </a>
-
           </div>
         </div>
-
       </div>
     </motion.section>
   );
