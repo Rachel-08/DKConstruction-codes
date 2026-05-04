@@ -3,81 +3,228 @@
 import { motion, type MotionValue } from "motion/react";
 
 type WelcomeWindowProps = {
+  isActive: boolean;
   leftRotate: MotionValue<number>;
   rightRotate: MotionValue<number>;
   windowScale: MotionValue<number>;
   windowOpacity: MotionValue<number>;
   windowExitX: MotionValue<string>;
+  frameOpacity: MotionValue<number>;
   scrollTextOpacity: MotionValue<number>;
+  onEnterClick: () => void;
 };
 
 export default function WelcomeWindow({
+  isActive,
   leftRotate,
   rightRotate,
   windowScale,
   windowOpacity,
   windowExitX,
+  frameOpacity,
   scrollTextOpacity,
+  onEnterClick,
 }: WelcomeWindowProps) {
   return (
-    <section className="pointer-events-none absolute inset-0 z-[80]">
-      {/* WINDOW INTRO */}
+    <section
+      className={`absolute inset-0 z-[80] overflow-hidden ${
+        isActive ? "pointer-events-auto" : "pointer-events-none"
+      }`}
+    >
+      {/* BACKGROUND WALL */}
+      <div className="absolute inset-0 bg-[#d7c5aa]">
+        {/* subtle plaster grain */}
+        <div className="absolute inset-0 opacity-[0.18] [background-image:radial-gradient(circle_at_1px_1px,rgba(70,55,38,0.45)_1px,transparent_0)] [background-size:18px_18px]" />
+
+        {/* warm glow behind window */}
+        <div className="absolute left-1/2 top-[6%] h-[560px] w-[820px] -translate-x-1/2 rounded-full bg-[#fff0cd]/45 blur-[100px]" />
+
+        {/* soft vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_35%,rgba(44,34,24,0.2)_100%)]" />
+      </div>
+
+      {/* WINDOW INTRO - CLICK AREA */}
       <motion.div
+        role="button"
+        tabIndex={isActive ? 0 : -1}
+        aria-label="Enter website"
+        onClick={onEnterClick}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onEnterClick();
+          }
+        }}
         style={{
           scale: windowScale,
           opacity: windowOpacity,
           x: windowExitX,
         }}
-        className="absolute inset-0 flex items-center justify-center"
+        className="absolute inset-0 flex cursor-pointer items-center justify-center px-4 outline-none"
       >
-        <div className="relative h-[58vh] w-[84vw] max-w-5xl overflow-hidden rounded-[18px] border-[12px] border-[#2b2118] bg-[#1d1712] shadow-[0_40px_120px_rgba(0,0,0,0.45)] [perspective:1400px] md:h-[65vh] md:w-[78vw] md:border-[14px]">
-          {/* BACKGROUND VIEW */}
-          <img
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
-            alt="Architecture view"
-            draggable={false}
-            className="absolute inset-0 h-full w-full select-none rounded-[4px] object-cover"
+        <div className="relative flex h-screen w-full items-center justify-center [perspective:1400px]">
+          {/* WALL RECESS OUTER SHADOW */}
+          <motion.div
+            style={{ opacity: frameOpacity }}
+            className="absolute h-[68vh] min-h-[510px] w-[min(41vw,520px)] min-w-[320px] bg-[#bda98a] shadow-[0_34px_80px_rgba(36,27,18,0.38)]"
           />
 
-          {/* SOFT DARK OVERLAY */}
-          <div className="absolute inset-0 bg-black/10" />
-
-          {/* CENTER FRAME */}
-          <div className="absolute left-1/2 top-0 z-[20] h-full w-[10px] -translate-x-1/2 bg-[#2b2118] md:w-[12px]" />
-
-          {/* LEFT WINDOW PANEL */}
+          {/* RECESSED OPENING */}
           <motion.div
-            style={{
-              rotateY: leftRotate,
-              transformOrigin: "left center",
-            }}
-            className="absolute left-0 top-0 z-[30] h-full w-1/2 border-r-[5px] border-[#2b2118] bg-[#120f0c]/80 backdrop-blur-[3px] md:border-r-[6px]"
+            style={{ opacity: frameOpacity }}
+            className="absolute h-[66vh] min-h-[490px] w-[min(39vw,500px)] min-w-[305px] bg-[#c8b594] p-[12px] shadow-[inset_0_18px_34px_rgba(35,25,16,0.42),inset_0_-10px_20px_rgba(255,255,255,0.2)]"
           >
-            <div className="absolute inset-4 border border-white/25 md:inset-5" />
-            <div className="absolute inset-8 border border-white/10 md:inset-10" />
+            {/* WINDOW FRAME OUTER */}
+            <div className="relative h-full w-full bg-[#15130f] p-[10px] shadow-[0_24px_50px_rgba(24,18,12,0.6)]">
+              {/* subtle bronze inner edge */}
+              <div className="absolute inset-[4px] border border-[#4f4638]/80" />
+
+              {/* SOFT VIEW BEHIND THE GLASS */}
+              <div className="absolute inset-[20px] overflow-hidden bg-[#c9b793]">
+                <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(236,219,184,0.95)_0%,rgba(199,181,148,0.92)_42%,rgba(143,127,99,0.9)_100%)]" />
+
+                {/* right architecture form */}
+                <div className="absolute right-[-8%] top-[10%] h-[60%] w-[48%] bg-[#ead9b7]/75 blur-[1px]" />
+
+                {/* floor / pool line */}
+                <div className="absolute bottom-[8%] right-[-2%] h-[24%] w-[76%] bg-[#ae9775]/45 blur-[2px]" />
+
+                {/* foliage shadow */}
+                <div className="absolute bottom-[5%] left-[-10%] h-[42%] w-[48%] rounded-full bg-[#4a5039]/35 blur-[22px]" />
+
+                {/* bottom dark reflection */}
+                <div className="absolute bottom-0 left-0 h-[19%] w-full bg-[#8d7959]/35 blur-[5px]" />
+
+                {/* warm haze */}
+                <div className="absolute inset-0 bg-[#f4dfb7]/25 backdrop-blur-[1px]" />
+              </div>
+
+              {/* LEFT WINDOW PANEL */}
+              <motion.div
+                style={{
+                  rotateY: leftRotate,
+                  transformOrigin: "left center",
+                  opacity: frameOpacity,
+                }}
+                className="absolute left-[20px] top-[20px] z-[30] h-[calc(100%-40px)] w-[calc(50%-22px)] bg-[#1b1915] p-[8px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),12px_0_26px_rgba(0,0,0,0.3)] [transform-style:preserve-3d]"
+              >
+                <GlassPanel side="left" />
+              </motion.div>
+
+              {/* RIGHT WINDOW PANEL */}
+              <motion.div
+                style={{
+                  rotateY: rightRotate,
+                  transformOrigin: "right center",
+                  opacity: frameOpacity,
+                }}
+                className="absolute right-[20px] top-[20px] z-[30] h-[calc(100%-40px)] w-[calc(50%-22px)] bg-[#1b1915] p-[8px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),-12px_0_26px_rgba(0,0,0,0.3)] [transform-style:preserve-3d]"
+              >
+                <GlassPanel side="right" />
+              </motion.div>
+
+              {/* CENTER FRAME */}
+              <motion.div
+                style={{ opacity: frameOpacity }}
+                className="absolute left-1/2 top-[20px] z-[40] h-[calc(100%-40px)] w-[13px] -translate-x-1/2 bg-[#11100d] shadow-[0_0_12px_rgba(0,0,0,0.45)]"
+              >
+                <div className="absolute left-1/2 top-1/2 h-[42px] w-px -translate-x-1/2 -translate-y-1/2 bg-[#b8aa8c]/50" />
+              </motion.div>
+
+              {/* FRAME HIGHLIGHT */}
+              <div className="pointer-events-none absolute inset-[20px] z-[45] border border-white/5" />
+            </div>
+
+            {/* BOTTOM SILL */}
+            <div className="absolute -bottom-[14px] left-1/2 h-[16px] w-[106%] -translate-x-1/2 bg-[#a79575] shadow-[0_12px_28px_rgba(40,30,20,0.28)]" />
           </motion.div>
 
-          {/* RIGHT WINDOW PANEL */}
+          {/* TEXT OVERLAY */}
           <motion.div
-            style={{
-              rotateY: rightRotate,
-              transformOrigin: "right center",
-            }}
-            className="absolute right-0 top-0 z-[30] h-full w-1/2 border-l-[5px] border-[#2b2118] bg-[#120f0c]/80 backdrop-blur-[3px] md:border-l-[6px]"
+            style={{ opacity: frameOpacity }}
+            className="pointer-events-none absolute z-[60] flex max-w-[900px] flex-col items-center px-6 text-center text-white"
           >
-            <div className="absolute inset-4 border border-white/25 md:inset-5" />
-            <div className="absolute inset-8 border border-white/10 md:inset-10" />
+            <p className="mb-5 text-[10px] font-medium uppercase tracking-[0.48em] text-white/85 md:text-[13px] md:tracking-[0.55em]">
+              Architecture Studio
+            </p>
+
+            <h1 className="font-serif text-[clamp(3.1rem,7.4vw,7.6rem)] leading-[0.9] tracking-[-0.06em] text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.22)]">
+              DK Construction
+              <br />
+              <span className="tracking-[-0.07em]">& Consultancy</span>
+            </h1>
+
+            <p className="mt-8 text-[12px] font-light tracking-wide text-white/90 md:text-[16px]">
+              Architecture · Interiors · Construction Consultancy
+            </p>
+
+            <div className="mt-6 h-px w-11 bg-white/45" />
+
+            <p className="mt-6 max-w-[520px] text-[12px] font-light leading-relaxed text-white/88 md:text-[15px]">
+              Designing refined spaces with clarity, function, and purpose.
+            </p>
           </motion.div>
         </div>
       </motion.div>
 
-      {/* SCROLL TEXT */}
-      <motion.p
+      {/* BOTTOM CLICK INDICATOR */}
+      <motion.div
         style={{ opacity: scrollTextOpacity }}
-        className="absolute bottom-8 left-1/2 z-[90] -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] text-black/60 md:bottom-10 md:text-xs"
+        className="pointer-events-none absolute bottom-7 left-1/2 z-[90] flex -translate-x-1/2 flex-col items-center text-white md:bottom-9"
       >
-        Scroll to enter
-      </motion.p>
+        <p className="mb-3 text-[10px] font-light uppercase tracking-[0.35em] text-white/85 md:text-[12px]">
+          Click to enter
+        </p>
+
+        <motion.div
+          animate={{ scale: [1, 1.08, 1], opacity: [0.65, 1, 0.65] }}
+          transition={{
+            duration: 1.6,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="h-[34px] w-[34px] rounded-full border border-white/45"
+        >
+          <div className="flex h-full w-full items-center justify-center">
+            <div className="h-[5px] w-[5px] rounded-full bg-white/85" />
+          </div>
+        </motion.div>
+      </motion.div>
     </section>
+  );
+}
+
+function GlassPanel({ side }: { side: "left" | "right" }) {
+  return (
+    <div className="relative h-full w-full overflow-hidden border border-[#4d4538] bg-[#c9b898]/25 shadow-[inset_0_0_35px_rgba(255,255,255,0.08)]">
+      {/* glass tint */}
+      <div className="absolute inset-0 bg-[#b6c3c4]/10 backdrop-blur-[1px]" />
+
+      {/* soft reflection streak */}
+      <div
+        className={`absolute top-[-8%] h-[70%] w-[55%] rotate-[34deg] bg-white/14 blur-[10px] ${
+          side === "left" ? "left-[20%]" : "right-[6%]"
+        }`}
+      />
+
+      {/* bottom glass darkness */}
+      <div className="absolute bottom-0 left-0 h-[32%] w-full bg-black/13" />
+
+      {/* vertical reflection */}
+      <div className="absolute right-[10%] top-0 h-full w-px bg-white/12" />
+
+      {/* inner border */}
+      <div className="absolute inset-[6px] border border-black/45" />
+
+      {/* horizontal mullions */}
+      <div className="absolute left-0 top-[30%] h-[5px] w-full bg-[#14130f] shadow-[0_1px_0_rgba(255,255,255,0.08)]" />
+      <div className="absolute left-0 bottom-[22%] h-[5px] w-full bg-[#14130f] shadow-[0_1px_0_rgba(255,255,255,0.08)]" />
+
+      {/* bevel highlights */}
+      <div className="absolute left-0 top-0 h-full w-px bg-white/10" />
+      <div className="absolute right-0 top-0 h-full w-px bg-black/35" />
+      <div className="absolute left-0 top-0 h-px w-full bg-white/10" />
+      <div className="absolute bottom-0 left-0 h-px w-full bg-black/40" />
+    </div>
   );
 }
