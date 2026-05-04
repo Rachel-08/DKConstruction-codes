@@ -1,41 +1,47 @@
 "use client";
 
-import { motion, type MotionValue } from "motion/react";
+import { motion } from "motion/react";
 
 type StudioLandingProps = {
-  landingOpacity: MotionValue<number>;
-  landingY: MotionValue<number>;
-  landingExitX: MotionValue<string>;
+  isActive: boolean;
 };
 
-export default function StudioLanding({
-  landingOpacity,
-  landingY,
-  landingExitX,
-}: StudioLandingProps) {
+export default function StudioLanding({ isActive }: StudioLandingProps) {
   return (
-    <motion.section
-      style={{
-        opacity: landingOpacity,
-        y: landingY,
-        x: landingExitX,
-      }}
-      className="pointer-events-none absolute inset-0 z-[50] flex items-center justify-center bg-[#f5f2eb] px-6 pt-24"
-    >
-      <div className="text-center">
-        <p className="mb-6 text-xs uppercase tracking-[0.45em] text-neutral-500">
-          Welcome to
+    <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f4efe7] px-6 text-[#302b25]">
+      <motion.div
+        initial={{
+          opacity: 0,
+          scale: 1.08,
+          y: 40,
+        }}
+        animate={{
+          opacity: isActive ? 1 : 0,
+          scale: isActive ? 1 : 1.08,
+          y: isActive ? 0 : 40,
+        }}
+        transition={{
+          duration: 1.2,
+          ease: [0.76, 0, 0.24, 1],
+          delay: 0.25,
+        }}
+        className="max-w-5xl text-center"
+      >
+        <p className="mb-6 text-sm font-medium uppercase tracking-[0.45em] text-[#8a7a66]">
+          Welcome to DK Studio
         </p>
 
-        <h1 className="font-serif text-6xl italic tracking-[-0.06em] md:text-9xl">
-          Aurea Studio
-        </h1>
+        <h2 className="font-serif text-[72px] leading-[0.95] tracking-[-0.05em] md:text-[110px]">
+          Spaces designed
+          <br />
+          with intention.
+        </h2>
 
-        <p className="mx-auto mt-8 max-w-xl text-lg leading-8 text-neutral-600">
-          A modern architecture studio designing spaces with light, silence,
-          proportion and timeless form.
+        <p className="mx-auto mt-8 max-w-2xl text-lg leading-8 text-[#6d6256]">
+          We create refined architecture, interiors, and construction solutions
+          rooted in clarity, function, and purpose.
         </p>
-      </div>
-    </motion.section>
+      </motion.div>
+    </section>
   );
 }
