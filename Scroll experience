@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, use } from "react";
-import { useScroll, useTransform, useMotionValueEvent } from "motion/react";
+import { animate, useMotionValue, useScroll, useTransform, useMotionValueEvent } from "motion/react";
 
 import Navbar from "@/components/Navbar";
 import WelcomeWindow from "@/components/WelcomeWindow";
@@ -44,6 +44,10 @@ useMotionValueEvent(scrollYProgress, "change", (latest) => {
 
   if(latest < 0.22){
     setShowNavbar(false);
+    return;
+  }
+  if(latest>=0.22 && latest < 0.54){
+    setShowNavbar(true);
     return;
   }
   if(isScrollingDown){
@@ -95,42 +99,55 @@ const isContactActive = activeSegment === "contact";
   // SEGMENT 1: WELCOME WINDOW
   // ----------------------------------------
 
-  const leftRotate = useTransform(
-    scrollYProgress,
-    [0, 0.18],
-    [0, -78]
-  );
+  // const leftRotate = useTransform(
+  //   scrollYProgress,
+  //   [0, 0.18],
+  //   [0, -78]
+  // );
 
-  const rightRotate = useTransform(
-    scrollYProgress,
-    [0, 0.18],
-    [0, 78]
-  );
+  // const rightRotate = useTransform(
+  //   scrollYProgress,
+  //   [0, 0.18],
+  //   [0, 78]
+  // );
 
-  const windowScale = useTransform(
-    scrollYProgress,
-    [0.08, 0.28],
-    [1, 2.8]
-  );
+  // const windowScale = useTransform(
+  //   scrollYProgress,
+  //   [0.0, 0.28],
+  //   [1, 2.1]
+  // );
 
-  const windowOpacity = useTransform(
-    scrollYProgress,
-    [0.22, 0.32],
-    [1, 0]
-  );
+  // const windowOpacity = useTransform(
+  //   scrollYProgress,
+  //   [0.26, 0.34],
+  //   [1, 0]
+  // );
 
-  const windowExitX = useTransform(
-    scrollYProgress,
-    [0.4, 0.52],
-    ["0vw", "-140vw"]
-  );
+  // const windowExitX = useTransform(
+  //   scrollYProgress,
+  //   [0.4, 0.52],
+  //   ["0vw", "-180vw"]
+  // );
 
-  const scrollTextOpacity = useTransform(
-    scrollYProgress,
-    [0, 0.035, 0.055],
-    [1, 1, 0]
-  );
+  // const frameOpacity = useTransform(
+  //   scrollYProgress,
+  //   [0.08, 0.2],
+  //   [1, 0]
+  // );
 
+  // const scrollTextOpacity = useTransform(
+  //   scrollYProgress,
+  //   [0.1, 0.2],
+  //   [1, 0]
+  // );
+
+  const leftRotate = useMotionValue(0);
+  const rightRotate = useMotionValue(0);
+  const windowScale = useMotionValue(1);
+  const windowOpacity = useMotionValue(1);
+  const windowExitX = useMotionValue("0vw");
+  const frameOpacity = useMotionValue(1);
+  const scrollTextOpacity = useMotionValue(1);
   // ----------------------------------------
   // SEGMENT 2: STUDIO LANDING
   // ----------------------------------------
@@ -144,7 +161,7 @@ const isContactActive = activeSegment === "contact";
   const landingY = useTransform(
     scrollYProgress,
     [0.24, 0.36],
-    ["120vw", "0vw"]
+    ["120vh", "0vh"]
   );
 
   const landingExitX = useTransform(
@@ -172,7 +189,7 @@ const isContactActive = activeSegment === "contact";
   const workHeadingY = useTransform(
     scrollYProgress,
     [0.58, 0.68],
-    ["0vw", "-16vw"]
+    ["0vh", "-22vh"]
   );
 
   const workHeadingScale = useTransform(
@@ -218,7 +235,7 @@ const isContactActive = activeSegment === "contact";
   const aboutY = useTransform(
     scrollYProgress,
     [0.82, 0.9],
-    ["80vw", "0vw"]
+    ["90vh", "0vh"]
   );
 
 //   const aboutExitY = useTransform(
@@ -233,15 +250,32 @@ const isContactActive = activeSegment === "contact";
 
   const contactOpacity = useTransform(
     scrollYProgress,
-    [0.98, 1],
+    [0.94, 1],
     [0, 1]
   );
 
   const contactY = useTransform(
     scrollYProgress,
-    [0.98, 1],
-    ["260vw", "0vw"]
+    [0.94, 1],
+    ["100vh", "0vh"]
   );
+
+  const srollToProgress = (progress: number) => {
+    if(!containerRef.current) return;
+
+    const container = containerRef.current;
+    const containerTop = container.offsetTop;
+    const scrollableDistance = container.offsetHeight - window.innerHeight;
+
+    window.scrollTo({
+      top: containerTop + scrollableDistance * progress,
+      behavior: 'smooth',
+    });
+  };
+
+  const handleEnterClick = () => {
+    srollToProgress(0.368);
+  }
 
   return (
     <section
@@ -259,7 +293,9 @@ const isContactActive = activeSegment === "contact";
           windowScale={windowScale}
           windowOpacity={windowOpacity}
           windowExitX={windowExitX}
+          frameOpacity={frameOpacity}
           scrollTextOpacity={scrollTextOpacity}
+          onEnterClick={handleEnterClick}
         />
 
         <StudioLanding
