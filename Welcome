@@ -35,7 +35,7 @@ export default function WelcomeWindow({
 
     const interval = window.setInterval(() => {
       setActiveWordIndex((prev) => (prev + 1) % focusWords.length);
-    }, 1400);
+    }, 1450);
 
     return () => window.clearInterval(interval);
   }, [isActive]);
@@ -47,19 +47,26 @@ export default function WelcomeWindow({
       }`}
     >
       {/* BACKGROUND WALL */}
-      <div className="absolute inset-0 bg-[#cdbc9f]">
-        {/* plaster grain */}
-        <div className="absolute inset-0 opacity-[0.16] [background-image:radial-gradient(circle_at_1px_1px,rgba(65,50,35,0.45)_1px,transparent_0)] [background-size:18px_18px]" />
+      <div className="absolute inset-0 bg-[#c7b697]">
+        {/* fine plaster grain */}
+        <div className="absolute inset-0 opacity-[0.13] [background-image:radial-gradient(circle_at_1px_1px,rgba(44,34,24,0.55)_1px,transparent_0)] [background-size:15px_15px]" />
 
-        {/* soft uneven wall shade */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_32%_35%,rgba(255,239,204,0.38)_0%,transparent_35%),radial-gradient(circle_at_72%_38%,rgba(255,229,180,0.26)_0%,transparent_28%),linear-gradient(90deg,rgba(255,255,255,0.08),rgba(0,0,0,0.08))]" />
+        {/* subtle plaster noise */}
+        <div className="absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.45)_0_1px,transparent_2px),radial-gradient(circle_at_70%_60%,rgba(0,0,0,0.4)_0_1px,transparent_2px)] [background-size:28px_28px]" />
 
-        {/* edge vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_42%,rgba(38,29,21,0.22)_100%)]" />
+        {/* uneven wall lighting */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_31%_39%,rgba(255,234,190,0.30)_0%,transparent_32%),radial-gradient(circle_at_70%_42%,rgba(255,219,156,0.40)_0%,transparent_25%),linear-gradient(90deg,rgba(255,255,255,0.10)_0%,rgba(0,0,0,0.08)_100%)]" />
 
-        {/* floor strip */}
-        <div className="absolute bottom-0 left-0 h-[7vh] w-full border-t border-black/10 bg-[#a99b86]/45" />
-        <div className="absolute bottom-[7vh] left-0 h-px w-full bg-white/20" />
+        {/* vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_46%,rgba(33,25,18,0.28)_100%)]" />
+
+        {/* floor */}
+        <div className="absolute bottom-0 left-0 h-[7.2vh] w-full border-t border-black/12 bg-[#9b8f7d]/48" />
+        <div className="absolute bottom-[7.2vh] left-0 h-px w-full bg-white/20" />
+
+        {/* floor tile lines */}
+        <div className="absolute bottom-0 left-[33%] h-[7.2vh] w-px bg-black/10" />
+        <div className="absolute bottom-0 left-[66%] h-[7.2vh] w-px bg-black/10" />
       </div>
 
       {/* FULL CLICK AREA */}
@@ -80,132 +87,178 @@ export default function WelcomeWindow({
         }}
         className="absolute inset-0 cursor-pointer outline-none"
       >
-        {/* MAIN LAYOUT */}
-        <div className="relative grid h-screen w-full grid-cols-1 items-center px-6 md:grid-cols-[0.95fr_1.05fr] md:px-[7vw]">
-          {/* LEFT WINDOW SIDE */}
-          <div className="relative hidden h-full items-center justify-center md:flex">
+        {/* DESKTOP LAYOUT */}
+        <div className="relative hidden h-screen w-full grid-cols-[0.92fr_1.08fr] items-center px-[7.2vw] md:grid">
+          {/* LEFT WINDOW AREA */}
+          <div className="relative flex h-full items-center justify-center">
             <motion.div
               style={{
                 scale: windowScale,
               }}
-              className="relative h-[74vh] min-h-[560px] w-[min(29vw,430px)] [perspective:1400px]"
+              className="relative h-[73vh] min-h-[530px] w-[min(28vw,410px)] [perspective:1500px]"
             >
-              {/* wall recess shadow */}
+              {/* outer recessed cut in wall */}
               <motion.div
                 style={{ opacity: frameOpacity }}
-                className="absolute inset-[-26px] bg-[#aa9777] shadow-[0_34px_85px_rgba(32,24,17,0.42)]"
+                className="absolute inset-[-31px] bg-[#aa987b] shadow-[0_34px_80px_rgba(31,23,16,0.44)]"
               />
 
-              {/* recessed opening */}
+              {/* inner bevel */}
               <motion.div
                 style={{ opacity: frameOpacity }}
-                className="absolute inset-[-14px] bg-[#bba888] p-[10px] shadow-[inset_0_20px_34px_rgba(36,26,17,0.46),inset_0_-10px_20px_rgba(255,255,255,0.18)]"
+                className="absolute inset-[-20px] bg-[#bba988] shadow-[inset_0_24px_42px_rgba(37,27,18,0.50),inset_0_-14px_28px_rgba(255,255,255,0.18)]"
               />
 
-              {/* image behind window - this zooms with windowScale */}
+              {/* deep black shadow around frame */}
+              <motion.div
+                style={{ opacity: frameOpacity }}
+                className="absolute inset-[-5px] bg-[#17130f] shadow-[0_20px_48px_rgba(20,14,10,0.62)]"
+              />
+
+              {/* view image behind glass */}
               <motion.img
                 src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1800&auto=format&fit=crop"
                 alt="Architecture view"
                 draggable={false}
-                className="absolute inset-[18px] h-[calc(100%-36px)] w-[calc(100%-36px)] select-none object-cover"
+                className="absolute inset-[19px] h-[calc(100%-38px)] w-[calc(100%-38px)] select-none object-cover"
               />
 
-              {/* warm glass tint over image */}
-              <div className="absolute inset-[18px] bg-[#d8c39c]/18 backdrop-blur-[1px]" />
+              {/* image color correction */}
+              <div className="absolute inset-[19px] bg-[#d9c197]/20 backdrop-blur-[0.7px]" />
+              <div className="absolute inset-[19px] bg-[linear-gradient(90deg,rgba(0,0,0,0.10),transparent_38%,rgba(255,220,160,0.12))]" />
 
-              {/* frame body */}
+              {/* main window frame */}
               <motion.div
                 style={{ opacity: frameOpacity }}
-                className="absolute inset-0 bg-[#15130f] p-[12px] shadow-[0_24px_55px_rgba(18,13,9,0.68)]"
+                className="absolute inset-0 bg-[#14110d] p-[12px] shadow-[0_26px_55px_rgba(18,13,9,0.70)]"
               >
-                <div className="relative h-full w-full border border-[#544a3a] bg-transparent">
-                  {/* left glass panel */}
+                <div className="relative h-full w-full border border-[#574d3d] bg-transparent">
+                  {/* left glass door */}
                   <motion.div
                     style={{
                       rotateY: leftRotate,
                       transformOrigin: "left center",
                     }}
-                    className="absolute left-0 top-0 z-20 h-full w-1/2 border-r-[4px] border-[#13110e] bg-[#c8b693]/18 shadow-[inset_0_0_34px_rgba(255,255,255,0.1),10px_0_24px_rgba(0,0,0,0.24)] backdrop-blur-[1px] [transform-style:preserve-3d]"
+                    className="absolute left-0 top-0 z-20 h-full w-1/2 border-r-[3px] border-[#11100d] bg-[#d0c1a4]/16 shadow-[inset_0_0_34px_rgba(255,255,255,0.10),10px_0_22px_rgba(0,0,0,0.25)] backdrop-blur-[1px] [transform-style:preserve-3d]"
                   >
                     <GlassDetails />
                   </motion.div>
 
-                  {/* right glass panel */}
+                  {/* right glass door */}
                   <motion.div
                     style={{
                       rotateY: rightRotate,
                       transformOrigin: "right center",
                     }}
-                    className="absolute right-0 top-0 z-20 h-full w-1/2 border-l-[4px] border-[#13110e] bg-[#c8b693]/18 shadow-[inset_0_0_34px_rgba(255,255,255,0.1),-10px_0_24px_rgba(0,0,0,0.24)] backdrop-blur-[1px] [transform-style:preserve-3d]"
+                    className="absolute right-0 top-0 z-20 h-full w-1/2 border-l-[3px] border-[#11100d] bg-[#d0c1a4]/16 shadow-[inset_0_0_34px_rgba(255,255,255,0.10),-10px_0_22px_rgba(0,0,0,0.25)] backdrop-blur-[1px] [transform-style:preserve-3d]"
                   >
                     <GlassDetails />
                   </motion.div>
 
-                  {/* central divider */}
-                  <div className="absolute left-1/2 top-0 z-30 h-full w-[7px] -translate-x-1/2 bg-[#11100d]" />
+                  {/* fixed central mullion */}
+                  <div className="absolute left-1/2 top-0 z-30 h-full w-[7px] -translate-x-1/2 bg-[#100f0c]" />
 
-                  {/* horizontal mullions */}
-                  <div className="absolute left-0 top-[27%] z-30 h-[5px] w-full bg-[#11100d]" />
-                  <div className="absolute left-0 bottom-[24%] z-30 h-[5px] w-full bg-[#11100d]" />
+                  {/* horizontal bars */}
+                  <div className="absolute left-0 top-[27%] z-30 h-[5px] w-full bg-[#100f0c]" />
+                  <div className="absolute left-0 bottom-[24%] z-30 h-[5px] w-full bg-[#100f0c]" />
 
-                  {/* glass shine */}
-                  <div className="pointer-events-none absolute right-[13%] top-[7%] z-40 h-[42%] w-[20%] rotate-[28deg] bg-white/12 blur-[14px]" />
-                  <div className="pointer-events-none absolute left-[9%] top-[11%] z-40 h-[58%] w-px bg-white/16" />
+                  {/* inner edge highlights */}
+                  <div className="pointer-events-none absolute inset-[8px] z-40 border border-white/7" />
+                  <div className="pointer-events-none absolute left-[9%] top-[10%] z-40 h-[62%] w-px bg-white/15" />
+                  <div className="pointer-events-none absolute right-[12%] top-[8%] z-40 h-[43%] w-[18%] rotate-[28deg] bg-white/12 blur-[13px]" />
+
+                  {/* lower darker reflection */}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 h-[25%] bg-black/10" />
                 </div>
               </motion.div>
 
               {/* bottom sill */}
               <motion.div
                 style={{ opacity: frameOpacity }}
-                className="absolute -bottom-[18px] left-1/2 h-[15px] w-[108%] -translate-x-1/2 bg-[#9d8b6f] shadow-[0_12px_28px_rgba(40,30,20,0.32)]"
+                className="absolute -bottom-[18px] left-1/2 h-[15px] w-[109%] -translate-x-1/2 bg-[#97856a] shadow-[0_12px_26px_rgba(40,30,20,0.35)]"
+              />
+              <motion.div
+                style={{ opacity: frameOpacity }}
+                className="absolute -bottom-[22px] left-1/2 h-[5px] w-[116%] -translate-x-1/2 bg-[#7e715f] shadow-[0_10px_22px_rgba(40,30,20,0.28)]"
               />
             </motion.div>
           </div>
 
-          {/* RIGHT CONTENT SIDE */}
+          {/* RIGHT CONTENT AREA */}
           <motion.div
             style={{ opacity: frameOpacity }}
-            className="relative flex h-full flex-col justify-center md:pl-[5vw]"
+            className="relative flex h-full flex-col justify-center pl-[4.8vw]"
           >
-            {/* HANGING LAMP */}
-            <div className="pointer-events-none absolute left-[25%] top-0 hidden h-[38vh] w-[260px] -translate-x-1/2 md:block">
-              {/* wire */}
-              <div className="absolute left-1/2 top-0 h-[18vh] w-px -translate-x-1/2 bg-[#2b251e]/70" />
+            {/* HANGING LAMP - REALISTIC */}
+            <div className="pointer-events-none absolute left-[33%] top-0 h-[46vh] w-[520px] -translate-x-1/2">
+              {/* cable */}
+              <div className="absolute left-1/2 top-0 h-[17.8vh] w-[2px] -translate-x-1/2 bg-[linear-gradient(90deg,rgba(20,16,12,0.95),rgba(88,72,55,0.75),rgba(20,16,12,0.95))]" />
 
-              {/* shade */}
-              <div className="absolute left-1/2 top-[17vh] h-[88px] w-[150px] -translate-x-1/2 overflow-hidden rounded-b-[46%] rounded-t-[16px] bg-[linear-gradient(90deg,#312419,#7b6042_45%,#2a2119_100%)] shadow-[0_20px_45px_rgba(30,22,15,0.38)]">
-                <div className="absolute inset-x-[18px] bottom-[10px] h-[18px] rounded-full bg-[#ffd98e] blur-[5px]" />
-                <div className="absolute bottom-0 left-1/2 h-[19px] w-[112px] -translate-x-1/2 rounded-full bg-[#ffd98e]" />
-                <div className="absolute left-[22%] top-0 h-full w-[22px] rotate-[8deg] bg-white/10 blur-[8px]" />
+              {/* tiny ceiling shadow */}
+              <div className="absolute left-1/2 top-[16.9vh] h-[10px] w-[24px] -translate-x-1/2 rounded-full bg-black/25 blur-[6px]" />
+
+              {/* lamp body */}
+              <div className="absolute left-1/2 top-[16.9vh] h-[112px] w-[164px] -translate-x-1/2">
+                {/* outer shade shape */}
+                <div className="absolute inset-0 overflow-hidden rounded-t-[22px] rounded-b-[54%] bg-[linear-gradient(100deg,#211812_0%,#4d3825_20%,#8b6a45_45%,#3a2a1e_72%,#1f1712_100%)] shadow-[0_18px_32px_rgba(26,18,12,0.42),inset_10px_0_18px_rgba(255,232,183,0.13),inset_-18px_0_24px_rgba(0,0,0,0.42)]">
+                  {/* left highlight */}
+                  <div className="absolute left-[25%] top-[4px] h-[95%] w-[24px] rotate-[7deg] rounded-full bg-white/12 blur-[9px]" />
+
+                  {/* center bronze glow */}
+                  <div className="absolute left-1/2 top-[8px] h-[85%] w-[58px] -translate-x-1/2 rounded-full bg-[#c08b4e]/20 blur-[18px]" />
+
+                  {/* right dark edge */}
+                  <div className="absolute right-0 top-0 h-full w-[42px] bg-black/32 blur-[8px]" />
+
+                  {/* top rim */}
+                  <div className="absolute left-1/2 top-0 h-[18px] w-[112px] -translate-x-1/2 rounded-full bg-[linear-gradient(90deg,#2b1f17,#7b5d3b,#241a13)] shadow-[inset_0_3px_7px_rgba(255,255,255,0.08)]" />
+
+                  {/* inner warm bulb reflection */}
+                  <div className="absolute bottom-[13px] left-1/2 h-[28px] w-[122px] -translate-x-1/2 rounded-full bg-[#ffd991] blur-[9px]" />
+
+                  {/* visible bottom opening */}
+                  <div className="absolute bottom-[1px] left-1/2 h-[25px] w-[122px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,#ffe5a8_0%,#ffd17c_42%,#8a5f35_78%,#312116_100%)] shadow-[0_0_18px_rgba(255,207,121,0.55)]" />
+
+                  {/* black lower lip */}
+                  <div className="absolute bottom-[-2px] left-1/2 h-[9px] w-[130px] -translate-x-1/2 rounded-full border-t border-black/45 bg-black/18" />
+                </div>
               </div>
 
-              {/* lamp glow */}
-              <div className="absolute left-1/2 top-[24vh] h-[300px] w-[420px] -translate-x-1/2 rounded-full bg-[#ffdca0]/38 blur-[62px]" />
-              <div className="absolute left-1/2 top-[27vh] h-[220px] w-[360px] -translate-x-1/2 rounded-full bg-[#f3c06f]/20 blur-[42px]" />
+              {/* main light pool on wall */}
+              <div className="absolute left-1/2 top-[24vh] h-[310px] w-[470px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,220,151,0.52)_0%,rgba(255,211,132,0.34)_28%,rgba(255,197,104,0.16)_52%,transparent_74%)] blur-[34px]" />
+
+              {/* sharper light directly below lamp */}
+              <div className="absolute left-1/2 top-[25.2vh] h-[175px] w-[310px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,230,174,0.46)_0%,rgba(255,208,125,0.24)_48%,transparent_72%)] blur-[24px]" />
+
+              {/* soft cone shadow falloff like mockup */}
+              <div className="absolute left-1/2 top-[20.5vh] h-[330px] w-[560px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_top,rgba(255,216,145,0.24)_0%,rgba(255,205,124,0.14)_36%,transparent_68%)] blur-[18px]" />
+
+              {/* darker shade shadow above light */}
+              <div className="absolute left-1/2 top-[20.4vh] h-[58px] w-[220px] -translate-x-1/2 rounded-full bg-black/18 blur-[24px]" />
             </div>
 
             {/* TEXT CONTENT */}
-            <div className="relative z-20 max-w-[720px] pt-20 text-[#342d25] md:pt-28">
-              <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.55em] text-[#3b342c]/75 md:text-[13px]">
+            <div className="relative z-20 max-w-[700px] translate-y-[3.8vh] text-[#342d25]">
+              <p className="mb-6 text-[12px] font-semibold uppercase tracking-[0.58em] text-[#40382f]/70">
                 Architecture Studio
               </p>
 
-              <h1 className="font-serif text-[clamp(4rem,6.9vw,7.4rem)] leading-[0.9] tracking-[-0.07em] text-[#3a332b]">
+              <h1 className="font-serif text-[clamp(4.5rem,6.75vw,7.25rem)] leading-[0.91] tracking-[-0.075em] text-[#3a332b]">
                 DK Construction
                 <br />
-                <span>& Consultancy</span>
+                <span>&amp; Consultancy</span>
               </h1>
 
-              <p className="mt-7 text-[13px] font-light tracking-wide text-[#3b342c]/78 md:text-[16px]">
+              <p className="mt-7 text-[15px] font-light tracking-[0.015em] text-[#3b342c]/78">
                 Architecture · Interiors · Construction Consultancy
               </p>
 
               <div className="mt-12">
-                <p className="mb-5 text-[13px] leading-relaxed text-[#3b342c]/80 md:text-[15px]">
+                <p className="mb-5 text-[14px] leading-relaxed text-[#3b342c]/78">
                   Designing refined spaces with,
                 </p>
 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {focusWords.map((word, index) => {
                     const active = activeWordIndex === index;
 
@@ -213,23 +266,23 @@ export default function WelcomeWindow({
                       <motion.div
                         key={word}
                         animate={{
-                          opacity: active ? 1 : 0.34,
-                          x: active ? 0 : -6,
+                          opacity: active ? 1 : 0.38,
+                          x: active ? 0 : -5,
                         }}
                         transition={{ duration: 0.45, ease: "easeOut" }}
-                        className="flex max-w-[480px] items-center gap-5"
+                        className="flex max-w-[500px] items-center gap-5"
                       >
                         <span
-                          className={`font-serif italic leading-none tracking-[-0.04em] transition-all duration-500 ${
+                          className={`font-serif italic leading-none tracking-[-0.05em] transition-all duration-500 ${
                             active
-                              ? "text-[clamp(2.8rem,4.6vw,4.8rem)] text-[#342d25]"
-                              : "text-[clamp(2.3rem,3.7vw,3.8rem)] text-[#342d25]/70"
+                              ? "text-[clamp(3rem,4.25vw,4.6rem)] text-[#342d25]"
+                              : "text-[clamp(2.55rem,3.6vw,3.75rem)] text-[#342d25]/72"
                           }`}
                         >
                           {word}
                         </span>
 
-                        <div className="h-px flex-1 bg-[#3b342c]/20" />
+                        <div className="h-px flex-1 bg-[#3b342c]/18" />
 
                         <motion.div
                           animate={{
@@ -248,9 +301,9 @@ export default function WelcomeWindow({
               {/* CLICK INDICATOR */}
               <motion.div
                 style={{ opacity: scrollTextOpacity }}
-                className="mt-12 inline-flex flex-col items-start"
+                className="mt-11 inline-flex flex-col items-start"
               >
-                <p className="text-[13px] font-light tracking-wide text-[#3b342c]/75">
+                <p className="text-[13px] font-light tracking-wide text-[#3b342c]/72">
                   Click to enter
                 </p>
 
@@ -261,50 +314,57 @@ export default function WelcomeWindow({
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
-                  className="mt-2 h-px w-[88px] origin-left bg-[#3b342c]/38"
+                  className="mt-2 h-px w-[88px] origin-left bg-[#3b342c]/35"
                 />
               </motion.div>
             </div>
           </motion.div>
+        </div>
 
-          {/* MOBILE SIMPLIFIED VERSION */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center md:hidden">
-            <div className="absolute inset-0 bg-[#cdbc9f]" />
+        {/* MOBILE VERSION */}
+        <div className="relative flex h-screen w-full items-center justify-center px-6 text-center md:hidden">
+          <div className="absolute inset-0 bg-[#c7b697]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_42%,rgba(33,25,18,0.25)_100%)]" />
 
-            <div className="relative z-10 max-w-[420px] text-[#342d25]">
-              <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.45em] text-[#3b342c]/70">
-                Architecture Studio
-              </p>
+          <motion.div
+            style={{ opacity: frameOpacity }}
+            className="relative z-10 max-w-[420px] text-[#342d25]"
+          >
+            <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.45em] text-[#3b342c]/70">
+              Architecture Studio
+            </p>
 
-              <h1 className="font-serif text-[4.1rem] leading-[0.88] tracking-[-0.07em]">
-                DK
-                <br />
-                Construction
-              </h1>
+            <h1 className="font-serif text-[4rem] leading-[0.88] tracking-[-0.07em]">
+              DK
+              <br />
+              Construction
+            </h1>
 
-              <p className="mt-6 text-[12px] tracking-wide text-[#3b342c]/75">
-                Architecture · Interiors · Construction Consultancy
-              </p>
+            <p className="mt-6 text-[12px] tracking-wide text-[#3b342c]/75">
+              Architecture · Interiors · Construction Consultancy
+            </p>
 
-              <p className="mt-10 text-[13px] text-[#3b342c]/75">
-                Designing refined spaces with,
-              </p>
+            <p className="mt-10 text-[13px] text-[#3b342c]/75">
+              Designing refined spaces with,
+            </p>
 
-              <motion.p
-                key={focusWords[activeWordIndex]}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45 }}
-                className="mt-4 font-serif text-[3.4rem] italic tracking-[-0.05em]"
-              >
-                {focusWords[activeWordIndex]}
-              </motion.p>
+            <motion.p
+              key={focusWords[activeWordIndex]}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45 }}
+              className="mt-4 font-serif text-[3.4rem] italic tracking-[-0.05em]"
+            >
+              {focusWords[activeWordIndex]}
+            </motion.p>
 
-              <p className="mt-12 text-[11px] uppercase tracking-[0.3em] text-[#3b342c]/65">
-                Click to enter
-              </p>
-            </div>
-          </div>
+            <motion.p
+              style={{ opacity: scrollTextOpacity }}
+              className="mt-12 text-[11px] uppercase tracking-[0.3em] text-[#3b342c]/65"
+            >
+              Click to enter
+            </motion.p>
+          </motion.div>
         </div>
       </motion.div>
     </section>
@@ -316,9 +376,15 @@ function GlassDetails() {
     <>
       <div className="absolute inset-0 bg-[#c0c7c4]/10" />
       <div className="absolute inset-[7px] border border-black/38" />
+
+      {/* internal mullions */}
       <div className="absolute left-0 top-[27%] h-[4px] w-full bg-[#12110e]" />
       <div className="absolute left-0 bottom-[24%] h-[4px] w-full bg-[#12110e]" />
+
+      {/* dark bottom reflection */}
       <div className="absolute bottom-0 left-0 h-[28%] w-full bg-black/13" />
+
+      {/* highlights */}
       <div className="absolute right-[12%] top-[4%] h-[56%] w-[22%] rotate-[28deg] bg-white/10 blur-[12px]" />
       <div className="absolute left-0 top-0 h-full w-px bg-white/10" />
       <div className="absolute right-0 top-0 h-full w-px bg-black/35" />
