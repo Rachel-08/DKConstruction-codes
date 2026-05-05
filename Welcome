@@ -11,6 +11,7 @@ type WelcomeWindowProps = {
   windowExitX: MotionValue<string>;
   frameOpacity: MotionValue<number>;
   scrollTextOpacity: MotionValue<number>;
+  onEnterClick: () => void;
 };
 
 export default function WelcomeWindow({
@@ -22,187 +23,283 @@ export default function WelcomeWindow({
   windowExitX,
   frameOpacity,
   scrollTextOpacity,
+  onEnterClick,
 }: WelcomeWindowProps) {
   return (
     <section
-      className={`absolute inset-0 z-[80] overflow-hidden ${
+      className={`absolute inset-0 z-[80] ${
         isActive ? "pointer-events-auto" : "pointer-events-none"
       }`}
     >
-      {/* BACKGROUND WALL */}
-      <div className="absolute inset-0 bg-[#d8c8ae]">
-        {/* soft plaster texture */}
-        <div className="absolute inset-0 opacity-[0.22] [background-image:radial-gradient(circle_at_1px_1px,rgba(70,55,38,0.35)_1px,transparent_0)] [background-size:18px_18px]" />
-
-        {/* warm spotlight behind window */}
-        <div className="absolute left-1/2 top-[8%] h-[520px] w-[760px] -translate-x-1/2 rounded-full bg-[#fff0cf]/45 blur-[90px]" />
-
-        {/* subtle vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,rgba(60,45,30,0.18)_100%)]" />
-      </div>
-
-      {/* MAIN WINDOW INTRO */}
+      {/* WINDOW INTRO */}
       <motion.div
+        role="button"
+        tabIndex={isActive ? 0 : -1}
+        aria-label="Enter website"
+        onClick={onEnterClick}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onEnterClick();
+          }
+        }}
         style={{
           scale: windowScale,
           opacity: windowOpacity,
           x: windowExitX,
         }}
-        className="absolute inset-0 flex items-center justify-center px-4"
+        className="absolute inset-0 cursor-pointer overflow-hidden outline-none"
       >
-        <div className="relative flex h-screen w-full items-center justify-center">
-          {/* WALL RECESS SHADOW */}
-          <motion.div
-            style={{ opacity: frameOpacity }}
-            className="absolute h-[69vh] max-h-[680px] min-h-[520px] w-[min(42vw,520px)] min-w-[330px] rounded-[2px] bg-[#bda98a] shadow-[0_35px_80px_rgba(35,25,15,0.38)]"
-          />
+        {/* WALL BACKGROUND - realistic architectural panel surface */}
+<div className="absolute inset-0 bg-[#b8aa91]">
+  {/* base plaster / warm wall tone */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_23%_20%,rgba(255,231,189,0.42),transparent_34%),radial-gradient(circle_at_66%_36%,rgba(243,198,121,0.22),transparent_28%),linear-gradient(90deg,rgba(255,255,255,0.12),rgba(0,0,0,0.18))]" />
 
-          {/* RECESSED OPENING */}
-          <motion.div
-            style={{ opacity: frameOpacity }}
-            className="absolute h-[67vh] max-h-[660px] min-h-[500px] w-[min(40vw,500px)] min-w-[310px] bg-[#c9b797] p-[12px] shadow-[inset_0_18px_30px_rgba(36,27,18,0.38),inset_0_-10px_18px_rgba(255,255,255,0.22)]"
-          >
-            {/* WINDOW FRAME OUTER */}
-            <div className="relative h-full w-full bg-[#171612] p-[10px] shadow-[0_22px_45px_rgba(28,22,15,0.55)]">
-              {/* bronze edge */}
-              <div className="absolute inset-[4px] border border-[#4b4234]/80" />
+  {/* subtle plaster grain */}
+  <div className="absolute inset-0 opacity-[0.18] [background-image:radial-gradient(rgba(58,47,35,0.38)_0.65px,transparent_0.65px)] [background-size:4px_4px]" />
 
-              {/* BACK VIEW BEHIND GLASS */}
-              <div className="absolute inset-[20px] overflow-hidden bg-[#cdbb99]">
-                {/* blurred architecture scene */}
-                <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(237,220,184,0.95)_0%,rgba(196,178,148,0.92)_42%,rgba(160,143,113,0.9)_100%)]" />
+  {/* large wall cladding panels */}
+  <div className="absolute inset-x-[4vw] top-[6vh] bottom-[46px]">
+    {/* vertical panel seams */}
+    {/* <div className="absolute left-[30%] top-0 h-full w-px bg-black/10 shadow-[1px_0_0_rgba(255,255,255,0.16)]" />
+    <div className="absolute left-[63%] top-0 h-full w-px bg-black/10 shadow-[1px_0_0_rgba(255,255,255,0.16)]" /> */}
 
-                <div className="absolute right-[-6%] top-[10%] h-[55%] w-[46%] rotate-[0deg] bg-[#e9d9b8]/75 blur-[1px]" />
+    {/* horizontal panel seams */}
+    {/* <div className="absolute left-0 top-[34%] h-px w-full bg-black/8 shadow-[0_1px_0_rgba(255,255,255,0.13)]" />
+    <div className="absolute left-0 top-[68%] h-px w-full bg-black/8 shadow-[0_1px_0_rgba(255,255,255,0.13)]" /> */}
 
-                <div className="absolute bottom-[8%] right-[0%] h-[22%] w-[70%] bg-[#b19a78]/45 blur-[2px]" />
+    {/* very subtle panel face variation */}
+    <div className="absolute left-0 top-0 h-full w-[30%] bg-white/[0.025]" />
+    <div className="absolute left-[30%] top-0 h-full w-[33%] bg-black/[0.018]" />
+    <div className="absolute right-0 top-0 h-full w-[37%] bg-white/[0.018]" />
+  </div>
 
-                <div className="absolute bottom-[5%] left-[-8%] h-[38%] w-[45%] rounded-full bg-[#4e543c]/35 blur-[20px]" />
+  {/* floor / base edge */}
+  <div className="absolute bottom-0 left-0 h-[46px] w-full border-t border-black/20 bg-[#766f64]/35" />
+  <div className="absolute bottom-[46px] left-0 h-px w-full bg-white/20" />
+</div>
 
-                <div className="absolute bottom-[0%] left-0 h-[18%] w-full bg-[#8f7b5b]/35 blur-[5px]" />
+        {/* MAIN LAYOUT */}
+        <div className="relative z-10 grid h-full w-full grid-cols-1 items-center px-6 py-8 md:grid-cols-[46%_54%] md:px-[8vw] lg:px-[11vw]">
+          {/* LEFT WINDOW AREA */}
+          <div className="flex h-full items-center justify-center md:justify-start">
+            <div className="relative h-[62vh] w-[48vw] max-w-[300px] min-w-[220px] md:h-[78vh] md:w-[26vw] md:max-w-[390px] [perspective:1400px]">
+              {/* REALISTIC WALL PANEL / WINDOW MOUNTING RECESS */}
+<div className="absolute -inset-x-10 -inset-y-9">
+  {/* main raised wall panel slab around window */}
+  <div className="absolute inset-0 bg-[#b5a68d] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),inset_0_-1px_0_rgba(0,0,0,0.16),0_18px_34px_rgba(0,0,0,0.16)]" />
 
-                {/* warm haze */}
-                <div className="absolute inset-0 bg-[#f3dfb7]/25 backdrop-blur-[1px]" />
+  {/* panel material texture */}
+  <div className="absolute inset-0 opacity-[0.16] [background-image:radial-gradient(rgba(55,43,31,0.42)_0.6px,transparent_0.6px)] [background-size:3px_3px]" />
+
+  {/* outer panel bevel highlights */}
+  <div className="absolute inset-0 border border-white/12 shadow-[inset_2px_2px_4px_rgba(255,255,255,0.16),inset_-3px_-3px_8px_rgba(0,0,0,0.18)]" />
+
+  {/* darker recessed cut-out behind window */}
+  <div className="absolute inset-x-7 inset-y-6 bg-[#5f5344]/34 shadow-[inset_24px_24px_34px_rgba(0,0,0,0.34),inset_-10px_-10px_22px_rgba(255,255,255,0.13)]" />
+
+  {/* finished return edges of the wall opening */}
+  <div className="absolute left-7 top-6 h-[calc(100%-48px)] w-[10px] bg-[#8f806b] shadow-[inset_2px_0_3px_rgba(255,255,255,0.14),inset_-3px_0_5px_rgba(0,0,0,0.28)]" />
+  <div className="absolute right-7 top-6 h-[calc(100%-48px)] w-[10px] bg-[#6f6252] shadow-[inset_2px_0_3px_rgba(255,255,255,0.1),inset_-3px_0_5px_rgba(0,0,0,0.26)]" />
+  <div className="absolute left-7 top-6 h-[10px] w-[calc(100%-56px)] bg-[#8d7e69] shadow-[inset_0_2px_3px_rgba(255,255,255,0.14),inset_0_-4px_7px_rgba(0,0,0,0.32)]" />
+  <div className="absolute left-7 bottom-6 h-[10px] w-[calc(100%-56px)] bg-[#776957] shadow-[inset_0_1px_2px_rgba(255,255,255,0.12),inset_0_-3px_6px_rgba(0,0,0,0.22)]" />
+
+  {/* fine reveal line around the window installation */}
+  <div className="absolute inset-x-[34px] inset-y-[30px] border border-black/18 shadow-[0_0_0_1px_rgba(255,255,255,0.08),inset_0_0_12px_rgba(0,0,0,0.22)]" />
+
+  {/* tiny construction joint around mounting surface */}
+  <div className="absolute inset-x-[42px] inset-y-[38px] border border-[#2f291f]/25" />
+</div>
+              {/* WINDOW CONTACT SHADOW */}
+              <div className="absolute -inset-x-3 -bottom-6 h-10 rounded-full bg-black/28 blur-xl" />
+
+              {/* WINDOW BODY */}
+              <div className="relative h-full w-full overflow-hidden bg-[#11100d] shadow-[0_28px_58px_rgba(0,0,0,0.42),0_4px_0_rgba(255,255,255,0.08)_inset]">
+                {/* BACKGROUND VIEW */}
+                <motion.img
+                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
+                  alt="Architecture view"
+                  draggable={false}
+                  className="absolute inset-0 h-full w-full select-none object-cover"
+                />
+
+                {/* GLASS DEPTH + TINT */}
+                <div className="absolute inset-0 bg-[#d7c3a1]/12" />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-black/28" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-40" />
+                <div className="absolute left-[11%] top-0 h-full w-[18%] -skew-x-12 bg-white/8 blur-[1px]" />
+
+                {/* OUTER FRAME - layered, beveled, thick */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute inset-0 z-[20] border-[13px] border-[#11100d] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),inset_0_0_0_7px_rgba(0,0,0,0.38),inset_0_0_22px_rgba(0,0,0,0.55)] md:border-[16px]"
+                />
+
+                {/* RAISED PROFILE 1 */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute inset-[16px] z-[22] border-[5px] border-[#1a1813] shadow-[0_0_0_1px_rgba(255,255,255,0.07),inset_0_0_0_1px_rgba(0,0,0,0.65)] md:inset-[20px]"
+                />
+
+                {/* INNER GROOVE */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute inset-[27px] z-[23] border border-[#393326]/70 shadow-[0_0_0_1px_rgba(0,0,0,0.45),inset_0_0_8px_rgba(0,0,0,0.38)] md:inset-[33px]"
+                />
+
+                {/* RECESSED GLASS BORDER */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute inset-[34px] z-[23] border border-white/8 shadow-[inset_0_0_18px_rgba(0,0,0,0.35)] md:inset-[41px]"
+                />
+
+                {/* CENTER MUNTIN */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute left-1/2 top-[16px] z-[25] h-[calc(100%-32px)] w-[5px] -translate-x-1/2 rounded-[2px] bg-[#14130f] shadow-[1px_0_0_rgba(255,255,255,0.08),-1px_0_0_rgba(0,0,0,0.7),0_0_8px_rgba(0,0,0,0.38)] md:top-[20px] md:h-[calc(100%-40px)]"
+                />
+
+                {/* HORIZONTAL MUNTINS */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute left-[16px] top-[30%] z-[25] h-[5px] w-[calc(100%-32px)] rounded-[2px] bg-[#14130f] shadow-[0_1px_0_rgba(255,255,255,0.08),0_-1px_0_rgba(0,0,0,0.7),0_0_8px_rgba(0,0,0,0.35)] md:left-[20px] md:w-[calc(100%-40px)]"
+                />
+
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute left-[16px] top-[78%] z-[25] h-[5px] w-[calc(100%-32px)] rounded-[2px] bg-[#14130f] shadow-[0_1px_0_rgba(255,255,255,0.08),0_-1px_0_rgba(0,0,0,0.7),0_0_8px_rgba(0,0,0,0.35)] md:left-[20px] md:w-[calc(100%-40px)]"
+                />
+
+                {/* LEFT WINDOW PANEL */}
+                <motion.div
+                  style={{
+                    rotateY: leftRotate,
+                    transformOrigin: "left center",
+                    opacity: frameOpacity,
+                  }}
+                  className="pointer-events-none absolute left-0 top-0 z-[30] h-full w-1/2 border-r-[4px] border-[#14130f] bg-[#0f0d0a]/8 backdrop-blur-[1.5px] shadow-[inset_-8px_0_18px_rgba(0,0,0,0.18)]"
+                >
+                  <div className="absolute inset-[16px] border border-white/10 shadow-[inset_0_0_8px_rgba(0,0,0,0.28)] md:inset-[20px]" />
+                  <div className="absolute inset-[27px] border border-black/30 md:inset-[33px]" />
+                  <div className="absolute left-[16px] right-0 top-[30%] h-[4px] rounded-[2px] bg-[#14130f] shadow-[0_1px_0_rgba(255,255,255,0.07)] md:left-[20px]" />
+                  <div className="absolute left-[16px] right-0 top-[78%] h-[4px] rounded-[2px] bg-[#14130f] shadow-[0_1px_0_rgba(255,255,255,0.07)] md:left-[20px]" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/8 via-transparent to-black/14" />
+                </motion.div>
+
+                {/* RIGHT WINDOW PANEL */}
+                <motion.div
+                  style={{
+                    rotateY: rightRotate,
+                    transformOrigin: "right center",
+                    opacity: frameOpacity,
+                  }}
+                  className="pointer-events-none absolute right-0 top-0 z-[30] h-full w-1/2 border-l-[4px] border-[#14130f] bg-[#0f0d0a]/8 backdrop-blur-[1.5px] shadow-[inset_8px_0_18px_rgba(0,0,0,0.18)]"
+                >
+                  <div className="absolute inset-[16px] border border-white/10 shadow-[inset_0_0_8px_rgba(0,0,0,0.28)] md:inset-[20px]" />
+                  <div className="absolute inset-[27px] border border-black/30 md:inset-[33px]" />
+                  <div className="absolute left-0 right-[16px] top-[30%] h-[4px] rounded-[2px] bg-[#14130f] shadow-[0_1px_0_rgba(255,255,255,0.07)] md:right-[20px]" />
+                  <div className="absolute left-0 right-[16px] top-[78%] h-[4px] rounded-[2px] bg-[#14130f] shadow-[0_1px_0_rgba(255,255,255,0.07)] md:right-[20px]" />
+                  <div className="absolute inset-0 bg-gradient-to-l from-white/8 via-transparent to-black/14" />
+                </motion.div>
               </div>
 
-              {/* LEFT SHUTTER */}
-              <motion.div
-                style={{
-                  rotateY: leftRotate,
-                  transformOrigin: "left center",
-                }}
-                className="absolute left-[20px] top-[20px] h-[calc(100%-40px)] w-[calc(50%-22px)] bg-[#1b1915] p-[8px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),12px_0_25px_rgba(0,0,0,0.28)] [transform-style:preserve-3d]"
-              >
-                <GlassPanel side="left" />
-              </motion.div>
+              {/* BEVELED WINDOW SILL */}
+              <div className="absolute -bottom-4 left-1/2 h-3 w-[112%] -translate-x-1/2 bg-[#93856f] shadow-[0_1px_0_rgba(255,255,255,0.28)_inset,0_8px_14px_rgba(0,0,0,0.3)]" />
+              <div className="absolute -bottom-6 left-1/2 h-2 w-[118%] -translate-x-1/2 bg-[#51483d] shadow-[0_1px_0_rgba(255,255,255,0.12)_inset]" />
+            </div>
+          </div>
 
-              {/* RIGHT SHUTTER */}
-              <motion.div
-                style={{
-                  rotateY: rightRotate,
-                  transformOrigin: "right center",
-                }}
-                className="absolute right-[20px] top-[20px] h-[calc(100%-40px)] w-[calc(50%-22px)] bg-[#1b1915] p-[8px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),-12px_0_25px_rgba(0,0,0,0.28)] [transform-style:preserve-3d]"
-              >
-                <GlassPanel side="right" />
-              </motion.div>
+          {/* RIGHT CONTENT AREA */}
+          <div className="relative hidden h-full items-center md:flex">
+            {/* PENDANT CORD */}
+            <div className="absolute left-[43%] top-0 h-[31vh] w-px bg-[#1f1a14]/75 shadow-[1px_0_0_rgba(255,255,255,0.08)]" />
 
-              {/* CENTER FRAME */}
-              <div className="absolute left-1/2 top-[20px] z-20 h-[calc(100%-40px)] w-[13px] -translate-x-1/2 bg-[#11100d] shadow-[0_0_12px_rgba(0,0,0,0.45)]">
-                <div className="absolute left-1/2 top-1/2 h-[42px] w-[1px] -translate-x-1/2 -translate-y-1/2 bg-[#b8aa8c]/50" />
-              </div>
+            {/* REFINED PENDANT LAMP */}
+            <div className="absolute left-[43%] top-[19vh] h-[102px] w-[142px] -translate-x-1/2">
+              {/* wall glow behind shade */}
+              <div className="absolute left-1/2 top-[58px] h-[150px] w-[270px] -translate-x-1/2 rounded-full bg-[#f0c16d]/22 blur-3xl" />
 
-              {/* FRAME HIGHLIGHTS */}
-              <div className="pointer-events-none absolute inset-[20px] z-30 border border-white/5" />
+              {/* outer metal shade */}
+              <div className="absolute inset-x-0 top-0 mx-auto h-[92px] w-[132px] rounded-b-[46px] rounded-t-[18px] bg-[linear-gradient(105deg,#2a2118_0%,#60442b_24%,#9b764b_43%,#3a2b1d_66%,#17130f_100%)] shadow-[inset_8px_0_18px_rgba(255,230,180,0.14),inset_-14px_0_18px_rgba(0,0,0,0.45),0_20px_52px_rgba(0,0,0,0.36)] [clip-path:polygon(28%_0,72%_0,100%_100%,0_100%)]" />
+
+              {/* top rim bevel */}
+              <div className="absolute left-1/2 top-0 h-[10px] w-[58px] -translate-x-1/2 rounded-full bg-[#2d2319] shadow-[0_1px_0_rgba(255,255,255,0.16)_inset,0_3px_8px_rgba(0,0,0,0.35)]" />
+
+              {/* inner warm surface */}
+              <div className="absolute bottom-[2px] left-1/2 h-[20px] w-[104px] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(circle_at_center,#ffd98a_0%,#c38a45_45%,#5e4026_100%)] shadow-[0_-4px_12px_rgba(255,209,123,0.58),0_0_26px_rgba(255,184,80,0.36)]" />
+
+              {/* bottom rim thickness */}
+              <div className="absolute bottom-0 left-1/2 h-[9px] w-[110px] -translate-x-1/2 rounded-full border border-black/20 bg-[#3b2b1d]/65 shadow-[0_1px_0_rgba(255,225,170,0.25)_inset,0_5px_14px_rgba(0,0,0,0.32)]" />
+
+              {/* vertical highlight on metal */}
+              <div className="absolute left-[42px] top-[13px] h-[62px] w-[16px] rotate-[8deg] rounded-full bg-white/14 blur-[2px]" />
             </div>
 
-            {/* BOTTOM SILL */}
-            <div className="absolute -bottom-[14px] left-1/2 h-[16px] w-[106%] -translate-x-1/2 bg-[#a99777] shadow-[0_12px_28px_rgba(40,30,20,0.28)]" />
-          </motion.div>
+            {/* LIGHT FALLOFF ON WALL */}
+            <div className="absolute left-[43%] top-[30vh] h-[34vh] w-[42vw] -translate-x-1/2 rounded-full bg-[#f1c674]/24 blur-3xl" />
+            <div className="absolute left-[43%] top-[35vh] h-[20vh] w-[30vw] -translate-x-1/2 rounded-full bg-[#ffe0a0]/18 blur-2xl" />
 
-          {/* TEXT OVERLAY */}
-          <motion.div
-            style={{ opacity: frameOpacity }}
-            className="pointer-events-none absolute z-40 flex max-w-[860px] flex-col items-center px-6 text-center text-white"
-          >
-            <p className="mb-5 text-[11px] font-medium uppercase tracking-[0.55em] text-white/82 md:text-[13px]">
-              Architecture Studio
-            </p>
+            <div className="relative ml-[5vw] max-w-[610px] pt-[8vh] text-[#2d2a24]">
+              <p className="mb-7 text-[11px] font-medium uppercase tracking-[0.52em] text-[#3f3a31]/70">
+                Architecture Studio
+              </p>
 
-            <h1 className="font-serif text-[clamp(3rem,7.5vw,7.6rem)] leading-[0.9] tracking-[-0.06em] text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.22)]">
-              DK Construction
-              <br />
-              <span className="tracking-[-0.07em]">& Consultancy</span>
-            </h1>
+              <h1 className="max-w-[600px] font-serif text-[clamp(48px,5.5vw,88px)] font-normal leading-[0.92] tracking-[-0.055em] text-[#2f2b25]">
+                DK Construction
+                <br />& Consultancy
+              </h1>
 
-            <p className="mt-8 text-[13px] font-light tracking-wide text-white/90 md:text-[16px]">
-              Architecture · Interiors · Construction Consultancy
-            </p>
+              <p className="mt-7 text-[15px] tracking-[-0.02em] text-[#3f3a31]/70">
+                Architecture · Interiors · Construction Consultancy
+              </p>
 
-            <div className="mt-6 h-px w-11 bg-white/45" />
+              <div className="mt-11">
+                <p className="mb-5 text-[14px] text-[#3f3a31]/70">
+                  Designing refined spaces with,
+                </p>
 
-            <p className="mt-6 max-w-[520px] text-[13px] font-light leading-relaxed text-white/88 md:text-[15px]">
-              Designing refined spaces with clarity, function, and purpose.
-            </p>
-          </motion.div>
+                <div className="space-y-3">
+                  {["Clarity", "Function", "Purpose"].map((word) => (
+                    <div key={word} className="flex items-center gap-6">
+                      <span className="min-w-[150px] font-serif text-[38px] italic leading-none tracking-[-0.05em] text-[#38332b]/85">
+                        {word}
+                      </span>
+                      <span className="h-px flex-1 bg-[#5d5447]/20" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#2f2b25]/80" />
+                    </div>
+                  ))}
+                </div>
+              </div>
 
-          {/* SCROLL INDICATOR */}
-          <motion.div
+              <motion.p
+                style={{ opacity: scrollTextOpacity }}
+                className="mt-11 w-fit border-b border-[#3f3a31]/25 pb-2 text-[13px] tracking-[-0.02em] text-[#2f2b25]/70"
+              >
+                Click to enter
+              </motion.p>
+            </div>
+          </div>
+        </div>
+
+        {/* MOBILE TEXT */}
+        <div className="absolute bottom-10 left-1/2 z-20 w-full -translate-x-1/2 px-6 text-center md:hidden">
+          <p className="text-[10px] font-medium uppercase tracking-[0.42em] text-[#2f2b25]/70">
+            Architecture Studio
+          </p>
+
+          <h1 className="mt-3 font-serif text-[34px] leading-[0.95] tracking-[-0.05em] text-[#2f2b25]">
+            DK Construction
+            <br />& Consultancy
+          </h1>
+
+          <motion.p
             style={{ opacity: scrollTextOpacity }}
-            className="absolute bottom-9 left-1/2 z-40 flex -translate-x-1/2 flex-col items-center text-white"
+            className="mt-5 text-[12px] text-[#2f2b25]/70"
           >
-            <p className="mb-4 text-[12px] font-light tracking-wide text-white/85">
-              Scroll to explore
-            </p>
-
-            <div className="relative h-16 w-px overflow-hidden bg-white/25">
-              <motion.div
-                animate={{ y: ["-100%", "100%"] }}
-                transition={{
-                  duration: 1.6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute left-0 top-0 h-8 w-px bg-white"
-              />
-            </div>
-          </motion.div>
+            Click to enter
+          </motion.p>
         </div>
       </motion.div>
     </section>
-  );
-}
-
-function GlassPanel({ side }: { side: "left" | "right" }) {
-  return (
-    <div className="relative h-full w-full overflow-hidden border border-[#4d4538] bg-[#c9b898]/25 shadow-[inset_0_0_35px_rgba(255,255,255,0.08)]">
-      {/* glass tint */}
-      <div className="absolute inset-0 bg-[#b6c3c4]/10 backdrop-blur-[1px]" />
-
-      {/* warm reflection */}
-      <div
-        className={`absolute top-[-8%] h-[70%] w-[55%] rotate-[34deg] bg-white/14 blur-[10px] ${
-          side === "left" ? "left-[20%]" : "right-[6%]"
-        }`}
-      />
-
-      {/* darker bottom reflection */}
-      <div className="absolute bottom-0 left-0 h-[32%] w-full bg-black/13" />
-
-      {/* vertical subtle glow */}
-      <div className="absolute right-[10%] top-0 h-full w-px bg-white/12" />
-
-      {/* inner frame */}
-      <div className="absolute inset-[6px] border border-black/45" />
-
-      {/* mullions */}
-      <div className="absolute left-0 top-[30%] h-[5px] w-full bg-[#14130f] shadow-[0_1px_0_rgba(255,255,255,0.08)]" />
-      <div className="absolute left-0 bottom-[22%] h-[5px] w-full bg-[#14130f] shadow-[0_1px_0_rgba(255,255,255,0.08)]" />
-
-      {/* bevel highlights */}
-      <div className="absolute left-0 top-0 h-full w-px bg-white/10" />
-      <div className="absolute right-0 top-0 h-full w-px bg-black/35" />
-      <div className="absolute left-0 top-0 h-px w-full bg-white/10" />
-      <div className="absolute bottom-0 left-0 h-px w-full bg-black/40" />
-    </div>
   );
 }
