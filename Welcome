@@ -29,20 +29,12 @@ export default function WelcomeWindow({
   onEnterClick,
 }: WelcomeWindowProps) {
   return (
-    <AnimatePresence mode="wait">
-      {isActive && (
-        <motion.section
+        <section
           key="welcome-window"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{
-            opacity: 0,
-            transition: {
-              duration: 0.7,
-              ease: [0.22, 1, 0.36, 1],
-            },
-          }}
-          className="absolute inset-0 z-[80] overflow-hidden"
+          className={`absolute inset-0 z-[80] ${
+        isActive ? "pointer-events-auto" : "pointer-events-none"
+      }`}
+          // className="absolute inset-0 z-[80] overflow-hidden"
         >
           {/* WALL BACKGROUND */}
           <motion.div
@@ -71,27 +63,48 @@ export default function WelcomeWindow({
 
           {/* MAIN CLICKABLE INTRO */}
           <motion.div
-            role="button"
-            tabIndex={0}
-            aria-label="Enter website"
-            onClick={onEnterClick}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                onEnterClick();
-              }
-            }}
-            style={{
-              scale: windowScale,
-              opacity: windowOpacity,
-              x: windowExitX,
-            }}
-            className="absolute inset-0 flex cursor-pointer items-center justify-center px-5 py-8 outline-none md:px-10"
+             role="button"
+        tabIndex={isActive ? 0 : -1}
+        aria-label="Enter website"
+        onClick={onEnterClick}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onEnterClick();
+          }
+        }}
+        style={{
+          scale: windowScale,
+          opacity: windowOpacity,
+          x: windowExitX,
+        }}
+        className="absolute inset-0 flex cursor-pointer items-center justify-center outline-none"
           >
-            <div className="relative grid h-full w-full max-w-[1460px] grid-cols-1 items-center gap-8 md:grid-cols-[390px_minmax(0,1fr)] md:gap-16 lg:grid-cols-[460px_minmax(0,1fr)] lg:gap-24">
+
+            
+
+            <div className="relative h-[58vh] w-[84vw] max-w-5xl overflow-hidden bg-[#1d1712] shadow-[0_40px_120px_rgba(0,0,0,0.45)] [perspective:1400px] md:h-[65vh] md:w-[78vw]">
+
+               {/* BACKGROUND VIEW - ONLY IMAGE ZOOMS */}
+          <motion.img
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
+            alt="Architecture view"
+            draggable={false}
+            // style={{
+            //   scale: windowScale,
+            // }}
+            className="absolute inset-0 h-full w-full select-none object-cover"
+          />
+
+          {/* SOFT DARK OVERLAY */}
+          <div className="absolute inset-0 bg-black/10" />
               {/* LEFT WINDOW */}
               <motion.div
-                style={{ opacity: frameOpacity }}
+                style={{
+              rotateY: leftRotate,
+              transformOrigin: "left center",
+              opacity: frameOpacity,
+            }}
                 className="relative flex items-center justify-center md:justify-start"
               >
                 <div className="relative [perspective:2200px]">
@@ -105,10 +118,7 @@ export default function WelcomeWindow({
                   <div className="relative h-[548px] w-[248px] bg-[#171512] p-[10px] shadow-[0_24px_50px_rgba(24,17,11,0.42)] md:h-[690px] md:w-[304px]">
                     <div className="absolute inset-[4px] border border-[#4b4031]/80" />
 
-                    {/* image behind the door */}
-                    <div className="absolute inset-[16px] overflow-hidden bg-[#c7b28f]">
-                      <SceneView />
-                    </div>
+                    
 
                     {/* single opening glass door */}
                     <motion.div
@@ -197,12 +207,9 @@ export default function WelcomeWindow({
           >
             Tap to enter
           </motion.p>
-        </motion.section>
+        </section>
       )}
-    </AnimatePresence>
-  );
-}
-
+  
 function SceneView() {
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#c7b28f]">
