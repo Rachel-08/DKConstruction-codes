@@ -1,16 +1,16 @@
 "use client";
 
-import { AnimatePresence, motion, type MotionValue } from "motion/react";
+import { motion, type MotionValue } from "motion/react";
 
 type WelcomeWindowProps = {
   isActive: boolean;
   leftRotate: MotionValue<number>;
-  rightRotate: MotionValue<number>;
+  rightRotate: MotionValue<number>; // kept for compatibility
   windowScale: MotionValue<number>;
   windowOpacity: MotionValue<number>;
   windowExitX: MotionValue<string>;
   frameOpacity: MotionValue<number>;
-  scrollTextOpacity: MotionValue<number>;
+  scrollTextOpacity: MotionValue<number>; // kept for compatibility
   onEnterClick: () => void;
 };
 
@@ -25,45 +25,40 @@ export default function WelcomeWindow({
   windowOpacity,
   windowExitX,
   frameOpacity,
-  scrollTextOpacity,
+  scrollTextOpacity: _scrollTextOpacity,
   onEnterClick,
 }: WelcomeWindowProps) {
   return (
-        <section
-          key="welcome-window"
-          className={`absolute inset-0 z-[80] ${
+    <section
+      className={`absolute inset-0 z-[80] overflow-hidden ${
         isActive ? "pointer-events-auto" : "pointer-events-none"
       }`}
-          // className="absolute inset-0 z-[80] overflow-hidden"
-        >
-          {/* WALL BACKGROUND */}
-          <motion.div
-            style={{ opacity: frameOpacity }}
-            className="absolute inset-0 bg-[#d6c3a7]"
-          >
-            {/* plaster texture */}
-            <div className="absolute inset-0 opacity-[0.17] [background-image:radial-gradient(circle_at_1px_1px,rgba(70,55,38,0.32)_1px,transparent_0)] [background-size:18px_18px]" />
+    >
+      {/* WALL BACKGROUND */}
+      <motion.div
+        style={{ opacity: frameOpacity }}
+        className="absolute inset-0 bg-[#d6c3a7]"
+      >
+        {/* plaster texture */}
+        <div className="absolute inset-0 opacity-[0.16] [background-image:radial-gradient(circle_at_1px_1px,rgba(68,52,34,0.30)_1px,transparent_0)] [background-size:18px_18px]" />
 
-            {/* soft wall depth */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,245,220,0.28),transparent_36%),radial-gradient(circle_at_85%_28%,rgba(0,0,0,0.08),transparent_44%),radial-gradient(circle_at_50%_100%,rgba(0,0,0,0.12),transparent_48%)]" />
+        {/* soft wall depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,245,220,0.24),transparent_35%),radial-gradient(circle_at_80%_25%,rgba(0,0,0,0.06),transparent_40%),radial-gradient(circle_at_50%_100%,rgba(0,0,0,0.12),transparent_46%)]" />
 
-            {/* lamp light on wall */}
-            <div className="absolute right-[12%] top-[17%] hidden h-[360px] w-[520px] rounded-full bg-[#f6ddb0]/45 blur-[95px] md:block" />
+        {/* floor */}
+        <div className="absolute bottom-0 left-0 right-0 h-[88px] bg-[linear-gradient(180deg,rgba(122,100,76,0.05)_0%,rgba(91,75,58,0.18)_100%)]" />
+        <div className="absolute bottom-[86px] left-0 right-0 h-px bg-black/12" />
 
-            {/* floor */}
-            <div className="absolute bottom-0 left-0 right-0 h-[86px] bg-[linear-gradient(180deg,rgba(122,100,76,0.06)_0%,rgba(91,75,58,0.18)_100%)]" />
-            <div className="absolute bottom-[84px] left-0 right-0 h-px bg-black/12" />
+        {/* floor tile hints */}
+        <div className="absolute bottom-0 left-0 right-0 h-[86px] opacity-20 [background-image:linear-gradient(to_right,transparent,transparent_24%,rgba(30,24,18,0.18)_24.2%,transparent_24.5%,transparent_49%,rgba(30,24,18,0.18)_49.2%,transparent_49.5%,transparent_74%,rgba(30,24,18,0.18)_74.2%,transparent_74.5%,transparent)]" />
 
-            {/* floor tile hints */}
-            <div className="absolute bottom-0 left-0 right-0 h-[84px] opacity-25 [background-image:linear-gradient(to_right,transparent,transparent_24%,rgba(30,24,18,0.22)_24.2%,transparent_24.5%,transparent_49%,rgba(30,24,18,0.22)_49.2%,transparent_49.5%,transparent_74%,rgba(30,24,18,0.22)_74.2%,transparent_74.5%,transparent)]" />
+        {/* vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_35%,rgba(38,28,18,0.16)_100%)]" />
+      </motion.div>
 
-            {/* vignette */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_32%,rgba(38,28,18,0.18)_100%)]" />
-          </motion.div>
-
-          {/* MAIN CLICKABLE INTRO */}
-          <motion.div
-             role="button"
+      {/* WINDOW WRAPPER */}
+      <motion.div
+        role="button"
         tabIndex={isActive ? 0 : -1}
         aria-label="Enter website"
         onClick={onEnterClick}
@@ -78,138 +73,52 @@ export default function WelcomeWindow({
           opacity: windowOpacity,
           x: windowExitX,
         }}
-        className="absolute inset-0 flex cursor-pointer items-center justify-center outline-none"
-          >
+        className="absolute inset-0 flex items-center justify-center outline-none"
+      >
+        <div className="relative [perspective:2200px]">
+          {/* recess shadow */}
+          <div className="absolute left-1/2 top-1/2 h-[590px] w-[280px] -translate-x-1/2 -translate-y-1/2 bg-black/22 blur-[24px] md:h-[720px] md:w-[340px]" />
 
-            
+          {/* recess niche */}
+          <div className="absolute inset-x-[-22px] inset-y-[-25px] bg-[#a99373]/55 shadow-[inset_0_28px_48px_rgba(0,0,0,0.26),inset_0_-20px_34px_rgba(255,255,255,0.12)]" />
 
-            <div className="relative h-[58vh] w-[84vw] max-w-5xl overflow-hidden bg-[#1d1712] shadow-[0_40px_120px_rgba(0,0,0,0.45)] [perspective:1400px] md:h-[65vh] md:w-[78vw]">
+          {/* outer frame */}
+          <div className="relative h-[548px] w-[248px] bg-[#171512] p-[10px] shadow-[0_24px_50px_rgba(24,17,11,0.42)] md:h-[690px] md:w-[304px]">
+            <div className="absolute inset-[4px] border border-[#4b4031]/80" />
 
-               {/* BACKGROUND VIEW - ONLY IMAGE ZOOMS */}
-          <motion.img
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
-            alt="Architecture view"
-            draggable={false}
-            // style={{
-            //   scale: windowScale,
-            // }}
-            className="absolute inset-0 h-full w-full select-none object-cover"
-          />
-
-          {/* SOFT DARK OVERLAY */}
-          <div className="absolute inset-0 bg-black/10" />
-              {/* LEFT WINDOW */}
-              <motion.div
-                style={{
-              rotateY: leftRotate,
-              transformOrigin: "left center",
-              opacity: frameOpacity,
-            }}
-                className="relative flex items-center justify-center md:justify-start"
-              >
-                <div className="relative [perspective:2200px]">
-                  {/* wall recess shadow */}
-                  <div className="absolute left-1/2 top-1/2 h-[590px] w-[280px] -translate-x-1/2 -translate-y-1/2 bg-black/22 blur-[24px] md:h-[720px] md:w-[340px]" />
-
-                  {/* recessed opening */}
-                  <div className="absolute inset-x-[-22px] inset-y-[-25px] rounded-[2px] bg-[#a99373]/55 shadow-[inset_0_28px_48px_rgba(0,0,0,0.26),inset_0_-20px_34px_rgba(255,255,255,0.12)]" />
-
-                  {/* outer black frame */}
-                  <div className="relative h-[548px] w-[248px] bg-[#171512] p-[10px] shadow-[0_24px_50px_rgba(24,17,11,0.42)] md:h-[690px] md:w-[304px]">
-                    <div className="absolute inset-[4px] border border-[#4b4031]/80" />
-
-                    
-
-                    {/* single opening glass door */}
-                    <motion.div
-                      style={{
-                        rotateY: leftRotate,
-                        transformOrigin: "left center",
-                        opacity: frameOpacity,
-                      }}
-                      className="absolute inset-[16px] z-30 bg-[#171512] p-[8px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),12px_0_30px_rgba(0,0,0,0.36)] [transform-style:preserve-3d] will-change-transform"
-                    >
-                      <SingleDoorPanel />
-                    </motion.div>
-
-                    {/* inner black trim */}
-                    <div className="pointer-events-none absolute inset-[16px] z-40 border border-white/5" />
-
-                    {/* deep inner shadow */}
-                    <div className="pointer-events-none absolute inset-[10px] z-50 shadow-[inset_0_0_26px_rgba(0,0,0,0.42)]" />
-                  </div>
-
-                  {/* bottom sill */}
-                  <div className="absolute bottom-[-14px] left-1/2 h-[15px] w-[112%] -translate-x-1/2 bg-[#9a8364] shadow-[0_12px_24px_rgba(33,24,16,0.34)]" />
-
-                  {/* thin sill highlight */}
-                  <div className="absolute bottom-[-4px] left-1/2 h-px w-[108%] -translate-x-1/2 bg-white/25" />
-                </div>
-              </motion.div>
-
-              {/* RIGHT CONTENT */}
-              <div className="relative flex h-full items-center justify-center md:justify-start">
-                {/* pendant lamp */}
-                <motion.div
-                  style={{ opacity: frameOpacity }}
-                  className="pointer-events-none absolute left-1/2 top-[1.2rem] z-20 hidden -translate-x-1/2 md:block lg:left-[33%]"
-                >
-                  <Lamp />
-                </motion.div>
-
-                {/* text block */}
-                <motion.div
-                  style={{ opacity: frameOpacity }}
-                  className="relative z-10 mx-auto w-full max-w-[760px] text-left md:mx-0 md:pt-24 lg:pt-20"
-                >
-                  <p className="mb-6 text-[11px] font-medium uppercase tracking-[0.44em] text-[#61574c] md:text-[14px]">
-                    Architecture Studio
-                  </p>
-
-                  <h1 className="font-serif text-[clamp(3.1rem,6.6vw,6.35rem)] leading-[0.91] tracking-[-0.055em] text-[#3e362e]">
-                    DK Construction
-                    <br />
-                    &amp; Consultancy
-                  </h1>
-
-                  <p className="mt-5 text-[13px] font-light tracking-wide text-[#665d52] md:text-[17px]">
-                    Architecture · Interiors · Construction Consultancy
-                  </p>
-
-                  <div className="mt-10">
-                    <p className="mb-5 text-[14px] font-light text-[#675d52] md:text-[16px]">
-                      Designing refined spaces with,
-                    </p>
-
-                    <div className="space-y-4">
-                      <FeatureRow label="Clarity" />
-                      <FeatureRow label="Function" />
-                      <FeatureRow label="Purpose" />
-                    </div>
-                  </div>
-
-                  <motion.div
-                    style={{ opacity: scrollTextOpacity }}
-                    className="mt-10 flex items-center gap-3 text-[13px] text-[#5f5549] md:text-[14px]"
-                  >
-                    <span>Click to enter</span>
-                    <span className="h-px w-16 bg-[#756857]/60" />
-                  </motion.div>
-                </motion.div>
-              </div>
+            {/* image behind door */}
+            <div className="absolute inset-[16px] overflow-hidden bg-[#c7b28f]">
+              <SceneView />
             </div>
-          </motion.div>
 
-          {/* MOBILE CLICK TEXT */}
-          <motion.p
-            style={{ opacity: scrollTextOpacity }}
-            className="pointer-events-none absolute bottom-7 left-1/2 z-[90] block -translate-x-1/2 text-center text-[10px] uppercase tracking-[0.32em] text-[#4d4338]/70 md:hidden"
-          >
-            Tap to enter
-          </motion.p>
-        </section>
-      )}
-  
+            {/* single door */}
+            <motion.div
+              style={{
+                rotateY: leftRotate,
+                transformOrigin: "left center",
+                opacity: frameOpacity,
+              }}
+              className="absolute inset-[16px] z-30 bg-[#171512] p-[8px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),12px_0_30px_rgba(0,0,0,0.36)] [transform-style:preserve-3d] will-change-transform"
+            >
+              <SingleDoorPanel />
+            </motion.div>
+
+            {/* inner trim */}
+            <div className="pointer-events-none absolute inset-[16px] z-40 border border-white/5" />
+
+            {/* inner shadow */}
+            <div className="pointer-events-none absolute inset-[10px] z-50 shadow-[inset_0_0_26px_rgba(0,0,0,0.42)]" />
+          </div>
+
+          {/* sill */}
+          <div className="absolute bottom-[-14px] left-1/2 h-[15px] w-[112%] -translate-x-1/2 bg-[#9a8364] shadow-[0_12px_24px_rgba(33,24,16,0.34)]" />
+          <div className="absolute bottom-[-4px] left-1/2 h-px w-[108%] -translate-x-1/2 bg-white/25" />
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
 function SceneView() {
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#c7b28f]">
@@ -221,17 +130,17 @@ function SceneView() {
       />
 
       {/* warm glass tone */}
-      <div className="absolute inset-0 bg-[#f2dfbb]/14" />
+      <div className="absolute inset-0 bg-[#f2dfbb]/12" />
 
-      {/* glass softness */}
+      {/* soft glass blur */}
       <div className="absolute inset-0 backdrop-blur-[0.45px]" />
 
-      {/* vertical glass reflection */}
+      {/* reflections */}
       <div className="absolute left-[12%] top-[-8%] h-[62%] w-[22%] rotate-[15deg] bg-white/14 blur-[10px]" />
       <div className="absolute right-[12%] top-[8%] h-[36%] w-[14%] rotate-[9deg] bg-white/8 blur-[8px]" />
 
-      {/* bottom darker reflection */}
-      <div className="absolute bottom-0 left-0 h-[24%] w-full bg-black/13" />
+      {/* lower dark reflection */}
+      <div className="absolute bottom-0 left-0 h-[24%] w-full bg-black/12" />
     </div>
   );
 }
@@ -239,17 +148,17 @@ function SceneView() {
 function SingleDoorPanel() {
   return (
     <div className="relative h-full w-full overflow-hidden border border-[#3d352c] bg-[#c9b898]/14 shadow-[inset_0_0_35px_rgba(255,255,255,0.08)]">
-      {/* transparent dark glass */}
+      {/* dark glass */}
       <div className="absolute inset-0 bg-[#11100d]/26 backdrop-blur-[1.2px]" />
 
-      {/* glass highlights */}
+      {/* highlights */}
       <div className="absolute left-[11%] top-[-8%] h-[70%] w-[24%] rotate-[16deg] bg-white/14 blur-[10px]" />
       <div className="absolute right-[18%] top-[4%] h-[48%] w-[15%] rotate-[10deg] bg-white/7 blur-[8px]" />
 
-      {/* lower darker tint */}
+      {/* lower tint */}
       <div className="absolute bottom-0 left-0 h-[25%] w-full bg-black/18" />
 
-      {/* main mullions */}
+      {/* mullions */}
       <div className="absolute left-1/2 top-0 h-full w-[3px] -translate-x-1/2 bg-[#11100d]" />
       <div className="absolute left-0 top-[28%] h-[3px] w-full bg-[#11100d]" />
       <div className="absolute left-0 bottom-[28%] h-[3px] w-full bg-[#11100d]" />
@@ -262,44 +171,6 @@ function SingleDoorPanel() {
       <div className="absolute right-0 top-0 h-full w-px bg-black/35" />
       <div className="absolute left-0 top-0 h-px w-full bg-white/10" />
       <div className="absolute bottom-0 left-0 h-px w-full bg-black/40" />
-    </div>
-  );
-}
-
-function Lamp() {
-  return (
-    <div className="relative h-[300px] w-[230px]">
-      {/* cable */}
-      <div className="absolute left-1/2 top-0 h-[112px] w-px -translate-x-1/2 bg-[#3b3027]" />
-
-      {/* light cone */}
-      <div className="absolute left-1/2 top-[105px] h-[220px] w-[340px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_top,rgba(250,222,171,0.62)_0%,rgba(250,222,171,0.28)_35%,rgba(250,222,171,0.10)_58%,transparent_76%)] blur-[12px]" />
-
-      {/* lamp shadow */}
-      <div className="absolute left-1/2 top-[82px] h-[76px] w-[122px] -translate-x-1/2 rounded-full bg-black/16 blur-[18px]" />
-
-      {/* shade */}
-      <div className="absolute left-1/2 top-[70px] h-[92px] w-[92px] -translate-x-1/2 overflow-hidden rounded-b-[42px] rounded-t-[18px] bg-[linear-gradient(180deg,#6b5845_0%,#33291f_100%)] shadow-[0_14px_24px_rgba(0,0,0,0.30)]">
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.10)_0%,transparent_38%,transparent_64%,rgba(0,0,0,0.26)_100%)]" />
-
-        {/* bottom glow */}
-        <div className="absolute bottom-[8px] left-1/2 h-[18px] w-[70px] -translate-x-1/2 rounded-full bg-[#edca87]" />
-        <div className="absolute bottom-[3px] left-1/2 h-[11px] w-[62px] -translate-x-1/2 rounded-full bg-[#fff0c8]/75 blur-[3px]" />
-      </div>
-    </div>
-  );
-}
-
-function FeatureRow({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-4 md:gap-6">
-      <span className="min-w-[118px] font-serif text-[clamp(2.1rem,4vw,3.9rem)] italic leading-none tracking-[-0.045em] text-[#5a5148] md:min-w-[150px]">
-        {label}
-      </span>
-
-      <div className="mt-2 h-px flex-1 bg-[#a79884]/45" />
-
-      <div className="mt-2 h-[5px] w-[5px] rounded-full bg-[#50483f]/80" />
     </div>
   );
 }
