@@ -14,32 +14,46 @@ import SelectedWork from "@/components/SelectedWork";
 import About from "@/components/About";
 import ContactSection from "@/components/Contact";
 
+type ActiveSegment = "intro" | "landing" | "work" | "about" | "contact";
+
 export default function ScrollExperience() {
   const containerRef = useRef<HTMLElement | null>(null);
+
   const [showNavbar, setShowNavbar] = useState(false);
+  const [activeSegment, setActiveSegment] =
+    useState<ActiveSegment>("intro");
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  const [activeSegment, setActiveSegment] = useState<
-    "intro" | "landing" | "work" | "about" | "contact"
-  >("intro");
+  // ----------------------------------------
+  // ACTIVE SEGMENT CONTROL
+  // ----------------------------------------
+  // Important:
+  // Intro stays active until 0.38 so AnimatePresence has time to exit smoothly.
+  // Landing starts visually before intro fully disappears.
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest < 0.22) {
+    if (latest < 0.38) {
       setActiveSegment("intro");
-    } else if (latest >= 0.22 && latest < 0.54) {
+    } else if (latest >= 0.38 && latest < 0.56) {
       setActiveSegment("landing");
-    } else if (latest >= 0.54 && latest < 0.82) {
+    } else if (latest >= 0.56 && latest < 0.82) {
       setActiveSegment("work");
-    } else if (latest >= 0.82 && latest < 0.98) {
+    } else if (latest >= 0.82 && latest < 0.96) {
       setActiveSegment("about");
     } else {
       setActiveSegment("contact");
     }
   });
+
+  // ----------------------------------------
+  // NAVBAR CONTROL
+  // ----------------------------------------
+  // Navbar should stay hidden during intro and entering.
+  // It appears once the landing has properly taken over.
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     const previous = scrollYProgress.getPrevious() ?? 0;
@@ -47,12 +61,12 @@ export default function ScrollExperience() {
     const isScrollingDown = latest > previous;
     const isScrollingUp = latest < previous;
 
-    if (latest < 0.22) {
+    if (latest < 0.36) {
       setShowNavbar(false);
       return;
     }
 
-    if (latest >= 0.22 && latest < 0.54) {
+    if (latest >= 0.36 && latest < 0.56) {
       setShowNavbar(true);
       return;
     }
@@ -67,120 +81,144 @@ export default function ScrollExperience() {
   });
 
   const isIntroActive = activeSegment === "intro";
-  const isLandingActive = activeSegment === "landing";
+  const isLandingActive =
+    activeSegment === "intro" || activeSegment === "landing";
   const isWorkActive = activeSegment === "work";
   const isAboutActive = activeSegment === "about";
   const isContactActive = activeSegment === "contact";
 
   // ----------------------------------------
-  // NAVBAR
+  // NAVBAR MOTION
   // ----------------------------------------
 
-  const navOpacity = useTransform(scrollYProgress, [0.22, 0.3], [0, 1]);
+  const navOpacity = useTransform(
+    scrollYProgress,
+    [0.34, 0.4],
+    [0, 1]
+  );
 
-  const navY = useTransform(scrollYProgress, [0.22, 0.3], ["-40vw", "0vw"]);
+  const navY = useTransform(
+    scrollYProgress,
+    [0.34, 0.4],
+    ["-40px", "0px"]
+  );
+
+  // If your Navbar currently does not accept navOpacity/navY,
+  // you can ignore these two values for now.
+  // They are kept here for future navbar animation improvement.
+
+  void navOpacity;
+  void navY;
 
   // ----------------------------------------
   // SEGMENT 1: WELCOME WINDOW
   // ----------------------------------------
-  // Keep the welcome page visible and realistic at first.
-  // Then open the window, zoom into it, and fade the editorial frame/lamp.
+  // New mockup behavior:
+  // 1. Window visible
+  // 2. Single door opens
+  // 3. Lamp / text / frame fade
+  // 4. Window scales into landing
+  // 5. Whole intro exits with AnimatePresence
 
   const leftRotate = useTransform(
     scrollYProgress,
-    [0.02, 0.12, 0.2],
-    [0, -18, -76]
+    [0.02, 0.13, 0.24, 0.34],
+    [0, -12, -52, -88]
   );
 
+  // Kept only for compatibility with WelcomeWindow props.
+  // The redesigned mockup uses one door only.
   const rightRotate = useTransform(
     scrollYProgress,
-    [0.02, 0.12, 0.2],
-    [0, 18, 76]
+    [0.02, 0.13, 0.24, 0.34],
+    [0, 0, 0, 0]
   );
 
   const windowScale = useTransform(
     scrollYProgress,
-    [0.0, 0.1, 0.22, 0.3],
-    [1, 1.02, 1.45, 2.35]
+    [0.0, 0.14, 0.26, 0.34, 0.4],
+    [1, 1.02, 1.16, 1.8, 2.35]
   );
 
   const windowOpacity = useTransform(
     scrollYProgress,
-    [0.0, 0.24, 0.32, 0.36],
-    [1, 1, 0.35, 0]
+    [0.0, 0.3, 0.36, 0.41],
+    [1, 1, 0.55, 0]
   );
 
   const windowExitX = useTransform(
     scrollYProgress,
-    [0.0, 0.28, 0.36],
-    ["0vw", "0vw", "-90vw"]
+    [0.0, 0.34, 0.42],
+    ["0vw", "0vw", "-60vw"]
   );
 
   const frameOpacity = useTransform(
     scrollYProgress,
-    [0.0, 0.14, 0.22, 0.28],
-    [1, 1, 0.65, 0]
+    [0.0, 0.16, 0.27, 0.35],
+    [1, 1, 0.55, 0]
   );
 
   const scrollTextOpacity = useTransform(
     scrollYProgress,
-    [0.0, 0.08, 0.14],
+    [0.0, 0.08, 0.16],
     [1, 1, 0]
   );
 
   // ----------------------------------------
   // SEGMENT 2: STUDIO LANDING
   // ----------------------------------------
+  // Landing fades in behind the intro before WelcomeWindow exits.
 
   const landingOpacity = useTransform(
     scrollYProgress,
-    [0.26, 0.34, 0.46, 0.54],
+    [0.22, 0.32, 0.48, 0.56],
     [0, 1, 1, 0]
   );
 
   const landingY = useTransform(
     scrollYProgress,
-    [0.26, 0.36],
-    ["120vh", "0vh"]
+    [0.24, 0.36],
+    ["8vh", "0vh"]
   );
 
   const landingExitX = useTransform(
     scrollYProgress,
-    [0.4, 0.52],
+    [0.46, 0.56],
     ["0vw", "-140vw"]
   );
 
   // ----------------------------------------
   // SEGMENT 3: SELECTED WORK
   // ----------------------------------------
+  // Selected work slides in while landing exits left.
 
   const workX = useTransform(
     scrollYProgress,
-    [0.42, 0.54],
+    [0.46, 0.56],
     ["120vw", "0vw"]
   );
 
   const workOpacity = useTransform(
     scrollYProgress,
-    [0.46, 0.54, 0.88, 0.94],
+    [0.5, 0.56, 0.88, 0.94],
     [0, 1, 1, 0]
   );
 
   const workHeadingY = useTransform(
     scrollYProgress,
-    [0.58, 0.68],
+    [0.6, 0.68],
     ["0vh", "-22vh"]
   );
 
   const workHeadingScale = useTransform(
     scrollYProgress,
-    [0.58, 0.68],
+    [0.6, 0.68],
     [1, 0.45]
   );
 
   const workHeadingX = useTransform(
     scrollYProgress,
-    [0.58, 0.68],
+    [0.6, 0.68],
     ["0vw", "-14vw"]
   );
 
@@ -221,6 +259,7 @@ export default function ScrollExperience() {
   // ----------------------------------------
   // SEGMENT 5: CONTACT
   // ----------------------------------------
+  // Last segment should not fade out.
 
   const contactOpacity = useTransform(
     scrollYProgress,
@@ -233,6 +272,10 @@ export default function ScrollExperience() {
     [0.94, 1],
     ["100vh", "0vh"]
   );
+
+  // ----------------------------------------
+  // CLICK TO ENTER
+  // ----------------------------------------
 
   const scrollToProgress = (progress: number) => {
     if (!containerRef.current) return;
@@ -248,7 +291,7 @@ export default function ScrollExperience() {
   };
 
   const handleEnterClick = () => {
-    scrollToProgress(0.34);
+    scrollToProgress(0.36);
   };
 
   return (
@@ -260,6 +303,13 @@ export default function ScrollExperience() {
       <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
         <Navbar showNavbar={showNavbar} />
 
+        <StudioLanding
+          isActive={isLandingActive}
+          landingOpacity={landingOpacity}
+          landingY={landingY}
+          landingExitX={landingExitX}
+        />
+
         <WelcomeWindow
           isActive={isIntroActive}
           leftRotate={leftRotate}
@@ -270,13 +320,6 @@ export default function ScrollExperience() {
           frameOpacity={frameOpacity}
           scrollTextOpacity={scrollTextOpacity}
           onEnterClick={handleEnterClick}
-        />
-
-        <StudioLanding
-          isActive={isLandingActive}
-          landingOpacity={landingOpacity}
-          landingY={landingY}
-          landingExitX={landingExitX}
         />
 
         <SelectedWork
