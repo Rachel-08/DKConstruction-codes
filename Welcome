@@ -2,18 +2,6 @@
 
 import { motion, type MotionValue } from "motion/react";
 
-// ─── REVEAL GEOMETRY CONSTANTS ────────────────────────────────────────────────
-const RX = 28;          // reveal depth left / right (px) – wall thickness shown
-const RT = 22;          // reveal depth top soffit
-const SILL_TOP_H = 14;  // sill horizontal face height
-const SILL_FRONT_H = 10;// sill vertical drop height
-const SILL_OVH = 14;    // sill overhang past reveal each side
-
-// ─── INLINE NOISE TEXTURE ─────────────────────────────────────────────────────
-// fractalNoise SVG – gives genuine plaster/stucco grain without any asset file
-const NOISE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.68' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E")`;
-
-// ─── TYPES ────────────────────────────────────────────────────────────────────
 type WelcomeWindowProps = {
   isActive: boolean;
   leftRotate: MotionValue<number>;
@@ -26,10 +14,15 @@ type WelcomeWindowProps = {
   onEnterClick: () => void;
 };
 
+// Steel colour matching reference window photo
+const STEEL    = "#1c1a18";
+const FRAME_PX = 12; // outer frame thickness in px
+const BAR_PX   = 9;  // glazing bar thickness in px
+
 export default function WelcomeWindow({
   isActive,
-  leftRotate,
-  rightRotate,
+  leftRotate,   // ← re-used as the single panel's rotateY (parent drives it negative to open left)
+  // rightRotate not used — single panel design
   windowScale,
   windowOpacity,
   windowExitX,
@@ -39,622 +32,187 @@ export default function WelcomeWindow({
 }: WelcomeWindowProps) {
   return (
     <section
-      className={`absolute inset-0 z-[80] ${isActive ? "pointer-events-auto" : "pointer-events-none"}`}
+      className={`absolute inset-0 z-[80] ${
+        isActive ? "pointer-events-auto" : "pointer-events-none"
+      }`}
     >
+      {/* ══════════════════════════════════════════════════════════════
+          LAYER 1 — FULL SCREEN BACKGROUND
+          The beige wall image with pendant lamp fills the entire viewport.
+          Save your Image 1 as: /public/images/welcome-bg.png
+      ══════════════════════════════════════════════════════════════ */}
+      <div className="absolute inset-0 z-[0]">
+        <img
+          src="/images/welcome-bg.png"
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+          className="h-full w-full select-none object-cover"
+        />
+        {/* Slight vignette to ground the card */}
+        <div className="absolute inset-0 bg-black/20" />
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════
+          LAYER 2 — CARD + WINDOW (scales / fades / exits as one unit)
+      ══════════════════════════════════════════════════════════════ */}
       <motion.div
         role="button"
         tabIndex={isActive ? 0 : -1}
         aria-label="Enter website"
         onClick={onEnterClick}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onEnterClick(); }
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onEnterClick();
+          }
         }}
-        style={{ scale: windowScale, opacity: windowOpacity, x: windowExitX }}
-        className="absolute inset-0 cursor-pointer overflow-hidden outline-none"
+        style={{
+          scale: windowScale,
+          opacity: windowOpacity,
+          x: windowExitX,
+        }}
+        className="absolute inset-0 z-[10] flex cursor-pointer items-center justify-center outline-none"
       >
+        {/*
+          CARD — sized to match the wall niche proportions (tall & narrow ~1:2).
+          The niche in the reference sits slightly left-of-centre;
+          we keep it centred here so it feels balanced across breakpoints.
+          Adjust the left offset via `translateX` if your bg image demands it.
 
-        {/* ══════════════════════════════════════════════════════════════════
-            WALL  — warm sandy-beige plaster
-        ══════════════════════════════════════════════════════════════════ */}
-        <div className="absolute inset-0" style={{ background: "#bfaf98" }}>
+          perspective is set on this container so the panel rotateY looks 3-D.
+        */}
+        <div
+          className="relative overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.55)]"
+          style={{
+            width: "clamp(180px, 28vw, 380px)",   /* narrow — niche width  */
+            height: "clamp(360px, 70vh, 820px)",  /* tall  — niche height  */
+            borderRadius: "4px",                   /* niche has near-square corners */
+            perspective: "1400px",
+            backgroundColor: "#1d1712",            /* fallback while image loads */
+            /* shift slightly left to align with niche in bg image */
+            transform: "translateX(-18%)",
+          }}
+        >
+          {/* ── CARD BACKGROUND: Unsplash architecture image (unchanged) ── */}
+          <img
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
+            alt="Architecture view"
+            draggable={false}
+            className="absolute inset-0 h-full w-full select-none object-cover"
+          />
 
-          {/* fractal plaster grain */}
-          <div className="absolute inset-0" style={{
-            backgroundImage: NOISE,
-            backgroundSize: "256px 256px",
-            opacity: 0.14,
-            mixBlendMode: "multiply",
-          }} />
+          {/* Soft dark overlay on the card background */}
+          <div className="absolute inset-0 bg-black/10" />
 
-          {/* lamp glow spreading across upper-right wall */}
-          <div className="absolute inset-0" style={{
-            background:
-              "radial-gradient(ellipse 66% 54% at 68% 25%, rgba(255,212,124,0.38) 0%, rgba(235,180,82,0.16) 42%, transparent 72%)",
-          }} />
+          {/* ── NICHE INSET SHADOW — sells the wall-recess depth ── */}
+          <div
+            className="pointer-events-none absolute inset-0 z-[15]"
+            style={{
+              boxShadow:
+                "inset 8px 8px 28px rgba(0,0,0,0.45), inset -5px -5px 18px rgba(0,0,0,0.22)",
+            }}
+          />
 
-          {/* left-side shadow (less lamp light) */}
-          <div className="absolute inset-0" style={{
-            background: "linear-gradient(95deg, rgba(0,0,0,0.12) 0%, transparent 36%)",
-          }} />
-
-          {/* floor strip */}
-          <div className="absolute bottom-0 left-0 w-full"
-            style={{ height: 50, background: "#887768" }} />
-
-          {/* wall-floor joint */}
-          <div className="absolute left-0 w-full"
-            style={{ bottom: 50, height: 1, background: "rgba(0,0,0,0.26)", boxShadow: "0 1px 0 rgba(255,255,255,0.12)" }} />
-
-          {/* floor tile seam */}
-          <div className="absolute bottom-0"
-            style={{ left: "35%", width: 1, height: 50, background: "rgba(0,0,0,0.2)", boxShadow: "1px 0 0 rgba(255,255,255,0.09)" }} />
-        </div>
-
-        {/* ══════════════════════════════════════════════════════════════════
-            MAIN LAYOUT
-        ══════════════════════════════════════════════════════════════════ */}
-        <div className="relative z-10 grid h-full w-full items-center
-                        grid-cols-1 md:grid-cols-[46%_54%]
-                        px-6 py-8 md:px-[8vw] lg:px-[11vw]">
-
-          {/* ── LEFT: WINDOW ─────────────────────────────────────────────── */}
-          <div className="flex h-full items-center justify-center md:justify-start">
-
-            {/*
-              ┌──────────────────────────────────────────────────────────────┐
-              │  CSS 3D REVEAL STRATEGY                                      │
-              │                                                              │
-              │  The wall reveal is built from actual 3D faces using        │
-              │  CSS transform: rotateY / rotateX on absolutely-positioned  │
-              │  divs anchored to the reveal opening edges.                  │
-              │                                                              │
-              │  WHY THIS APPROACH:                                          │
-              │  • Correct perspective foreshortening at rest                │
-              │  • Zero extra work for the zoom animation – perspective      │
-              │    just deepens naturally as the camera moves in             │
-              │  • Shadow/colour of each face is controlled independently   │
-              │  • Clean separation from the frame/glass layer              │
-              └──────────────────────────────────────────────────────────────┘
-            */}
+          {/* ══════════════════════════════════════════════════════════
+              STEEL WINDOW PANEL
+              Single panel, opens inward to the LEFT.
+              transformOrigin: "right center" → right edge is the hinge.
+              leftRotate MotionValue drives it; parent should animate it
+              from 0 → negative value (e.g. -90deg) to swing open leftward.
+          ══════════════════════════════════════════════════════════ */}
+          <motion.div
+            style={{
+              rotateY: leftRotate,
+              transformOrigin: "right center",   // hinge on right → opens left
+              opacity: frameOpacity,
+              position: "absolute",
+              inset: 0,
+              zIndex: 30,
+              pointerEvents: "none",
+            }}
+          >
+            {/* Outer frame — matte dark steel */}
             <div
               style={{
-                position: "relative",
-                width: "clamp(200px, 25vw, 316px)",
-                height: "76vh",
-                perspective: "880px",
-                perspectiveOrigin: "50% 48%",
-              }}
-            >
-              {/* ── WALL REVEAL SHELL ─────────────────────────────────── */}
-              {/*
-                This div is the opening in the wall.
-                Its children are the jamb faces (3D rotated planes).
-                It is inset outward from the glass by RX / RT.
-              */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: -RT,
-                  bottom: 0,
-                  left: -RX,
-                  right: -RX,
-                  transformStyle: "preserve-3d",
-                }}
-              >
-
-                {/* LEFT JAMB ─────────────────────────────────────────────
-                    Rotated 90° outward around its LEFT edge.
-                    Catches the least light → darkest face.
-                */}
-                <div style={{
-                  position: "absolute",
-                  top: 0, bottom: 0, left: 0,
-                  width: RX,
-                  transformOrigin: "left center",
-                  transform: "rotateY(90deg)",
-                  background: "linear-gradient(to right, #988870, #a89880)",
-                  boxShadow: "inset -3px 0 8px rgba(0,0,0,0.2)",
-                }}>
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    backgroundImage: NOISE, backgroundSize: "256px 256px",
-                    opacity: 0.1, mixBlendMode: "multiply",
-                  }} />
-                </div>
-
-                {/* RIGHT JAMB ─────────────────────────────────────────────
-                    Rotated -90° outward around its RIGHT edge.
-                    Catches the most light → lightest reveal face.
-                */}
-                <div style={{
-                  position: "absolute",
-                  top: 0, bottom: 0, right: 0,
-                  width: RX,
-                  transformOrigin: "right center",
-                  transform: "rotateY(-90deg)",
-                  background: "linear-gradient(to left, #bfb09a, #b4a48e)",
-                  boxShadow: "inset 2px 0 6px rgba(255,255,255,0.1)",
-                }}>
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    backgroundImage: NOISE, backgroundSize: "256px 256px",
-                    opacity: 0.08, mixBlendMode: "multiply",
-                  }} />
-                </div>
-
-                {/* TOP SOFFIT ─────────────────────────────────────────────
-                    Rotated -90° outward around its TOP edge.
-                    Faces down → mostly in shadow, deepest tone.
-                */}
-                <div style={{
-                  position: "absolute",
-                  top: 0, left: 0, right: 0,
-                  height: RT,
-                  transformOrigin: "top center",
-                  transform: "rotateX(-90deg)",
-                  background: "linear-gradient(to bottom, #8a7c6c, #948678)",
-                  boxShadow: "inset 0 -3px 8px rgba(0,0,0,0.22)",
-                }}>
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    backgroundImage: NOISE, backgroundSize: "256px 256px",
-                    opacity: 0.1, mixBlendMode: "multiply",
-                  }} />
-                </div>
-
-                {/* INNER EDGE LINES ────────────────────────────────────────
-                    Crisp 1px shadow lines where each jamb meets the frame –
-                    exactly what you see in the zoomed mockup photo.
-                */}
-                <div style={{
-                  position: "absolute", inset: 0, pointerEvents: "none",
-                  boxShadow: [
-                    "inset 0 1px 0 rgba(0,0,0,0.3)",    // top edge
-                    "inset 1px 0 0 rgba(0,0,0,0.24)",   // left edge
-                    "inset -1px 0 0 rgba(0,0,0,0.14)",  // right edge
-                  ].join(", "),
-                }} />
-
-                {/* CONTACT SHADOW (falls on floor below) */}
-                <div style={{
-                  position: "absolute",
-                  bottom: -14, left: "12%", right: "12%",
-                  height: 26,
-                  background: "rgba(0,0,0,0.28)",
-                  filter: "blur(14px)",
-                  borderRadius: "50%",
-                }} />
-              </div>
-              {/* end reveal shell */}
-
-              {/* ── SILL ──────────────────────────────────────────────────
-                  Two faces:
-                  1. Top face  – horizontal, light-catching (lighter plaster)
-                  2. Front face – vertical drop (darker / in shadow)
-                  Wider than the reveal by SILL_OVH each side.
-              */}
-              <div style={{
                 position: "absolute",
-                bottom: -(SILL_TOP_H + SILL_FRONT_H),
-                left:  -(RX + SILL_OVH),
-                right: -(RX + SILL_OVH),
-              }}>
-                {/* top horizontal face */}
-                <div style={{
-                  height: SILL_TOP_H,
-                  background: "linear-gradient(to bottom, #c0b09a, #b0a28c)",
-                  boxShadow:
-                    "inset 0 1px 0 rgba(255,255,255,0.24), 0 1px 0 rgba(0,0,0,0.22)",
-                }}>
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    backgroundImage: NOISE, backgroundSize: "256px 256px",
-                    opacity: 0.07, mixBlendMode: "multiply",
-                  }} />
-                </div>
-                {/* front vertical drop */}
-                <div style={{
-                  height: SILL_FRONT_H,
-                  background: "linear-gradient(to bottom, #7a6e5e, #6a6052)",
-                  boxShadow:
-                    "0 5px 14px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.08)",
-                }} />
-              </div>
+                inset: 0,
+                border: `${FRAME_PX}px solid ${STEEL}`,
+                boxSizing: "border-box",
+              }}
+            />
 
-              {/* ── WINDOW FRAME + GLASS ──────────────────────────────────── */}
-              <div
-                className="relative h-full w-full overflow-hidden"
-                style={{
-                  background: "#0d0c0a",
-                  boxShadow: [
-                    "0 0 0 1px rgba(0,0,0,0.75)",        // crisp perimeter outline
-                    "0 24px 56px rgba(0,0,0,0.48)",       // deep drop shadow
-                    "0 4px 10px rgba(0,0,0,0.3)",         // close contact shadow
-                    "inset 0 0 0 1px rgba(255,255,255,0.055)", // inner bead
-                  ].join(", "),
-                }}
-              >
-                {/* Scene behind glass */}
-                <img
-                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
-                  alt="Architecture view"
-                  draggable={false}
-                  style={{
-                    position: "absolute", inset: 0,
-                    width: "100%", height: "100%",
-                    objectFit: "cover",
-                    userSelect: "none", pointerEvents: "none",
-                  }}
-                />
+            {/* Glass — subtle warm-grey tint + minimal blur */}
+            <div
+              style={{
+                position: "absolute",
+                inset: FRAME_PX,
+                background: "rgba(140,150,145,0.18)",
+                backdropFilter: "blur(2px)",
+              }}
+            />
 
-                {/* Glass tint – warm grey-beige */}
-                <div style={{
-                  position: "absolute", inset: 0,
-                  background: "rgba(195,175,140,0.09)",
-                }} />
-                {/* Glass gradient – brighter sky top / dark ground bottom */}
-                <div style={{
-                  position: "absolute", inset: 0,
-                  background:
-                    "linear-gradient(to bottom, rgba(255,255,255,0.16) 0%, transparent 38%, rgba(0,0,0,0.22) 100%)",
-                }} />
-                {/* Specular sheen */}
-                <div style={{
-                  position: "absolute",
-                  top: 0, left: "9%", height: "100%", width: "13%",
-                  transform: "skewX(-11deg)",
-                  background: "rgba(255,255,255,0.055)",
-                  filter: "blur(1px)",
-                }} />
+            {/* ── GLAZING BARS: 1 vertical + 2 horizontal → 2×3 grid ── */}
 
-                {/* ── OUTER FRAME ──────────────────────────────────────────
-                    Flat matte charcoal-black, 14px each side.
-                    Three inset shadow layers = outer bead, cavity, ambient.
-                */}
-                <motion.div
-                  style={{ opacity: frameOpacity }}
-                  className="pointer-events-none absolute inset-0 z-20"
-                >
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    border: "14px solid #181614",
-                    boxShadow: [
-                      "inset 0 0 0 1px rgba(255,255,255,0.055)",  // inner bead
-                      "inset 0 0 0 5px rgba(0,0,0,0.4)",          // dark cavity
-                      "inset 0 0 22px rgba(0,0,0,0.34)",          // ambient depth
-                    ].join(", "),
-                  }} />
-                </motion.div>
+            {/* Vertical centre bar */}
+            <div
+              style={{
+                position: "absolute",
+                top: FRAME_PX,
+                bottom: FRAME_PX,
+                left: `calc(${FRAME_PX}px + (100% - ${FRAME_PX * 2}px) / 2 - ${BAR_PX / 2}px)`,
+                width: BAR_PX,
+                background: STEEL,
+              }}
+            />
 
-                {/* ── MUNTINS (6-pane: 2 col × 3 row) ────────────────────── */}
-                <motion.div
-                  style={{ opacity: frameOpacity }}
-                  className="pointer-events-none absolute inset-0 z-[25]"
-                >
-                  {/* VERTICAL CENTRE */}
-                  <div style={{
-                    position: "absolute",
-                    left: "50%", top: 14,
-                    height: "calc(100% - 28px)",
-                    width: 6,
-                    transform: "translateX(-50%)",
-                    background: "#181614",
-                    boxShadow: [
-                      "1px 0 0 rgba(255,255,255,0.07)",
-                      "-1px 0 0 rgba(0,0,0,0.7)",
-                      "0 0 5px rgba(0,0,0,0.28)",
-                    ].join(", "),
-                  }} />
+            {/* Horizontal bar — 1/3 from top */}
+            <div
+              style={{
+                position: "absolute",
+                left: FRAME_PX,
+                right: FRAME_PX,
+                top: `calc(${FRAME_PX}px + (100% - ${FRAME_PX * 2}px) / 3 - ${BAR_PX / 2}px)`,
+                height: BAR_PX,
+                background: STEEL,
+              }}
+            />
 
-                  {/* HORIZONTAL – upper third */}
-                  <div style={{
-                    position: "absolute",
-                    left: 14, top: "33%",
-                    width: "calc(100% - 28px)", height: 6,
-                    background: "#181614",
-                    boxShadow: [
-                      "0 1px 0 rgba(255,255,255,0.07)",
-                      "0 -1px 0 rgba(0,0,0,0.65)",
-                      "0 0 5px rgba(0,0,0,0.26)",
-                    ].join(", "),
-                  }} />
+            {/* Horizontal bar — 2/3 from top */}
+            <div
+              style={{
+                position: "absolute",
+                left: FRAME_PX,
+                right: FRAME_PX,
+                top: `calc(${FRAME_PX}px + 2 * (100% - ${FRAME_PX * 2}px) / 3 - ${BAR_PX / 2}px)`,
+                height: BAR_PX,
+                background: STEEL,
+              }}
+            />
 
-                  {/* HORIZONTAL – lower third */}
-                  <div style={{
-                    position: "absolute",
-                    left: 14, top: "67%",
-                    width: "calc(100% - 28px)", height: 6,
-                    background: "#181614",
-                    boxShadow: [
-                      "0 1px 0 rgba(255,255,255,0.07)",
-                      "0 -1px 0 rgba(0,0,0,0.65)",
-                      "0 0 5px rgba(0,0,0,0.26)",
-                    ].join(", "),
-                  }} />
-                </motion.div>
+            {/* Specular glare on glass */}
+            <div
+              style={{
+                position: "absolute",
+                inset: FRAME_PX,
+                background:
+                  "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%)",
+              }}
+            />
+          </motion.div>
 
-                {/* LEFT PANEL (animation: opens outward on click) */}
-                <motion.div
-                  style={{ rotateY: leftRotate, transformOrigin: "left center", opacity: frameOpacity }}
-                  className="pointer-events-none absolute left-0 top-0 z-[30] h-full w-1/2"
-                >
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    borderRight: "5px solid #181614",
-                    background: "rgba(10,9,8,0.06)",
-                    backdropFilter: "blur(1px)",
-                    boxShadow: "inset -5px 0 14px rgba(0,0,0,0.14)",
-                  }} />
-                  <div style={{ position: "absolute", left: 14, right: 0, top: "33%", height: 5, background: "#181614" }} />
-                  <div style={{ position: "absolute", left: 14, right: 0, top: "67%", height: 5, background: "#181614" }} />
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: "linear-gradient(to right, rgba(255,255,255,0.06), transparent 55%, rgba(0,0,0,0.1))",
-                  }} />
-                </motion.div>
-
-                {/* RIGHT PANEL */}
-                <motion.div
-                  style={{ rotateY: rightRotate, transformOrigin: "right center", opacity: frameOpacity }}
-                  className="pointer-events-none absolute right-0 top-0 z-[30] h-full w-1/2"
-                >
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    borderLeft: "5px solid #181614",
-                    background: "rgba(10,9,8,0.06)",
-                    backdropFilter: "blur(1px)",
-                    boxShadow: "inset 5px 0 14px rgba(0,0,0,0.14)",
-                  }} />
-                  <div style={{ position: "absolute", left: 0, right: 14, top: "33%", height: 5, background: "#181614" }} />
-                  <div style={{ position: "absolute", left: 0, right: 14, top: "67%", height: 5, background: "#181614" }} />
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: "linear-gradient(to left, rgba(255,255,255,0.06), transparent 55%, rgba(0,0,0,0.1))",
-                  }} />
-                </motion.div>
-              </div>
-              {/* end frame + glass */}
-
-            </div>
-            {/* end window wrapper */}
-          </div>
-          {/* end left column */}
-
-          {/* ── RIGHT: LAMP + TEXT ──────────────────────────────────────────── */}
-          <div className="relative hidden h-full items-center md:flex">
-
-            {/* ── PENDANT LAMP ─────────────────────────────────────────────── */}
-
-            {/* Cord */}
-            <div style={{
-              position: "absolute",
-              left: "43%", top: 0,
-              height: "30vh", width: 1,
-              background: "rgba(22,16,10,0.72)",
-              boxShadow: "1px 0 0 rgba(255,255,255,0.07)",
-            }} />
-
-            {/* Lamp shade assembly */}
-            <div style={{
-              position: "absolute",
-              left: "43%", top: "30vh",
-              transform: "translateX(-50%)",
-              width: 138,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}>
-              {/* Canopy / cord grip */}
-              <div style={{
-                width: 20, height: 12,
-                borderRadius: "4px 4px 3px 3px",
-                background: "linear-gradient(to bottom, #2c2318, #1c1510)",
-               boxShadow: "0 2px 5px rgba(0,0,0,0.54), inset 0 1px 0 rgba(255,255,255,0.09)",
-              }} />
- 
-              {/* Top rim ring */}
-              <div style={{
-                marginTop: -1,
-                width: 48, height: 11,
-                borderRadius: "3px 3px 0 0",
-                background: "linear-gradient(to bottom, #38291e, #221a12)",
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 3px 8px rgba(0,0,0,0.4)",
-              }} />
- 
-              {/* Shade body – trapezoid frustum */}
-              <div style={{
-                position: "relative",
-                height: 106, width: 138,
-                clipPath: "polygon(26% 0%, 74% 0%, 100% 100%, 0% 100%)",
-                background: [
-                  "linear-gradient(110deg,",
-                  "  #1c1510 0%,",
-                  "  #4a3420 12%,",
-                  "  #7c5c38 26%,",
-                  "  #a07848 36%,",  /* warm bronze peak */
-"  #7a5838 46%,",
-                  "  #3e2c1c 60%,",
-                  "  #1e160e 78%,",
-                  "  #120e08 100%",
-                  ")",
-                ].join(""),
-                boxShadow: [
-                  "inset 8px 0 22px rgba(255,200,120,0.12)",
-                  "inset -12px 0 22px rgba(0,0,0,0.54)",
-                  "0 14px 44px rgba(0,0,0,0.38)",
-                ].join(", "),
-              }}>
-                {/* Left vertical specular streak */}
-                <div style={{
-                  position: "absolute",
-                  left: "30%", top: "8%",
-                  width: 15, height: "68%",
-                  background:
-                    "linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(255,255,255,0.06) 65%, transparent)",
-                  transform: "skewX(5deg)",
-                  filter: "blur(2.5px)",
-                  borderRadius: 8,
-                }} />
-
-              {/* Warm inner-glow bleed from bottom opening */}
-<div style={{
-                  position: "absolute",
-                  bottom: 0, left: "50%",
-                  transform: "translateX(-50%)",
-                  width: "82%", height: 28,
-                  background:
-                    "radial-gradient(ellipse at center bottom, rgba(255,205,100,0.72) 0%, rgba(200,148,55,0.34) 52%, transparent 100%)",
-                  filter: "blur(4px)",
-                }} />
-              </div>
- 
-              {/* Bottom rim ring */}
-              <div style={{
-                marginTop: -1,
-                width: 130, height: 11,
-                borderRadius: "0 0 6px 6px",
-                background: "linear-gradient(to bottom, #2e2118, #1a1310)",
-                border: "1px solid rgba(0,0,0,0.32)",
-                boxShadow: [
-                  "inset 0 1px 0 rgba(255,215,155,0.22)",
-                  "0 6px 18px rgba(0,0,0,0.4)",
-                ].join(", "),
-              }} />
-            </div>
-            {/* end lamp */}
-{/* ── LIGHT CAST ON WALL ──── */}
-            {/* broad halo */}
-            <div style={{
-              position: "absolute",
-              left: "43%", top: "28vh",
-              width: "50vw", height: "50vh",
-              transform: "translateX(-50%)",
-              background:
-                "radial-gradient(ellipse at 50% 6%, rgba(252,208,110,0.36) 0%, rgba(240,185,85,0.17) 30%, rgba(225,168,60,0.06) 56%, transparent 76%)",
-              filter: "blur(7px)",
-              borderRadius: "50%",
-              pointerEvents: "none",
-            }} />
-            {/* tight hot-spot */}
-            <div style={{
-              position: "absolute",
-              left: "43%", top: "36vh",
-              width: "26vw", height: "22vh",
-              transform: "translateX(-50%)",
-              background:
-                "radial-gradient(ellipse at 50% 0%, rgba(255,218,130,0.28) 0%, rgba(238,188,90,0.12) 48%, transparent 78%)",
-              filter: "blur(3px)",
-              borderRadius: "50%",
-              pointerEvents: "none",
-            }} />
-{/* ── TEXT ───────────────────────────────────────────────────── */}
-            <div style={{
-              position: "relative",
-              marginLeft: "5vw", maxWidth: 610,
-              paddingTop: "8vh",
-              color: "#2d2a24",
-            }}>
-              <p style={{
-                marginBottom: 28, fontSize: 11, fontWeight: 500,
-                letterSpacing: "0.52em", textTransform: "uppercase",
-                color: "rgba(60,55,46,0.68)",
-              }}>
-                Architecture Studio
-              </p>
- 
-              <h1 style={{
-                maxWidth: 600,
-                fontFamily: "Georgia, 'Times New Roman', serif",
-                fontSize: "clamp(46px, 5.2vw, 84px)",
-                fontWeight: 400,
-                lineHeight: 0.92,
-                letterSpacing: "-0.055em",
-                color: "#2f2b25",
-              }}>
-                DK Construction
-                <br />& Consultancy
-              </h1>
-<p style={{
-                marginTop: 28, fontSize: 15,
-                letterSpacing: "-0.018em",
-                color: "rgba(60,55,46,0.68)",
-              }}>
-                Architecture · Interiors · Construction Consultancy
-              </p>
- 
-              <div style={{ marginTop: 44 }}>
-                <p style={{ marginBottom: 20, fontSize: 14, color: "rgba(60,55,46,0.68)" }}>
-                  Designing refined spaces with,
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {["Clarity", "Function", "Purpose"].map((word) => (
-                    <div key={word} style={{ display: "flex", alignItems: "center", gap: 24 }}>
-                      <span style={{
-                        minWidth: 150,
-                        fontFamily: "Georgia, 'Times New Roman', serif",
-                        fontSize: 38, fontStyle: "italic",
-                        lineHeight: 1, letterSpacing: "-0.05em",
-                        color: "rgba(54,49,41,0.84)",
-                      }}>
-{word}
-                      </span>
-                      <span style={{ flex: 1, height: 1, background: "rgba(88,80,68,0.2)" }} />
-                      <span style={{
-                        width: 6, height: 6, borderRadius: "50%",
-                        background: "rgba(45,41,35,0.8)", flexShrink: 0,
-                      }} />
-                    </div>
-                  ))}
-                </div>
-              </div>
- 
-              <motion.p style={{ opacity: scrollTextOpacity }} className="mt-11 w-fit">
-                <span style={{
-                  display: "inline-block",
-                  borderBottom: "1px solid rgba(60,55,46,0.25)",
-                  paddingBottom: 8,
-                  fontSize: 13,
-                  letterSpacing: "-0.02em",
-                  color: "rgba(47,43,37,0.7)",
-                }}>
-                  Click to enter
-                </span>
-              </motion.p>
-            </div>
-          </div>
-          {/* end right column */}
-</div>
-        {/* end grid */}
- 
-        {/* ── MOBILE TEXT ─────────────────────────────────────────────────── */}
-        <div className="absolute bottom-10 left-1/2 z-20 w-full -translate-x-1/2 px-6 text-center md:hidden">
-          <p style={{
-            fontSize: 10, fontWeight: 500,
-            letterSpacing: "0.42em", textTransform: "uppercase",
-            color: "rgba(47,43,37,0.7)",
-          }}>
-            Architecture Studio
-          </p>
-          <h1 style={{
-            marginTop: 12,
-            fontFamily: "Georgia, serif",
-            fontSize: 34, fontWeight: 400,
-            lineHeight: 0.95, letterSpacing: "-0.05em",
-            color: "#2f2b25",
-          }}>
-            DK Construction
-            <br />& Consultancy
-          </h1>
-          <motion.p
-            style={{ opacity: scrollTextOpacity }}
-            className="mt-5 text-[12px] text-[#2f2b25]/70"
-          >
-  Click to enter
-          </motion.p>
         </div>
- 
       </motion.div>
+
+      {/* ══════════════════════════════════════════════════════════════
+          CLICK TEXT — unchanged
+      ══════════════════════════════════════════════════════════════ */}
+      <motion.p
+        style={{ opacity: scrollTextOpacity }}
+        className="pointer-events-none absolute bottom-8 left-1/2 z-[90] -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] text-black/60 md:bottom-10 md:text-xs"
+      >
+        Click anywhere on the window to enter
+      </motion.p>
     </section>
   );
 }
- 
