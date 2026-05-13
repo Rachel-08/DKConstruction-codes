@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1537" height="1023" viewBox="0 0 1537 1023" fill="none">
+  <title>Classical white window border / frame</title>
+  <desc>Vector recreation of the uploaded window border mockup. The centre is transparent so it can be placed over any background.</desc>
+  <defs>
+    <linearGradient id="cream" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffef7"/>
+      <stop offset="0.48" stop-color="#f6f1dc"/>
+      <stop offset="1" stop-color="#e7dcc2"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#dbd0b5"/>
+      <stop offset="0.16" stop-color="#fffef7"/>
+      <stop offset="0.82" stop-color="#fbf8eb"/>
+      <stop offset="1" stop-color="#cfc4aa"/>
+    </linearGradient>
+    <linearGradient id="verticalFace" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e6ddc8"/>
+      <stop offset="0.18" stop-color="#fffef7"/>
+      <stop offset="0.52" stop-color="#f8f4e6"/>
+      <stop offset="1" stop-color="#d4c8ad"/>
+    </linearGradient>
+    <filter id="softShadow" x="-18%" y="-18%" width="136%" height="136%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.34"/>
+    </filter>
+    <filter id="smallShadow" x="-12%" y="-12%" width="124%" height="124%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="0.24"/>
+    </filter>
+  </defs>
+
+  <!-- Main frame group. Centre opening is intentionally empty/transparent. -->
+  <g filter="url(#softShadow)">
+    <!-- Top projecting cap -->
+    <path d="M332 61H1184L1190 83L1176 106H345L328 82L332 61Z" fill="url(#cream)"/>
+    <path d="M330 61H1186V80H330V61Z" fill="#fffef8"/>
+    <path d="M346 84H1175L1168 110H354L346 84Z" fill="#e8dec8"/>
+    <path d="M357 105H1160V119H357V105Z" fill="#fbf7e8"/>
+    <path d="M368 119H1148V130H368V119Z" fill="#d7caae"/>
+
+    <!-- Upper frieze / header block -->
+    <path d="M374 122H1144V170H374V122Z" fill="url(#cream)"/>
+    <path d="M361 158H1158V180H361V158Z" fill="#fffdf4"/>
+    <path d="M381 172H1138V190H381V172Z" fill="#d6c9ad"/>
+
+    <!-- Side vertical pilasters -->
+    <path d="M374 170H441V842H374V170Z" fill="url(#verticalFace)"/>
+    <path d="M1061 170H1128V842H1061V170Z" fill="url(#verticalFace)"/>
+    <path d="M441 170H462V842H441V170Z" fill="#d8ccb2"/>
+    <path d="M1040 170H1061V842H1040V170Z" fill="#d8ccb2"/>
+    <path d="M382 170H396V842H382V170Z" fill="#fffdf2" opacity="0.8"/>
+    <path d="M1082 170H1098V842H1082V170Z" fill="#fffdf2" opacity="0.75"/>
+
+    <!-- Inner top lintel shadow line -->
+    <path d="M441 170H1061V192H441V170Z" fill="#cfc2a5"/>
+    <path d="M458 184H1044V202H458V184Z" fill="#5c5a52" opacity="0.22"/>
+
+    <!-- Bottom sill and cornice -->
+    <path d="M326 843H1199V865H326V843Z" fill="#fffef7"/>
+    <path d="M345 865H1180L1166 895H358L345 865Z" fill="url(#cream)"/>
+    <path d="M356 895H1168V913H356V895Z" fill="#d7caae"/>
+    <path d="M368 913H1156V934H368V913Z" fill="#f7f0dc"/>
+    <path d="M384 934H1140V951H384V934Z" fill="#d2c4a9"/>
+    <path d="M348 866H1178V874H348V866Z" fill="#d7cab0"/>
+    <path d="M362 884H1165V891H362V884Z" fill="#fffdf4" opacity="0.95"/>
+    <path d="M376 916H1152V922H376V916Z" fill="#fffdf4" opacity="0.8"/>
+  </g>
+
+  <!-- Fine bevel/highlight lines -->
+  <g filter="url(#smallShadow)" opacity="0.98">
+    <path d="M329 61H1187" stroke="#ffffff" stroke-width="4"/>
+    <path d="M349 84H1175" stroke="#cfc2a5" stroke-width="3"/>
+    <path d="M360 108H1160" stroke="#ffffff" stroke-width="3"/>
+    <path d="M371 130H1147" stroke="#cbbda0" stroke-width="3"/>
+    <path d="M376 170H1127" stroke="#fffdf3" stroke-width="3"/>
+    <path d="M441 170V842" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
+    <path d="M1061 170V842" stroke="#ffffff" stroke-width="2" opacity="0.55"/>
+    <path d="M326 843H1199" stroke="#ffffff" stroke-width="4"/>
+    <path d="M348 866H1179" stroke="#d0c3a8" stroke-width="3"/>
+    <path d="M362 897H1167" stroke="#ffffff" stroke-width="3"/>
+    <path d="M383 935H1140" stroke="#c7b99d" stroke-width="3"/>
+  </g>
+</svg>
