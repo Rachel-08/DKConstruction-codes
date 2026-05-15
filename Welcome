@@ -14,15 +14,274 @@ type WelcomeWindowProps = {
   onEnterClick: () => void;
 };
 
-// Steel colour matching reference window photo
-const STEEL    = "#1c1a18";
-const FRAME_PX = 12; // outer frame thickness in px
-const BAR_PX   = 9;  // glazing bar thickness in px
+// Reusable hinge SVG — renders a realistic brass hinge at a given top offset (in %)
+function Hinge({ top, side }: { top: string; side: "left" | "right" }) {
+  const isLeft = side === "left";
+  return (
+    <div
+      className="pointer-events-none absolute z-[50]"
+      style={{
+        top,
+        [isLeft ? "right" : "left"]: "-1px",
+        transform: "translateY(-50%)",
+        width: "clamp(14px, 2vw, 22px)",
+        height: "clamp(36px, 6vh, 56px)",
+      }}
+    >
+      <svg
+        viewBox="0 0 22 56"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-full w-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
+      >
+        <defs>
+          <linearGradient id={`hinge-face-${side}-${top}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#f5c84a" />
+            <stop offset="18%" stopColor="#e0a020" />
+            <stop offset="40%" stopColor="#f8d060" />
+            <stop offset="60%" stopColor="#c88820" />
+            <stop offset="80%" stopColor="#f0b830" />
+            <stop offset="100%" stopColor="#8a6010" />
+          </linearGradient>
+          <linearGradient id={`hinge-knuckle-${side}-${top}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f8d060" />
+            <stop offset="35%" stopColor="#c08020" />
+            <stop offset="65%" stopColor="#e8aa30" />
+            <stop offset="100%" stopColor="#906010" />
+          </linearGradient>
+        </defs>
+        {/* Hinge plate */}
+        <rect x="1" y="1" width="20" height="54" rx="2" fill={`url(#hinge-face-${side}-${top})`} />
+        <rect x="1" y="1" width="20" height="54" rx="2" fill="none" stroke="#f8d870" strokeWidth="0.5" opacity="0.6" />
+        {/* Knuckle centre barrel */}
+        <rect x="7" y="18" width="8" height="20" rx="2" fill={`url(#hinge-knuckle-${side}-${top})`} />
+        <ellipse cx="11" cy="18" rx="4" ry="3.5" fill="#f8d060" />
+        <ellipse cx="11" cy="38" rx="4" ry="3.5" fill="#a07018" />
+        <line x1="11" y1="18" x2="11" y2="38" stroke="#c89028" strokeWidth="0.5" />
+        {/* Pin dot */}
+        <circle cx="11" cy="28" r="2" fill="#906010" />
+        <circle cx="11" cy="28" r="1" fill="#c89028" />
+        {/* Screws */}
+        <circle cx="5.5" cy="7" r="3" fill="#c88820" />
+        <line x1="3.5" y1="7" x2="7.5" y2="7" stroke="#604000" strokeWidth="0.9" />
+        <line x1="5.5" y1="5" x2="5.5" y2="9" stroke="#604000" strokeWidth="0.9" />
+        <circle cx="16.5" cy="7" r="3" fill="#c88820" />
+        <line x1="14.5" y1="7" x2="18.5" y2="7" stroke="#604000" strokeWidth="0.9" />
+        <line x1="16.5" y1="5" x2="16.5" y2="9" stroke="#604000" strokeWidth="0.9" />
+        <circle cx="5.5" cy="49" r="3" fill="#c88820" />
+        <line x1="3.5" y1="49" x2="7.5" y2="49" stroke="#604000" strokeWidth="0.9" />
+        <line x1="5.5" y1="47" x2="5.5" y2="51" stroke="#604000" strokeWidth="0.9" />
+        <circle cx="16.5" cy="49" r="3" fill="#c88820" />
+        <line x1="14.5" y1="49" x2="18.5" y2="49" stroke="#604000" strokeWidth="0.9" />
+        <line x1="16.5" y1="47" x2="16.5" y2="51" stroke="#604000" strokeWidth="0.9" />
+      </svg>
+    </div>
+  );
+}
+
+// Reusable handle — escutcheon plate + lever knob
+function Handle({ side }: { side: "left" | "right" }) {
+  const isLeft = side === "left";
+  return (
+    <div
+      className="pointer-events-none absolute z-[50] top-1/2 -translate-y-1/2"
+      style={{
+        [isLeft ? "right" : "left"]: "clamp(4px, 1.2vw, 12px)",
+        width: "clamp(16px, 2.2vw, 26px)",
+        height: "clamp(60px, 10vh, 88px)",
+      }}
+    >
+      <svg
+        viewBox="0 0 26 88"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-full w-full drop-shadow-[0_3px_6px_rgba(0,0,0,0.8)]"
+      >
+        <defs>
+          <linearGradient id={`esc-${side}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#f5c848" />
+            <stop offset="20%" stopColor="#e0a020" />
+            <stop offset="50%" stopColor="#f8cc50" />
+            <stop offset="75%" stopColor="#b07818" />
+            <stop offset="100%" stopColor="#f0b830" />
+          </linearGradient>
+          <linearGradient id={`lever-${side}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#e8aa28" />
+            <stop offset="15%" stopColor="#fad060" />
+            <stop offset="45%" stopColor="#c88820" />
+            <stop offset="70%" stopColor="#f5c040" />
+            <stop offset="100%" stopColor="#906010" />
+          </linearGradient>
+        </defs>
+        {/* Escutcheon plate */}
+        <rect x="3" y="1" width="20" height="86" rx="5" fill={`url(#esc-${side})`} />
+        <rect x="3" y="1" width="20" height="86" rx="5" fill="none" stroke="#f8d870" strokeWidth="0.6" opacity="0.55" />
+        {/* Keyhole slot */}
+        <circle cx="13" cy="72" r="4" fill="#5a3800" />
+        <rect x="11" y="72" width="4" height="8" rx="1" fill="#5a3800" />
+        {/* Escutcheon screws */}
+        <circle cx="13" cy="8" r="3.5" fill="#c88820" />
+        <line x1="10.5" y1="8" x2="15.5" y2="8" stroke="#5a3800" strokeWidth="1" />
+        <line x1="13" y1="5.5" x2="13" y2="10.5" stroke="#5a3800" strokeWidth="1" />
+        <circle cx="13" cy="56" r="3.5" fill="#c88820" />
+        <line x1="10.5" y1="56" x2="15.5" y2="56" stroke="#5a3800" strokeWidth="1" />
+        <line x1="13" y1="53.5" x2="13" y2="58.5" stroke="#5a3800" strokeWidth="1" />
+        {/* Lever knob */}
+        <rect x="5" y="20" width="16" height="28" rx="8" fill={`url(#lever-${side})`} />
+        {/* Knob highlight */}
+        <rect x="8" y="23" width="5" height="22" rx="2.5" fill="#fad870" opacity="0.45" />
+        {/* Knob shadow rim */}
+        <rect x="5" y="20" width="16" height="28" rx="8" fill="none" stroke="#804000" strokeWidth="0.8" opacity="0.6" />
+        <rect x="5" y="20" width="16" height="28" rx="8" fill="none" stroke="#f8d060" strokeWidth="0.4" opacity="0.35" />
+      </svg>
+    </div>
+  );
+}
+
+// Individual glass pane with wood frame + muntins
+function WindowPane({
+  side,
+  rotateY,
+  opacity,
+}: {
+  side: "left" | "right";
+  rotateY: MotionValue<number>;
+  opacity: MotionValue<number>;
+}) {
+  const isLeft = side === "left";
+
+  return (
+    <motion.div
+      style={{
+        rotateY,
+        transformOrigin: isLeft ? "left center" : "right center",
+        opacity,
+      }}
+      className={`pointer-events-none absolute top-0 z-[30] h-full w-1/2 ${
+        isLeft ? "left-0" : "right-0"
+      }`}
+    >
+      {/* Wood frame outer */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `
+            linear-gradient(
+              ${isLeft ? "90deg" : "270deg"},
+              #1a110a 0%,
+              #3d2410 6%,
+              #5c3418 16%,
+              #2e1a0c 32%,
+              #4a2a12 50%,
+              #3a2010 68%,
+              #5a3218 82%,
+              #2c1a0c 94%,
+              #1a110a 100%
+            )
+          `,
+        }}
+      />
+
+      {/* Glass pane — full panel bg, visible through inner cutout */}
+      <div
+        className="absolute"
+        style={{
+          inset: "clamp(10px, 1.8vw, 18px)",
+          background: isLeft
+            ? "linear-gradient(135deg, rgba(180,215,235,0.52) 0%, rgba(140,190,215,0.32) 40%, rgba(200,230,245,0.22) 70%, rgba(120,175,205,0.42) 100%)"
+            : "linear-gradient(225deg, rgba(180,215,235,0.52) 0%, rgba(140,190,215,0.32) 40%, rgba(200,230,245,0.22) 70%, rgba(120,175,205,0.42) 100%)",
+          backdropFilter: "blur(3px) saturate(1.15)",
+          boxShadow: "inset 0 0 0 0.5px rgba(200,230,250,0.3), inset 0 0 30px rgba(0,0,0,0.12)",
+        }}
+      >
+        {/* Glass sheen diagonal streak */}
+        <div
+          className="absolute"
+          style={{
+            top: 0,
+            left: isLeft ? "12%" : "auto",
+            right: isLeft ? "auto" : "12%",
+            width: "28%",
+            height: "100%",
+            background: `linear-gradient(${isLeft ? "150deg" : "210deg"}, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.04) 50%, transparent 100%)`,
+            pointerEvents: "none",
+          }}
+        />
+        {/* Secondary sheen */}
+        <div
+          className="absolute"
+          style={{
+            top: "10%",
+            left: isLeft ? "45%" : "auto",
+            right: isLeft ? "auto" : "45%",
+            width: "15%",
+            height: "70%",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.07) 0%, transparent 100%)",
+          }}
+        />
+      </div>
+
+      {/* HORIZONTAL MUNTIN — middle crossbar */}
+      <div
+        className="absolute left-0 right-0"
+        style={{
+          top: "50%",
+          height: "clamp(8px, 1.4vh, 14px)",
+          transform: "translateY(-50%)",
+          background:
+            "linear-gradient(180deg, #4a2a14 0%, #6b3a1c 25%, #3a1e0c 50%, #5c3018 75%, #2a1608 100%)",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.55), inset 0 1px 0 rgba(180,120,60,0.25)",
+        }}
+      />
+
+      {/* VERTICAL MUNTIN — centre */}
+      <div
+        className="absolute top-0 bottom-0"
+        style={{
+          left: "50%",
+          width: "clamp(7px, 1.2vw, 12px)",
+          transform: "translateX(-50%)",
+          background:
+            "linear-gradient(90deg, #2a1608 0%, #5c3018 20%, #3a1e0c 50%, #6b3a1c 80%, #2a1608 100%)",
+          boxShadow: "2px 0 6px rgba(0,0,0,0.45), inset 1px 0 0 rgba(180,120,60,0.2)",
+        }}
+      />
+
+      {/* FRAME bevel highlights */}
+      {/* Top inner highlight */}
+      <div
+        className="absolute left-0 right-0"
+        style={{
+          top: "clamp(9px, 1.7vw, 17px)",
+          height: "1px",
+          background: "rgba(160,100,40,0.35)",
+        }}
+      />
+      {/* Left inner highlight */}
+      <div
+        className="absolute top-0 bottom-0"
+        style={{
+          left: "clamp(9px, 1.7vw, 17px)",
+          width: "1px",
+          background: "rgba(160,100,40,0.3)",
+        }}
+      />
+
+      {/* HINGES */}
+      <Hinge top="16%" side={side} />
+      <Hinge top="50%" side={side} />
+      <Hinge top="84%" side={side} />
+
+      {/* HANDLE */}
+      <Handle side={side} />
+    </motion.div>
+  );
+}
 
 export default function WelcomeWindow({
   isActive,
-  leftRotate,   // ← re-used as the single panel's rotateY (parent drives it negative to open left)
-  // rightRotate not used — single panel design
+  leftRotate,
+  rightRotate,
   windowScale,
   windowOpacity,
   windowExitX,
@@ -36,34 +295,14 @@ export default function WelcomeWindow({
         isActive ? "pointer-events-auto" : "pointer-events-none"
       }`}
     >
-      {/* ══════════════════════════════════════════════════════════════
-          LAYER 1 — FULL SCREEN BACKGROUND
-          The beige wall image with pendant lamp fills the entire viewport.
-          Save your Image 1 as: /public/images/welcome-bg.png
-      ══════════════════════════════════════════════════════════════ */}
-      <div className="absolute inset-0 z-[0]">
-        <img
-          src="/images/welcome-bg.png"
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          className="h-full w-full select-none object-cover"
-        />
-        {/* Slight vignette to ground the card */}
-        <div className="absolute inset-0 bg-black/20" />
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════
-          LAYER 2 — CARD + WINDOW (scales / fades / exits as one unit)
-      ══════════════════════════════════════════════════════════════ */}
       <motion.div
         role="button"
         tabIndex={isActive ? 0 : -1}
         aria-label="Enter website"
         onClick={onEnterClick}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
             onEnterClick();
           }
         }}
@@ -72,141 +311,112 @@ export default function WelcomeWindow({
           opacity: windowOpacity,
           x: windowExitX,
         }}
-        className="absolute inset-0 z-[10] flex cursor-pointer items-center justify-center outline-none"
+        className="absolute inset-0 flex cursor-pointer items-center justify-center outline-none"
       >
-        {/*
-          CARD — sized to match the wall niche proportions (tall & narrow ~1:2).
-          The niche in the reference sits slightly left-of-centre;
-          we keep it centred here so it feels balanced across breakpoints.
-          Adjust the left offset via `translateX` if your bg image demands it.
-
-          perspective is set on this container so the panel rotateY looks 3-D.
-        */}
         <div
-          className="relative overflow-hidden shadow-[0_40px_120px_rgba(0,0,0,0.55)]"
-          style={{
-            width: "clamp(180px, 28vw, 380px)",   /* narrow — niche width  */
-            height: "clamp(360px, 70vh, 820px)",  /* tall  — niche height  */
-            borderRadius: "4px",                   /* niche has near-square corners */
-            perspective: "1400px",
-            backgroundColor: "#1d1712",            /* fallback while image loads */
-            /* shift slightly left to align with niche in bg image */
-            transform: "translateX(-18%)",
-          }}
+          className="relative h-[58vh] w-[84vw] max-w-5xl overflow-hidden rounded-[18px] bg-[#1d1712] shadow-[0_40px_120px_rgba(0,0,0,0.45)] [perspective:1400px] md:h-[65vh] md:w-[78vw]"
         >
-          {/* ── CARD BACKGROUND: Unsplash architecture image (unchanged) ── */}
-          <img
+          {/* BACKGROUND IMAGE */}
+          <motion.img
             src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
             alt="Architecture view"
             draggable={false}
             className="absolute inset-0 h-full w-full select-none object-cover"
           />
 
-          {/* Soft dark overlay on the card background */}
+          {/* SOFT DARK OVERLAY */}
           <div className="absolute inset-0 bg-black/10" />
 
-          {/* ── NICHE INSET SHADOW — sells the wall-recess depth ── */}
-          <div
-            className="pointer-events-none absolute inset-0 z-[15]"
-            style={{
-              boxShadow:
-                "inset 8px 8px 28px rgba(0,0,0,0.45), inset -5px -5px 18px rgba(0,0,0,0.22)",
-            }}
+          {/* OUTER DARK FRAME */}
+          <motion.div
+            style={{ opacity: frameOpacity }}
+            className="pointer-events-none absolute inset-0 z-[20] rounded-[18px] border-[12px] border-[#2b2118] md:border-[14px]"
           />
 
-          {/* ══════════════════════════════════════════════════════════
-              STEEL WINDOW PANEL
-              Single panel, opens inward to the LEFT.
-              transformOrigin: "right center" → right edge is the hinge.
-              leftRotate MotionValue drives it; parent should animate it
-              from 0 → negative value (e.g. -90deg) to swing open leftward.
-          ══════════════════════════════════════════════════════════ */}
+          {/* CENTER DIVIDER */}
           <motion.div
-            style={{
-              rotateY: leftRotate,
-              transformOrigin: "right center",   // hinge on right → opens left
-              opacity: frameOpacity,
-              position: "absolute",
-              inset: 0,
-              zIndex: 30,
-              pointerEvents: "none",
-            }}
+            style={{ opacity: frameOpacity }}
+            className="pointer-events-none absolute left-1/2 top-0 z-[25] h-full w-[10px] -translate-x-1/2 bg-[#2b2118] md:w-[12px]"
+          />
+
+          {/* LEFT PANEL — realistic wood + glass + hardware */}
+          <WindowPane side="left" rotateY={leftRotate} opacity={frameOpacity} />
+
+          {/* RIGHT PANEL — realistic wood + glass + hardware */}
+          <WindowPane side="right" rotateY={rightRotate} opacity={frameOpacity} />
+
+          {/* SVG DECORATIVE BORDER OVERLAY */}
+          <motion.svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1537 1023"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            style={{ opacity: frameOpacity }}
+            className="pointer-events-none absolute inset-0 z-[40] h-full w-full"
           >
-            {/* Outer frame — matte dark steel */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                border: `${FRAME_PX}px solid ${STEEL}`,
-                boxSizing: "border-box",
-              }}
-            />
-
-            {/* Glass — subtle warm-grey tint + minimal blur */}
-            <div
-              style={{
-                position: "absolute",
-                inset: FRAME_PX,
-                background: "rgba(140,150,145,0.18)",
-                backdropFilter: "blur(2px)",
-              }}
-            />
-
-            {/* ── GLAZING BARS: 1 vertical + 2 horizontal → 2×3 grid ── */}
-
-            {/* Vertical centre bar */}
-            <div
-              style={{
-                position: "absolute",
-                top: FRAME_PX,
-                bottom: FRAME_PX,
-                left: `calc(${FRAME_PX}px + (100% - ${FRAME_PX * 2}px) / 2 - ${BAR_PX / 2}px)`,
-                width: BAR_PX,
-                background: STEEL,
-              }}
-            />
-
-            {/* Horizontal bar — 1/3 from top */}
-            <div
-              style={{
-                position: "absolute",
-                left: FRAME_PX,
-                right: FRAME_PX,
-                top: `calc(${FRAME_PX}px + (100% - ${FRAME_PX * 2}px) / 3 - ${BAR_PX / 2}px)`,
-                height: BAR_PX,
-                background: STEEL,
-              }}
-            />
-
-            {/* Horizontal bar — 2/3 from top */}
-            <div
-              style={{
-                position: "absolute",
-                left: FRAME_PX,
-                right: FRAME_PX,
-                top: `calc(${FRAME_PX}px + 2 * (100% - ${FRAME_PX * 2}px) / 3 - ${BAR_PX / 2}px)`,
-                height: BAR_PX,
-                background: STEEL,
-              }}
-            />
-
-            {/* Specular glare on glass */}
-            <div
-              style={{
-                position: "absolute",
-                inset: FRAME_PX,
-                background:
-                  "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%)",
-              }}
-            />
-          </motion.div>
-
+            <defs>
+              <linearGradient id="ww-cream" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#fffef7" />
+                <stop offset="0.48" stopColor="#f6f1dc" />
+                <stop offset="1" stopColor="#e7dcc2" />
+              </linearGradient>
+              <linearGradient id="ww-verticalFace" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stopColor="#e6ddc8" />
+                <stop offset="0.18" stopColor="#fffef7" />
+                <stop offset="0.52" stopColor="#f8f4e6" />
+                <stop offset="1" stopColor="#d4c8ad" />
+              </linearGradient>
+              <filter id="ww-softShadow" x="-18%" y="-18%" width="136%" height="136%">
+                <feDropShadow dx="0" dy="10" stdDeviation="10" floodColor="#000000" floodOpacity="0.34" />
+              </filter>
+              <filter id="ww-smallShadow" x="-12%" y="-12%" width="124%" height="124%">
+                <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#000000" floodOpacity="0.24" />
+              </filter>
+            </defs>
+            <g filter="url(#ww-softShadow)">
+              <path d="M332 61H1184L1190 83L1176 106H345L328 82L332 61Z" fill="url(#ww-cream)" />
+              <path d="M330 61H1186V80H330V61Z" fill="#fffef8" />
+              <path d="M346 84H1175L1168 110H354L346 84Z" fill="#e8dec8" />
+              <path d="M357 105H1160V119H357V119Z" fill="#fbf7e8" />
+              <path d="M368 119H1148V130H368V130Z" fill="#d7caae" />
+              <path d="M374 122H1144V170H374V122Z" fill="url(#ww-cream)" />
+              <path d="M361 158H1158V180H361V158Z" fill="#fffdf4" />
+              <path d="M381 172H1138V190H381V172Z" fill="#d6c9ad" />
+              <path d="M374 170H441V842H374V170Z" fill="url(#ww-verticalFace)" />
+              <path d="M1061 170H1128V842H1061V170Z" fill="url(#ww-verticalFace)" />
+              <path d="M441 170H462V842H441V170Z" fill="#d8ccb2" />
+              <path d="M1040 170H1061V842H1040V170Z" fill="#d8ccb2" />
+              <path d="M382 170H396V842H382V170Z" fill="#fffdf2" opacity="0.8" />
+              <path d="M1082 170H1098V842H1082V170Z" fill="#fffdf2" opacity="0.75" />
+              <path d="M441 170H1061V192H441V170Z" fill="#cfc2a5" />
+              <path d="M458 184H1044V202H458V184Z" fill="#5c5a52" opacity="0.22" />
+              <path d="M326 843H1199V865H326V843Z" fill="#fffef7" />
+              <path d="M345 865H1180L1166 895H358L345 865Z" fill="url(#ww-cream)" />
+              <path d="M356 895H1168V913H356V913Z" fill="#d7caae" />
+              <path d="M368 913H1156V934H368V934Z" fill="#f7f0dc" />
+              <path d="M384 934H1140V951H384V951Z" fill="#d2c4a9" />
+              <path d="M348 866H1178V874H348V874Z" fill="#d7cab0" />
+              <path d="M362 884H1165V891H362V891Z" fill="#fffdf4" opacity="0.95" />
+              <path d="M376 916H1152V922H376V922Z" fill="#fffdf4" opacity="0.8" />
+            </g>
+            <g filter="url(#ww-smallShadow)" opacity="0.98">
+              <path d="M329 61H1187" stroke="#ffffff" strokeWidth="4" />
+              <path d="M349 84H1175" stroke="#cfc2a5" strokeWidth="3" />
+              <path d="M360 108H1160" stroke="#ffffff" strokeWidth="3" />
+              <path d="M371 130H1147" stroke="#cbbda0" strokeWidth="3" />
+              <path d="M376 170H1127" stroke="#fffdf3" strokeWidth="3" />
+              <path d="M441 170V842" stroke="#ffffff" strokeWidth="2" opacity="0.7" />
+              <path d="M1061 170V842" stroke="#ffffff" strokeWidth="2" opacity="0.55" />
+              <path d="M326 843H1199" stroke="#ffffff" strokeWidth="4" />
+              <path d="M348 866H1179" stroke="#d0c3a8" strokeWidth="3" />
+              <path d="M362 897H1167" stroke="#ffffff" strokeWidth="3" />
+              <path d="M383 935H1140" stroke="#c7b99d" strokeWidth="3" />
+            </g>
+          </motion.svg>
         </div>
       </motion.div>
 
-      {/* ══════════════════════════════════════════════════════════════
-          CLICK TEXT — unchanged
-      ══════════════════════════════════════════════════════════════ */}
+      {/* CLICK TEXT */}
       <motion.p
         style={{ opacity: scrollTextOpacity }}
         className="pointer-events-none absolute bottom-8 left-1/2 z-[90] -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] text-black/60 md:bottom-10 md:text-xs"
