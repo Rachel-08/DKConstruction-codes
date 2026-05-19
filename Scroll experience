@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef, use } from "react";
+import { useState, useRef } from "react";
 import { useScroll, useTransform, useMotionValueEvent } from "motion/react";
 
 import Navbar from "@/components/Navbar";
 import WelcomeWindow from "@/components/WelcomeWindow";
 import StudioLanding from "@/components/StudioLanding";
+import ServicesSection from "@/components/ServicesSection";
 import SelectedWork from "@/components/SelectedWork";
 import About from "@/components/About";
 import ContactSection from "@/components/Contact";
@@ -19,153 +20,107 @@ export default function ScrollExperience() {
     offset: ["start start", "end end"],
   });
 
-  const [activeSegment, setActiveSegment] = useState<
-  "intro" | "landing" | "work" | "about" | "contact">("intro");
+  const [activeSegment, setActiveSegment] = useState
+    "intro" | "landing" | "services" | "work" | "about" | "contact"
+  >("intro");
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     if (latest < 0.22) {
       setActiveSegment("intro");
-    } else if (latest >= 0.22 && latest < 0.36) {
+    } else if (latest >= 0.22 && latest < 0.38) {
       setActiveSegment("landing");
-    } else if (latest >= 0.36 && latest < 0.82) {
+    } else if (latest >= 0.38 && latest < 0.58) {
+      setActiveSegment("services");
+    } else if (latest >= 0.58 && latest < 0.82) {
       setActiveSegment("work");
-    }   else if (latest >= 0.82 && latest < 0.98) {
-        setActiveSegment("about");
+    } else if (latest >= 0.82 && latest < 0.92) {
+      setActiveSegment("about");
     } else {
-        setActiveSegment("contact");
+      setActiveSegment("contact");
     }
-});
+  });
 
-useMotionValueEvent(scrollYProgress, "change", (latest) => {
-  const previous = scrollYProgress.getPrevious() ?? 0;
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const previous = scrollYProgress.getPrevious() ?? 0;
+    const isScrollingDown = latest > previous;
+    const isScrollingUp = latest < previous;
 
-  const isScrollingDown = latest > previous;
-  const isScrollingUp = latest < previous;
+    if (latest < 0.22) {
+      setShowNavbar(false);
+      return;
+    }
+    if (latest >= 0.22 && latest < 0.54) {
+      setShowNavbar(true);
+      return;
+    }
+    if (isScrollingDown) setShowNavbar(false);
+    if (isScrollingUp) setShowNavbar(true);
+  });
 
-  if(latest < 0.22){
-    setShowNavbar(false);
-    return;
-  }
-  if(latest>=0.22 && latest < 0.54){
-    setShowNavbar(true);
-    return;
-  }
-  if(isScrollingDown){
-    setShowNavbar(false);
-  }
+  const isIntroActive    = activeSegment === "intro";
+  const isLandingActive  = activeSegment === "landing";
+  const isServicesActive = activeSegment === "services";
+  const isWorkActive     = activeSegment === "work";
+  const isAboutActive    = activeSegment === "about";
+  const isContactActive  = activeSegment === "contact";
 
-  if(isScrollingUp){
-    setShowNavbar(true);
-  }
-});
-
-const isIntroActive = activeSegment === "intro";
-const isLandingActive = activeSegment === "landing";
-const isWorkActive = activeSegment === "work";
-const isAboutActive = activeSegment === "about";
-const isContactActive = activeSegment === "contact";
   /**
    * MASTER TIMELINE
    *
-   * 0.00 - 0.18  Window opens
-   * 0.08 - 0.28  Window zooms in
-   * 0.24 - 0.36  Landing text slides in from below
-   * 0.40 - 0.52  Landing exits left
-   * 0.50 - 0.64  Selected Work enters from right
-   * 0.64 - 0.72  Selected Work heading moves upward
-   * 0.70 - 0.78  Carousel appears
-   * 0.78 - 0.88  Carousel moves horizontally
-   * 0.88 - 0.94  About slides in from below
-   * 0.94 - 1.00  Contact slides in from below
+   * 0.00 – 0.18   Window opens (panels rotate)
+   * 0.08 – 0.22   Window zooms + fades
+   * 0.20 – 0.24   Landing slides up from below
+   * 0.24 – 0.34   Landing rests
+   * 0.34 – 0.38   Landing + window exit left
+   * 0.38 – 0.44   Services panels fold in (staggered rotateX)
+   * 0.44 – 0.54   Services rest / hover interaction
+   * 0.54 – 0.58   Services exit up
+   * 0.58 – 0.62   Selected Work enters from right
+   * 0.62 – 0.68   Work heading moves up + scales
+   * 0.68 – 0.74   Carousel appears
+   * 0.74 – 0.78   Carousel scrolls horizontally
+   * 0.78 – 0.82   Work exits up
+   * 0.82 – 0.88   About slides in from below
+   * 0.92 – 1.00   Contact slides in from below
    */
 
   // ----------------------------------------
   // NAVBAR
   // ----------------------------------------
-
-  const navOpacity = useTransform(
-    scrollYProgress,
-    [0.22, 0.3],
-    [0, 1]
-  );
-
-  const navY = useTransform(
-    scrollYProgress,
-    [0.22, 0.3],
-    ["-40vw", "0vw"]
-  );
+  const navOpacity = useTransform(scrollYProgress, [0.22, 0.30], [0, 1]);
+  const navY       = useTransform(scrollYProgress, [0.22, 0.30], ["-40vw", "0vw"]);
 
   // ----------------------------------------
   // SEGMENT 1: WELCOME WINDOW
   // ----------------------------------------
+  const leftRotate  = useTransform(scrollYProgress, [0, 0.14], [0, -78]);
+  const rightRotate = useTransform(scrollYProgress, [0, 0.14], [0, 78]);
 
-  const leftRotate = useTransform(
-    scrollYProgress,
-    [0, 0.14],
-    [0, -78]
-  );
+  const windowScale   = useTransform(scrollYProgress, [0.00, 0.20], [1, 2.4]);
+  const windowOpacity = useTransform(scrollYProgress, [0.08, 0.20], [1, 0]);
+  const frameOpacity  = useTransform(scrollYProgress, [0.06, 0.16], [1, 0]);
 
-  const rightRotate = useTransform(
-    scrollYProgress,
-    [0, 0.14],
-    [0, 78]
-  );
+  const scrollTextOpacity = useTransform(scrollYProgress, [0.00, 0.08], [1, 0]);
 
-  const windowScale = useTransform(
-    scrollYProgress,
-    [0.0, 0.20], 
-    [1, 2.4]
-  );
-
-  const windowOpacity = useTransform(
-    scrollYProgress,
-    [0.08, 0.20], /* The window frame fades out completely here */
-    [1, 0]
-  );
-
-  const frameOpacity = useTransform(
-    scrollYProgress,
-    [0.06, 0.16],
-    [1, 0]
-  );
-
-  const scrollTextOpacity = useTransform(
-    scrollYProgress,
-    [0.0, 0.08],
-    [1, 0]
-  );
-
-    const windowExitX = useTransform(
+  const windowExitX = useTransform(
     scrollYProgress,
     [0.34, 0.38],
     ["0vw", "-130vw"]
   );
 
-  // // ========================================================
-  // // BACK IMAGE EXIT: Synced perfectly with Studio Landing Exit
-  // // ========================================================
-  // const backgroundImageExitX = useTransform(
-  //   scrollYProgress,
-  //   [0.34, 0.38], /* Matches the exact exit window of Segment 2 */
-  //   ["0vw", "100vw"] /* Sweeps out to the right */
-  // );
-
-
-  // ========================================================
-  // SEGMENT 2: STUDIO LANDING (Snappy Entry & Quick Exit)
-  // ========================================================
+  // ----------------------------------------
+  // SEGMENT 2: STUDIO LANDING
+  // ----------------------------------------
   const landingY = useTransform(
     scrollYProgress,
-    [0.20, 0.24], 
+    [0.20, 0.24],
     ["130vh", "0vh"]
   );
 
-  // REST ZONE: Studio Landing and your Background Image stay still (0.24 to 0.34)
-
   const landingExitX = useTransform(
     scrollYProgress,
-    [0.34, 0.38], /* Matches your back image exit timing */
-    ["0vw", "-130vw"] /* Sweeps out to the left */
+    [0.34, 0.38],
+    ["0vw", "-130vw"]
   );
 
   const landingOpacity = useTransform(
@@ -174,133 +129,92 @@ const isContactActive = activeSegment === "contact";
     [0, 1, 1, 0]
   );
 
+  // ----------------------------------------
+  // SEGMENT 3: SERVICES
+  // ----------------------------------------
 
-  // ========================================================
-  // SEGMENT 3: SELECTED WORK (Instant hand-off)
-  // ========================================================
+  // Whole section fades + rises in after landing exits
+  const servicesOpacity = useTransform(
+    scrollYProgress,
+    [0.36, 0.42, 0.54, 0.58],
+    [0,    1,    1,    0   ]
+  );
+
+  const servicesY = useTransform(
+    scrollYProgress,
+    [0.36, 0.42],
+    ["60vh", "0vh"]
+  );
+
+  // Section exits upward
+  const servicesExitY = useTransform(
+    scrollYProgress,
+    [0.54, 0.58],
+    ["0vh", "-80vh"]
+  );
+
+  // ----------------------------------------
+  // SEGMENT 4: SELECTED WORK
+  // ----------------------------------------
   const workX = useTransform(
     scrollYProgress,
-    [0.36, 0.40], 
+    [0.56, 0.62],
     ["100vw", "0vw"]
   );
 
   const workOpacity = useTransform(
     scrollYProgress,
-    [0.36, 0.40, 0.82, 0.86],
-    [0, 1, 1, 0]
+    [0.56, 0.62, 0.78, 0.82],
+    [0,    1,    1,    0   ]
   );
 
-  // REST ZONE: Selected Work header sits still from 0.42 to 0.48
+  const workHeadingY     = useTransform(scrollYProgress, [0.62, 0.68], ["0vh",   "-22vh"]);
+  const workHeadingScale = useTransform(scrollYProgress, [0.66, 0.68], [1,       0.45  ]);
+  const workHeadingX     = useTransform(scrollYProgress, [0.66, 0.68], ["0vw",   "-14vw"]);
 
-  const workHeadingY = useTransform(
-    scrollYProgress,
-    [0.42, 0.50], 
-    ["0vh", "-22vh"]
-  );
+  const carouselOpacity = useTransform(scrollYProgress, [0.68, 0.72], [0, 1]);
+  const carouselX       = useTransform(scrollYProgress, [0.72, 0.80], ["25vw", "-95vw"]);
 
-  const workHeadingScale = useTransform(
-    scrollYProgress,
-    [0.46, 0.50],
-    [1, 0.45]
-  );
-
-  const workHeadingX = useTransform(
-    scrollYProgress,
-    [0.46, 0.50],
-    ["0vw", "-14vw"]
-  );
-
-
-  // ========================================================
-  // CAROUSEL DISPLAY
-  // ========================================================
-  const carouselOpacity = useTransform(
-    scrollYProgress,
-    [0.50, 0.53], 
-    [0, 1]
-  );
-
-  const carouselX = useTransform(
-    scrollYProgress,
-    [0.53, 0.73], 
-    ["25vw", "-95vw"]
-  );
-
-  const workExitY = useTransform(
-    scrollYProgress,
-    [0.76, 0.82], 
-    ["0vh", "-100vh"]
-  );
-
-
-
+  const workExitY = useTransform(scrollYProgress, [0.78, 0.82], ["0vh", "-100vh"]);
 
   // ----------------------------------------
-  // SEGMENT 4: ABOUT
+  // SEGMENT 5: ABOUT
   // ----------------------------------------
-
-  const aboutOpacity = useTransform(
-    scrollYProgress,
-    [0.80, 0.90],
-    [0, 1]
-  );
-
-  const aboutY = useTransform(
-    scrollYProgress,
-    [0.80, 0.88],
-    ["90vh", "0vh"]
-  );
-
-//   const aboutExitY = useTransform(
-//     scrollYProgress,
-//     [0.95, 0.97],
-//     [0, -20]
-//   );
+  const aboutOpacity = useTransform(scrollYProgress, [0.80, 0.88], [0, 1]);
+  const aboutY       = useTransform(scrollYProgress, [0.80, 0.88], ["90vh", "0vh"]);
 
   // ----------------------------------------
-  // SEGMENT 5: CONTACT
+  // SEGMENT 6: CONTACT
   // ----------------------------------------
+  const contactOpacity = useTransform(scrollYProgress, [0.92, 1.00], [0, 1]);
+  const contactY       = useTransform(scrollYProgress, [0.92, 1.00], ["100vh", "0vh"]);
 
-  const contactOpacity = useTransform(
-    scrollYProgress,
-    [0.92, 1],
-    [0, 1]
-  );
-
-  const contactY = useTransform(
-    scrollYProgress,
-    [0.92, 1],
-    ["100vh", "0vh"]
-  );
-
-  const srollToProgress = (progress: number) => {
-    if(!containerRef.current) return;
-
+  // ----------------------------------------
+  // HELPERS
+  // ----------------------------------------
+  const scrollToProgress = (progress: number) => {
+    if (!containerRef.current) return;
     const container = containerRef.current;
-    const containerTop = container.offsetTop;
     const scrollableDistance = container.offsetHeight - window.innerHeight;
-
     window.scrollTo({
-      top: containerTop + scrollableDistance * progress,
-      behavior: 'smooth',
+      top: container.offsetTop + scrollableDistance * progress,
+      behavior: "smooth",
     });
   };
 
-  const handleEnterClick = () => {
-    srollToProgress(0.32);
-  }
+  const handleEnterClick = () => scrollToProgress(0.32);
 
   return (
     <section
       id="top"
       ref={containerRef}
-      className="relative h-[1150vh] bg-[#f5f2eb] md:h-[1200vh] xl:h-[1300vh] 2xl:h-[1400vh]"
+      className="relative h-[1350vh] bg-[#f5f2eb] md:h-[1450vh] xl:h-[1550vh] 2xl:h-[1650vh]"
     >
       <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
-        <Navbar showNavbar={showNavbar}/>
+        <Navbar showNavbar={showNavbar} />
 
         <WelcomeWindow
-        isActive={isIntroActive}
+          isActive={isIntroActive}
           leftRotate={leftRotate}
           rightRotate={rightRotate}
           windowScale={windowScale}
@@ -309,18 +223,30 @@ const isContactActive = activeSegment === "contact";
           frameOpacity={frameOpacity}
           scrollTextOpacity={scrollTextOpacity}
           onEnterClick={handleEnterClick}
-          // backgroundImageExitX={backgroundImageExitX}
         />
 
         <StudioLanding
-        isActive={isLandingActive}
+          isActive={isLandingActive}
           landingOpacity={landingOpacity}
           landingY={landingY}
           landingExitX={landingExitX}
         />
 
+        {/* SERVICES — sits in the stack, driven by scroll */}
+        <motion.div
+          style={{
+            opacity: servicesOpacity,
+            y: isServicesActive ? servicesExitY : servicesY,
+          }}
+          className={`absolute inset-0 z-[70] ${
+            isServicesActive ? "pointer-events-auto" : "pointer-events-none"
+          }`}
+        >
+          <ServicesSection />
+        </motion.div>
+
         <SelectedWork
-        isActive={isWorkActive}
+          isActive={isWorkActive}
           workX={workX}
           workOpacity={workOpacity}
           workHeadingY={workHeadingY}
@@ -328,18 +254,17 @@ const isContactActive = activeSegment === "contact";
           workHeadingX={workHeadingX}
           carouselX={carouselX}
           carouselOpacity={carouselOpacity}
-            workExitY={workExitY}
+          workExitY={workExitY}
         />
 
         <About
-        isActive={isAboutActive}
+          isActive={isAboutActive}
           aboutOpacity={aboutOpacity}
           aboutY={aboutY}
-        //   aboutExitY={aboutExitY}
         />
 
         <ContactSection
-        isActive={isContactActive}
+          isActive={isContactActive}
           contactOpacity={contactOpacity}
           contactY={contactY}
         />
