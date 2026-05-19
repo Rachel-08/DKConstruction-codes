@@ -1,9 +1,40 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useInView } from "motion/react";
+import { motion, useInView, type MotionValue } from "motion/react";
 
-const SERVICES = [
+// ─────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────
+
+type Service = {
+  id: number;
+  number: string;
+  title: string;
+  shortTitle: string;
+  description: string;
+  detail: string;
+  icon: React.ReactNode;
+};
+
+type ServicePanelProps = {
+  service: Service;
+  index: number;
+  total: number;
+};
+
+type ServicesSectionProps = {
+  isActive: boolean;
+  servicesOpacity: MotionValue<number>;
+  servicesY: MotionValue<string>;
+  servicesExitY: MotionValue<string>;
+};
+
+// ─────────────────────────────────────────────
+// Data
+// ─────────────────────────────────────────────
+
+const SERVICES: Service[] = [
   {
     id: 1,
     number: "01",
@@ -117,16 +148,12 @@ const SERVICES = [
   },
 ];
 
-function ServicePanel({
-  service,
-  index,
-  total,
-}: {
-  service: (typeof SERVICES)[0];
-  index: number;
-  total: number;
-}) {
-  const [hovered, setHovered] = useState(false);
+// ─────────────────────────────────────────────
+// ServicePanel
+// ─────────────────────────────────────────────
+
+function ServicePanel({ service, index, total }: ServicePanelProps) {
+  const [hovered, setHovered] = useState<boolean>(false);
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-10%" });
 
@@ -145,25 +172,19 @@ function ServicePanel({
       style={{ transformStyle: "preserve-3d" }}
       className="group relative flex-1 cursor-default select-none"
     >
-      {/* Thin top brass rule — draws in on hover */}
+      {/* Top brass rule — draws in on hover */}
       <motion.div
         animate={{ scaleX: hovered ? 1 : 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        style={{ transformOrigin: "left" }}
-        className="absolute top-0 left-0 right-0 h-[1.5px] z-10"
-        // warm gold line
         style={{
           transformOrigin: "left",
-          background:
-            "linear-gradient(90deg, #c8a052 0%, #e8c070 40%, #b88840 100%)",
+          background: "linear-gradient(90deg, #c8a052 0%, #e8c070 40%, #b88840 100%)",
           height: "1.5px",
           position: "absolute",
           top: 0,
           left: 0,
           right: 0,
           zIndex: 10,
-          scaleX: hovered ? 1 : 0,
-          transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)",
         }}
       />
 
@@ -180,7 +201,7 @@ function ServicePanel({
         style={{ transformOrigin: "bottom center" }}
       />
 
-      {/* Right divider line (skip last) */}
+      {/* Right divider line — skip last panel */}
       {index < total - 1 && (
         <div
           className="absolute top-[8%] bottom-[8%] right-0 w-[0.5px]"
@@ -193,7 +214,6 @@ function ServicePanel({
 
         {/* Top — number + icon */}
         <div className="flex flex-col gap-6">
-          {/* Service number */}
           <div className="flex items-center gap-3">
             <span
               className="font-mono text-[10px] tracking-[0.3em]"
@@ -202,13 +222,20 @@ function ServicePanel({
               {service.number}
             </span>
             <motion.div
-              animate={{ scaleX: hovered ? 1 : 0.3, opacity: hovered ? 0.4 : 0.15 }}
+              animate={{
+                scaleX: hovered ? 1 : 0.3,
+                opacity: hovered ? 0.4 : 0.15,
+              }}
               transition={{ duration: 0.4 }}
-              style={{ transformOrigin: "left", height: "0.5px", flex: 1, background: "rgba(200,160,80,0.6)" }}
+              style={{
+                transformOrigin: "left",
+                height: "0.5px",
+                flex: 1,
+                background: "rgba(200,160,80,0.6)",
+              }}
             />
           </div>
 
-          {/* Blueprint icon */}
           <motion.div
             animate={{
               opacity: hovered ? 0.9 : 0.35,
@@ -216,13 +243,17 @@ function ServicePanel({
             }}
             transition={{ duration: 0.4 }}
             className="w-[clamp(28px,3.5vw,44px)] h-[clamp(28px,3.5vw,44px)]"
-            style={{ color: hovered ? "rgba(200,160,80,0.85)" : "rgba(180,160,130,0.5)" }}
+            style={{
+              color: hovered
+                ? "rgba(200,160,80,0.85)"
+                : "rgba(180,160,130,0.5)",
+            }}
           >
             {service.icon}
           </motion.div>
         </div>
 
-        {/* Middle — service title */}
+        {/* Middle — vertical service title */}
         <div className="flex flex-col gap-4">
           <motion.h3
             animate={{ color: hovered ? "#f0e0c0" : "#9a8a72" }}
@@ -240,7 +271,7 @@ function ServicePanel({
           </motion.h3>
         </div>
 
-        {/* Bottom — description + detail (fade in on hover) */}
+        {/* Bottom — description + detail, revealed on hover */}
         <div className="flex flex-col gap-3">
           <motion.p
             animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 10 }}
@@ -265,14 +296,14 @@ function ServicePanel({
               lineHeight: 1.8,
             }}
           >
-            {service.detail.split(" · ").map((item, i) => (
+            {service.detail.split(" · ").map((item: string, i: number) => (
               <div key={i}>— {item}</div>
             ))}
           </motion.div>
         </div>
       </div>
 
-      {/* Warm light bleed overlay on hover */}
+      {/* Warm light bleed on hover */}
       <motion.div
         animate={{ opacity: hovered ? 1 : 0 }}
         transition={{ duration: 0.5 }}
@@ -286,15 +317,35 @@ function ServicePanel({
   );
 }
 
-export default function ServicesSection() {
+// ─────────────────────────────────────────────
+// ServicesSection
+// ─────────────────────────────────────────────
+
+export default function ServicesSection({
+  isActive,
+  servicesOpacity,
+  servicesY,
+  servicesExitY,
+}: ServicesSectionProps) {
   const headingRef = useRef<HTMLDivElement>(null);
   const headingInView = useInView(headingRef, { once: true, margin: "-8%" });
 
   return (
-    <section
+    <motion.section
+      style={{
+        opacity: servicesOpacity,
+        y: isActive ? servicesExitY : servicesY,
+        position: "absolute",
+        inset: 0,
+        zIndex: 70,
+        pointerEvents: isActive ? "auto" : "none",
+      }}
       className="relative w-full min-h-screen flex flex-col"
-      style={{ background: "#060402" }}
+      aria-hidden={!isActive}
     >
+      {/* Dark background */}
+      <div className="absolute inset-0" style={{ background: "#060402" }} />
+
       {/* Top heading strip */}
       <div
         ref={headingRef}
@@ -336,7 +387,8 @@ export default function ServicesSection() {
             lineHeight: 1.7,
           }}
         >
-          Six disciplines, one studio. Each practised with the same attention to craft, material, and duration.
+          Six disciplines, one studio. Each practised with the same attention
+          to craft, material, and duration.
         </motion.p>
       </div>
 
@@ -361,13 +413,13 @@ export default function ServicesSection() {
 
       {/* Bottom rule */}
       <div
-        className="w-full"
+        className="relative w-full"
         style={{
           height: "0.5px",
           background:
             "linear-gradient(90deg, transparent 0%, rgba(200,160,80,0.18) 20%, rgba(200,160,80,0.18) 80%, transparent 100%)",
         }}
       />
-    </section>
+    </motion.section>
   );
 }
