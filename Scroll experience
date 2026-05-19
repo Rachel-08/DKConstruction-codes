@@ -1,11 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import {
-  useScroll,
-  useTransform,
-  useMotionValueEvent,
-} from "motion/react";
+import { useState, useRef, use } from "react";
+import { useScroll, useTransform, useMotionValueEvent } from "motion/react";
 
 import Navbar from "@/components/Navbar";
 import WelcomeWindow from "@/components/WelcomeWindow";
@@ -14,289 +10,285 @@ import SelectedWork from "@/components/SelectedWork";
 import About from "@/components/About";
 import ContactSection from "@/components/Contact";
 
-type ActiveSegment = "intro" | "landing" | "work" | "about" | "contact";
-
 export default function ScrollExperience() {
   const containerRef = useRef<HTMLElement | null>(null);
-
-  const [showNavbar, setShowNavbar]     = useState(false);
-  const [activeSegment, setActiveSegment] = useState<ActiveSegment>("intro");
+  const [showNavbar, setShowNavbar] = useState(false);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // ACTIVE SEGMENT  (unchanged from live site)
-  // ─────────────────────────────────────────────────────────────────────────
+  const [activeSegment, setActiveSegment] = useState<
+  "intro" | "landing" | "work" | "about" | "contact">("intro");
+
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest < 0.38) {
+    if (latest < 0.22) {
       setActiveSegment("intro");
-    } else if (latest < 0.56) {
+    } else if (latest >= 0.22 && latest < 0.36) {
       setActiveSegment("landing");
-    } else if (latest < 0.82) {
+    } else if (latest >= 0.36 && latest < 0.82) {
       setActiveSegment("work");
-    } else if (latest < 0.96) {
-      setActiveSegment("about");
+    }   else if (latest >= 0.82 && latest < 0.98) {
+        setActiveSegment("about");
     } else {
-      setActiveSegment("contact");
+        setActiveSegment("contact");
     }
-  });
+});
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // NAVBAR  (unchanged from live site)
-  // ─────────────────────────────────────────────────────────────────────────
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    const previous = scrollYProgress.getPrevious() ?? 0;
+useMotionValueEvent(scrollYProgress, "change", (latest) => {
+  const previous = scrollYProgress.getPrevious() ?? 0;
 
-    if (latest < 0.36) {
-      setShowNavbar(false);
-      return;
-    }
-    if (latest >= 0.36 && latest < 0.56) {
-      setShowNavbar(true);
-      return;
-    }
-    if (latest > previous) setShowNavbar(false);
-    else                    setShowNavbar(true);
-  });
+  const isScrollingDown = latest > previous;
+  const isScrollingUp = latest < previous;
 
-  const isIntroActive   = activeSegment === "intro";
-  // Landing receives pointer events while intro OR landing is active, so the
-  // landing content is interactive as soon as the welcome window fades away.
-  const isLandingActive = activeSegment === "intro" || activeSegment === "landing";
-  const isWorkActive    = activeSegment === "work";
-  const isAboutActive   = activeSegment === "about";
-  const isContactActive = activeSegment === "contact";
+  if(latest < 0.22){
+    setShowNavbar(false);
+    return;
+  }
+  if(latest>=0.22 && latest < 0.54){
+    setShowNavbar(true);
+    return;
+  }
+  if(isScrollingDown){
+    setShowNavbar(false);
+  }
 
-  // Reserved for future Navbar entrance animation
-  const navOpacity = useTransform(scrollYProgress, [0.34, 0.40], [0, 1]);
-  const navY       = useTransform(scrollYProgress, [0.34, 0.40], ["-40px", "0px"]);
-  void navOpacity;
-  void navY;
+  if(isScrollingUp){
+    setShowNavbar(true);
+  }
+});
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SEGMENT 1 — WELCOME WINDOW
-  //
-  // ┌─ Scroll progress ──────────────────────────────────────────────────────┐
-  // │  0.00          Idle. Window, lamp, text, frame all fully visible.      │
-  // │  0.00 → 0.08   "Click to enter" hint fades away.                      │
-  // │  0.04 → 0.28   Left door swings open (0° → -92°).                     │
-  // │  0.08 → 0.22   Frame / muntins / lamp / right-side text fade to 0.    │
-  // │                Must reach 0 before scale gets large enough for the     │
-  // │                dark border to clip the expanding glass image.           │
-  // │  0.12 → 0.36   Window scales up — image fills viewport.               │
-  // │  0.28 → 0.40   Entire welcome layer fades to 0 opacity.               │
-  // │  0.36 → 0.44   windowExitX slides layer fully off-screen (insurance). │
-  // │  0.36          handleEnterClick target — all above at near-complete.  │
-  // └────────────────────────────────────────────────────────────────────────┘
-  //
-  // KEY CONSTRAINT: frameOpacity must hit 0 before windowScale > ~1.4.
-  // If the frame is still visible when the scale is large, the dark border
-  // visibly rings the expanding image. frameOpacity ends at 0.22,
-  // scale stays ≤ 1.08 until 0.20 — so they never overlap.
-  // ─────────────────────────────────────────────────────────────────────────
+const isIntroActive = activeSegment === "intro";
+const isLandingActive = activeSegment === "landing";
+const isWorkActive = activeSegment === "work";
+const isAboutActive = activeSegment === "about";
+const isContactActive = activeSegment === "contact";
+  /**
+   * MASTER TIMELINE
+   *
+   * 0.00 - 0.18  Window opens
+   * 0.08 - 0.28  Window zooms in
+   * 0.24 - 0.36  Landing text slides in from below
+   * 0.40 - 0.52  Landing exits left
+   * 0.50 - 0.64  Selected Work enters from right
+   * 0.64 - 0.72  Selected Work heading moves upward
+   * 0.70 - 0.78  Carousel appears
+   * 0.78 - 0.88  Carousel moves horizontally
+   * 0.88 - 0.94  About slides in from below
+   * 0.94 - 1.00  Contact slides in from below
+   */
 
-  // LEFT PANEL — single door, swings open counter-clockwise
+  // ----------------------------------------
+  // NAVBAR
+  // ----------------------------------------
+
+  const navOpacity = useTransform(
+    scrollYProgress,
+    [0.22, 0.3],
+    [0, 1]
+  );
+
+  const navY = useTransform(
+    scrollYProgress,
+    [0.22, 0.3],
+    ["-40vw", "0vw"]
+  );
+
+  // ----------------------------------------
+  // SEGMENT 1: WELCOME WINDOW
+  // ----------------------------------------
+
   const leftRotate = useTransform(
     scrollYProgress,
-    //           idle  start   mid    open   full
-    [0.00,       0.04, 0.12,   0.20,  0.28],
-    [0,          -4,   -38,    -72,   -92],
+    [0, 0.14],
+    [0, -78]
   );
 
-  // RIGHT PANEL — stays closed (prop still required by WelcomeWindow)
   const rightRotate = useTransform(
     scrollYProgress,
-    [0.0, 1.0],
-    [0,   0],
+    [0, 0.14],
+    [0, 78]
   );
 
-  // SCALE — gentle start, then dramatic push once door is open
   const windowScale = useTransform(
     scrollYProgress,
-    //           idle  gentle  door-open  push   fill-screen
-    [0.00,       0.12, 0.20,   0.28,      0.36],
-    [1,          1.02, 1.08,   1.55,      2.8],
+    [0.0, 0.20], 
+    [1, 2.4]
   );
 
-  // OPACITY — whole welcome layer fades out late so landing can bleed through
   const windowOpacity = useTransform(
     scrollYProgress,
-    [0.00, 0.28, 0.33, 0.40],
-    [1,    1,    0.4,  0],
+    [0.08, 0.20], /* The window frame fades out completely here */
+    [1, 0]
   );
 
-  // EXIT X — slides the layer off left (belt-and-suspenders, fully clears DOM)
-  const windowExitX = useTransform(
-    scrollYProgress,
-    [0.00, 0.36, 0.44],
-    ["0vw", "0vw", "-55vw"],
-  );
-
-  // FRAME / MUNTINS / LAMP / TEXT — must vanish before scale pushes hard
   const frameOpacity = useTransform(
     scrollYProgress,
-    [0.00, 0.08, 0.14, 0.22],
-    [1,    1,    0.5,  0],
+    [0.06, 0.16],
+    [1, 0]
   );
 
-  // SCROLL HINT TEXT — "Click to enter" disappears first
   const scrollTextOpacity = useTransform(
     scrollYProgress,
-    [0.00, 0.04, 0.10],
-    [1,    1,    0],
+    [0.0, 0.08],
+    [1, 0]
   );
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SEGMENT 2 — STUDIO LANDING  (unchanged from live site)
-  // Fades in behind the welcome layer, so it's visible through the glass
-  // as windowOpacity drops. Exits left when SelectedWork slides in.
-  // ─────────────────────────────────────────────────────────────────────────
-
-  const landingOpacity = useTransform(
+    const windowExitX = useTransform(
     scrollYProgress,
-    [0.22, 0.32, 0.48, 0.56],
-    [0,    1,    1,    0],
+    [0.34, 0.38],
+    ["0vw", "-130vw"]
   );
 
+  // // ========================================================
+  // // BACK IMAGE EXIT: Synced perfectly with Studio Landing Exit
+  // // ========================================================
+  // const backgroundImageExitX = useTransform(
+  //   scrollYProgress,
+  //   [0.34, 0.38], /* Matches the exact exit window of Segment 2 */
+  //   ["0vw", "100vw"] /* Sweeps out to the right */
+  // );
+
+
+  // ========================================================
+  // SEGMENT 2: STUDIO LANDING (Snappy Entry & Quick Exit)
+  // ========================================================
   const landingY = useTransform(
     scrollYProgress,
-    [0.24, 0.36],
-    ["8vh", "0vh"],
+    [0.20, 0.24], 
+    ["130vh", "0vh"]
   );
+
+  // REST ZONE: Studio Landing and your Background Image stay still (0.24 to 0.34)
 
   const landingExitX = useTransform(
     scrollYProgress,
-    [0.46, 0.56],
-    ["0vw", "-140vw"],
+    [0.34, 0.38], /* Matches your back image exit timing */
+    ["0vw", "-130vw"] /* Sweeps out to the left */
   );
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SEGMENT 3 — SELECTED WORK  (unchanged from live site)
-  // ─────────────────────────────────────────────────────────────────────────
+  const landingOpacity = useTransform(
+    scrollYProgress,
+    [0.20, 0.24, 0.34, 0.38],
+    [0, 1, 1, 0]
+  );
 
+
+  // ========================================================
+  // SEGMENT 3: SELECTED WORK (Instant hand-off)
+  // ========================================================
   const workX = useTransform(
     scrollYProgress,
-    [0.46, 0.56],
-    ["120vw", "0vw"],
+    [0.36, 0.40], 
+    ["100vw", "0vw"]
   );
 
   const workOpacity = useTransform(
     scrollYProgress,
-    [0.50, 0.56, 0.88, 0.94],
-    [0,    1,    1,    0],
+    [0.36, 0.40, 0.82, 0.86],
+    [0, 1, 1, 0]
   );
+
+  // REST ZONE: Selected Work header sits still from 0.42 to 0.48
 
   const workHeadingY = useTransform(
     scrollYProgress,
-    [0.60, 0.68],
-    ["0vh", "-22vh"],
+    [0.42, 0.50], 
+    ["0vh", "-22vh"]
   );
 
   const workHeadingScale = useTransform(
     scrollYProgress,
-    [0.60, 0.68],
-    [1, 0.45],
+    [0.46, 0.50],
+    [1, 0.45]
   );
 
   const workHeadingX = useTransform(
     scrollYProgress,
-    [0.60, 0.68],
-    ["0vw", "-14vw"],
+    [0.46, 0.50],
+    ["0vw", "-14vw"]
   );
 
+
+  // ========================================================
+  // CAROUSEL DISPLAY
+  // ========================================================
   const carouselOpacity = useTransform(
     scrollYProgress,
-    [0.68, 0.70, 0.82, 0.88],
-    [0,    1,    1,    0],
+    [0.50, 0.53], 
+    [0, 1]
   );
 
   const carouselX = useTransform(
     scrollYProgress,
-    [0.70, 0.82],
-    ["25vw", "-95vw"],
+    [0.53, 0.73], 
+    ["25vw", "-95vw"]
   );
 
   const workExitY = useTransform(
     scrollYProgress,
-    [0.82, 0.92],
-    ["0vh", "-95vh"],
+    [0.76, 0.82], 
+    ["0vh", "-100vh"]
   );
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SEGMENT 4 — ABOUT  (unchanged from live site)
-  // ─────────────────────────────────────────────────────────────────────────
+
+
+
+  // ----------------------------------------
+  // SEGMENT 4: ABOUT
+  // ----------------------------------------
 
   const aboutOpacity = useTransform(
     scrollYProgress,
-    [0.82, 0.92],
-    [0, 1],
+    [0.80, 0.90],
+    [0, 1]
   );
 
   const aboutY = useTransform(
     scrollYProgress,
-    [0.82, 0.90],
-    ["90vh", "0vh"],
+    [0.80, 0.88],
+    ["90vh", "0vh"]
   );
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // SEGMENT 5 — CONTACT  (unchanged from live site)
-  // Last segment — never fades out.
-  // ─────────────────────────────────────────────────────────────────────────
+//   const aboutExitY = useTransform(
+//     scrollYProgress,
+//     [0.95, 0.97],
+//     [0, -20]
+//   );
+
+  // ----------------------------------------
+  // SEGMENT 5: CONTACT
+  // ----------------------------------------
 
   const contactOpacity = useTransform(
     scrollYProgress,
-    [0.94, 1.0],
-    [0, 1],
+    [0.92, 1],
+    [0, 1]
   );
 
   const contactY = useTransform(
     scrollYProgress,
-    [0.94, 1.0],
-    ["100vh", "0vh"],
+    [0.92, 1],
+    ["100vh", "0vh"]
   );
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // CLICK TO ENTER
-  //
-  // Scrolls to progress 0.36 — the point where:
-  //   • door is fully open (-92°)
-  //   • frame / lamp / text are fully faded
-  //   • scale ≈ 2.4 (image almost filling screen)
-  //   • landing is at full opacity behind the welcome layer
-  //   • welcomeOpacity is beginning its final fade
-  //
-  // The browser's native smooth scroll provides the easing. If you need a
-  // spring-based scroll, replace window.scrollTo with a third-party library
-  // (e.g. lenis.scrollTo or a custom RAF loop) — the target progress value
-  // itself does not change.
-  // ─────────────────────────────────────────────────────────────────────────
+  const srollToProgress = (progress: number) => {
+    if(!containerRef.current) return;
 
-  const scrollToProgress = (progress: number) => {
-    if (!containerRef.current) return;
-    const container        = containerRef.current;
-    const scrollableHeight = container.offsetHeight - window.innerHeight;
+    const container = containerRef.current;
+    const containerTop = container.offsetTop;
+    const scrollableDistance = container.offsetHeight - window.innerHeight;
+
     window.scrollTo({
-      top:      container.offsetTop + scrollableHeight * progress,
-      behavior: "smooth",
+      top: containerTop + scrollableDistance * progress,
+      behavior: 'smooth',
     });
   };
 
-  const handleEnterClick = () => scrollToProgress(0.36);
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // RENDER
-  //
-  // Layer order (bottom → top):
-  //   1. StudioLanding  — rendered first, always below
-  //   2. SelectedWork   — slides in from right, above landing
-  //   3. About          — rises from bottom, above work
-  //   4. ContactSection — rises from bottom, topmost persistent layer
-  //   5. WelcomeWindow  — z-[80], sits above everything until it exits
-  //   6. Navbar         — fixed, always on top
-  // ─────────────────────────────────────────────────────────────────────────
+  const handleEnterClick = () => {
+    srollToProgress(0.32);
+  }
 
   return (
     <section
@@ -305,22 +297,10 @@ export default function ScrollExperience() {
       className="relative h-[1150vh] bg-[#f5f2eb] md:h-[1200vh] xl:h-[1300vh] 2xl:h-[1400vh]"
     >
       <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
+        <Navbar showNavbar={showNavbar}/>
 
-        <Navbar showNavbar={showNavbar} />
-
-        {/* Landing — renders beneath welcome window so it's visible through
-            the glass as the window scales up and its opacity drops */}
-        <StudioLanding
-          isActive={isLandingActive}
-          landingOpacity={landingOpacity}
-          landingY={landingY}
-          landingExitX={landingExitX}
-        />
-
-        {/* Welcome window — topmost layer (z-[80]).
-            Exits via scale + opacity + translateX. */}
         <WelcomeWindow
-          isActive={isIntroActive}
+        isActive={isIntroActive}
           leftRotate={leftRotate}
           rightRotate={rightRotate}
           windowScale={windowScale}
@@ -329,10 +309,18 @@ export default function ScrollExperience() {
           frameOpacity={frameOpacity}
           scrollTextOpacity={scrollTextOpacity}
           onEnterClick={handleEnterClick}
+          // backgroundImageExitX={backgroundImageExitX}
+        />
+
+        <StudioLanding
+        isActive={isLandingActive}
+          landingOpacity={landingOpacity}
+          landingY={landingY}
+          landingExitX={landingExitX}
         />
 
         <SelectedWork
-          isActive={isWorkActive}
+        isActive={isWorkActive}
           workX={workX}
           workOpacity={workOpacity}
           workHeadingY={workHeadingY}
@@ -340,21 +328,21 @@ export default function ScrollExperience() {
           workHeadingX={workHeadingX}
           carouselX={carouselX}
           carouselOpacity={carouselOpacity}
-          workExitY={workExitY}
+            workExitY={workExitY}
         />
 
         <About
-          isActive={isAboutActive}
+        isActive={isAboutActive}
           aboutOpacity={aboutOpacity}
           aboutY={aboutY}
+        //   aboutExitY={aboutExitY}
         />
 
         <ContactSection
-          isActive={isContactActive}
+        isActive={isContactActive}
           contactOpacity={contactOpacity}
           contactY={contactY}
         />
-
       </div>
     </section>
   );
