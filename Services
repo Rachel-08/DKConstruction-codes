@@ -1,0 +1,373 @@
+"use client";
+
+import { useRef, useState } from "react";
+import { motion, useInView } from "motion/react";
+
+const SERVICES = [
+  {
+    id: 1,
+    number: "01",
+    title: "Architectural\nDesign",
+    shortTitle: "Architecture",
+    description:
+      "End-to-end architectural design from initial concept through to construction documentation. We translate vision into precise, buildable form.",
+    detail: "Site analysis · Concept design · Working drawings · Planning submissions",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" className="h-full w-full">
+        <rect x="6" y="38" width="36" height="2" stroke="currentColor" strokeWidth="1.2" />
+        <polyline points="6,38 24,10 42,38" stroke="currentColor" strokeWidth="1.2" fill="none" />
+        <line x1="14" y1="28" x2="34" y2="28" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 2" />
+        <line x1="24" y1="10" x2="24" y2="38" stroke="currentColor" strokeWidth="0.6" strokeDasharray="1.5 2" />
+      </svg>
+    ),
+  },
+  {
+    id: 2,
+    number: "02",
+    title: "Interior\nDesign",
+    shortTitle: "Interiors",
+    description:
+      "Spatial planning and material curation for residential and commercial environments. Every surface, texture, and proportion considered.",
+    detail: "Space planning · Material boards · Furniture selection · Lighting design",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" className="h-full w-full">
+        <rect x="8" y="12" width="32" height="26" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="8" y1="28" x2="40" y2="28" stroke="currentColor" strokeWidth="0.7" strokeDasharray="2 2" />
+        <line x1="26" y1="12" x2="26" y2="38" stroke="currentColor" strokeWidth="0.7" strokeDasharray="2 2" />
+        <rect x="12" y="31" width="8" height="7" stroke="currentColor" strokeWidth="0.8" />
+        <rect x="28" y="16" width="8" height="8" stroke="currentColor" strokeWidth="0.8" />
+      </svg>
+    ),
+  },
+  {
+    id: 3,
+    number: "03",
+    title: "Urban\nPlanning",
+    shortTitle: "Urban",
+    description:
+      "Master planning and urban design at the district and city scale. Shaping the relationship between built form, movement, and public life.",
+    detail: "Master planning · Public realm · Transport integration · Zoning strategy",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" className="h-full w-full">
+        <rect x="6" y="24" width="10" height="14" stroke="currentColor" strokeWidth="1" />
+        <rect x="19" y="16" width="10" height="22" stroke="currentColor" strokeWidth="1" />
+        <rect x="32" y="20" width="10" height="18" stroke="currentColor" strokeWidth="1" />
+        <line x1="6" y1="38" x2="42" y2="38" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="6" y1="38" x2="6" y2="42" stroke="currentColor" strokeWidth="0.8" />
+        <line x1="42" y1="38" x2="42" y2="42" stroke="currentColor" strokeWidth="0.8" />
+      </svg>
+    ),
+  },
+  {
+    id: 4,
+    number: "04",
+    title: "Renovation\n& Restoration",
+    shortTitle: "Restoration",
+    description:
+      "Sensitive restoration of heritage buildings alongside contemporary renovation. Preserving what matters while making space for the new.",
+    detail: "Heritage assessment · Adaptive reuse · Material matching · Conservation",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" className="h-full w-full">
+        <path d="M8 38 L8 18 L24 8 L40 18 L40 38" stroke="currentColor" strokeWidth="1.2" fill="none" />
+        <rect x="18" y="26" width="12" height="12" stroke="currentColor" strokeWidth="1" />
+        <line x1="8" y1="38" x2="40" y2="38" stroke="currentColor" strokeWidth="1.2" />
+        <path d="M16 18 Q24 14 32 18" stroke="currentColor" strokeWidth="0.7" strokeDasharray="2 1.5" fill="none" />
+      </svg>
+    ),
+  },
+  {
+    id: 5,
+    number: "05",
+    title: "Landscape\nDesign",
+    shortTitle: "Landscape",
+    description:
+      "Outdoor environments designed with the same rigour as interior space. Ground plane, planting, water, and light working as a unified whole.",
+    detail: "Site masterplan · Planting design · Water features · Material specification",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" className="h-full w-full">
+        <line x1="6" y1="36" x2="42" y2="36" stroke="currentColor" strokeWidth="1.2" />
+        <path d="M12 36 Q12 24 20 20 Q16 28 18 36" stroke="currentColor" strokeWidth="0.9" fill="none" />
+        <path d="M24 36 Q24 18 30 14 Q26 24 28 36" stroke="currentColor" strokeWidth="0.9" fill="none" />
+        <path d="M34 36 Q36 28 40 26 Q37 30 36 36" stroke="currentColor" strokeWidth="0.8" fill="none" />
+        <ellipse cx="20" cy="19" rx="5" ry="4" stroke="currentColor" strokeWidth="0.7" strokeDasharray="1.5 1.5" />
+        <ellipse cx="30" cy="13" rx="5" ry="4" stroke="currentColor" strokeWidth="0.7" strokeDasharray="1.5 1.5" />
+      </svg>
+    ),
+  },
+  {
+    id: 6,
+    number: "06",
+    title: "Project\nManagement",
+    shortTitle: "Management",
+    description:
+      "On-site oversight and contractor coordination from groundbreaking to handover. Keeping every project on programme, on budget, on brief.",
+    detail: "Programme management · Cost control · Contractor liaison · Site inspection",
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" className="h-full w-full">
+        <rect x="8" y="8" width="32" height="32" rx="1" stroke="currentColor" strokeWidth="1.2" />
+        <line x1="8" y1="16" x2="40" y2="16" stroke="currentColor" strokeWidth="0.8" />
+        <line x1="16" y1="8" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" />
+        <line x1="32" y1="8" x2="32" y2="16" stroke="currentColor" strokeWidth="0.8" />
+        <line x1="14" y1="24" x2="22" y2="24" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 1" />
+        <line x1="14" y1="29" x2="28" y2="29" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 1" />
+        <line x1="14" y1="34" x2="24" y2="34" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 1" />
+        <polyline points="30,26 33,30 38,23" stroke="currentColor" strokeWidth="1" fill="none" />
+      </svg>
+    ),
+  },
+];
+
+function ServicePanel({
+  service,
+  index,
+  total,
+}: {
+  service: (typeof SERVICES)[0];
+  index: number;
+  total: number;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-10%" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ rotateX: 18, opacity: 0, y: 40 }}
+      animate={inView ? { rotateX: 0, opacity: 1, y: 0 } : {}}
+      transition={{
+        duration: 0.85,
+        delay: index * 0.11,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ transformStyle: "preserve-3d" }}
+      className="group relative flex-1 cursor-default select-none"
+    >
+      {/* Thin top brass rule — draws in on hover */}
+      <motion.div
+        animate={{ scaleX: hovered ? 1 : 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        style={{ transformOrigin: "left" }}
+        className="absolute top-0 left-0 right-0 h-[1.5px] z-10"
+        // warm gold line
+        style={{
+          transformOrigin: "left",
+          background:
+            "linear-gradient(90deg, #c8a052 0%, #e8c070 40%, #b88840 100%)",
+          height: "1.5px",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          scaleX: hovered ? 1 : 0,
+          transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1)",
+        }}
+      />
+
+      {/* Panel background */}
+      <motion.div
+        animate={{
+          background: hovered
+            ? "linear-gradient(180deg,#1c1208 0%,#120d06 40%,#0c0906 100%)"
+            : "linear-gradient(180deg,#0e0b06 0%,#080603 60%,#060402 100%)",
+          y: hovered ? -6 : 0,
+        }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute inset-0"
+        style={{ transformOrigin: "bottom center" }}
+      />
+
+      {/* Right divider line (skip last) */}
+      {index < total - 1 && (
+        <div
+          className="absolute top-[8%] bottom-[8%] right-0 w-[0.5px]"
+          style={{ background: "rgba(200,160,80,0.12)" }}
+        />
+      )}
+
+      {/* Inner content */}
+      <div className="relative z-[5] flex h-full flex-col justify-between px-[clamp(14px,2vw,28px)] py-[clamp(28px,5vh,52px)]">
+
+        {/* Top — number + icon */}
+        <div className="flex flex-col gap-6">
+          {/* Service number */}
+          <div className="flex items-center gap-3">
+            <span
+              className="font-mono text-[10px] tracking-[0.3em]"
+              style={{ color: "rgba(200,160,80,0.55)" }}
+            >
+              {service.number}
+            </span>
+            <motion.div
+              animate={{ scaleX: hovered ? 1 : 0.3, opacity: hovered ? 0.4 : 0.15 }}
+              transition={{ duration: 0.4 }}
+              style={{ transformOrigin: "left", height: "0.5px", flex: 1, background: "rgba(200,160,80,0.6)" }}
+            />
+          </div>
+
+          {/* Blueprint icon */}
+          <motion.div
+            animate={{
+              opacity: hovered ? 0.9 : 0.35,
+              scale: hovered ? 1.04 : 1,
+            }}
+            transition={{ duration: 0.4 }}
+            className="w-[clamp(28px,3.5vw,44px)] h-[clamp(28px,3.5vw,44px)]"
+            style={{ color: hovered ? "rgba(200,160,80,0.85)" : "rgba(180,160,130,0.5)" }}
+          >
+            {service.icon}
+          </motion.div>
+        </div>
+
+        {/* Middle — service title */}
+        <div className="flex flex-col gap-4">
+          <motion.h3
+            animate={{ color: hovered ? "#f0e0c0" : "#9a8a72" }}
+            transition={{ duration: 0.4 }}
+            className="font-serif leading-[1.15] tracking-[0.04em]"
+            style={{
+              fontSize: "clamp(13px,1.5vw,20px)",
+              writingMode: "vertical-lr",
+              textOrientation: "mixed",
+              transform: "rotate(180deg)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {service.shortTitle}
+          </motion.h3>
+        </div>
+
+        {/* Bottom — description + detail (fade in on hover) */}
+        <div className="flex flex-col gap-3">
+          <motion.p
+            animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 10 }}
+            transition={{ duration: 0.45, delay: hovered ? 0.08 : 0 }}
+            className="leading-relaxed"
+            style={{
+              fontSize: "clamp(9px,0.85vw,12px)",
+              color: "rgba(210,190,160,0.75)",
+            }}
+          >
+            {service.description}
+          </motion.p>
+
+          <motion.div
+            animate={{ opacity: hovered ? 0.5 : 0, y: hovered ? 0 : 6 }}
+            transition={{ duration: 0.4, delay: hovered ? 0.14 : 0 }}
+            className="font-mono"
+            style={{
+              fontSize: "clamp(7px,0.7vw,9px)",
+              color: "rgba(200,160,80,0.7)",
+              letterSpacing: "0.15em",
+              lineHeight: 1.8,
+            }}
+          >
+            {service.detail.split(" · ").map((item, i) => (
+              <div key={i}>— {item}</div>
+            ))}
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Warm light bleed overlay on hover */}
+      <motion.div
+        animate={{ opacity: hovered ? 1 : 0 }}
+        transition={{ duration: 0.5 }}
+        className="pointer-events-none absolute inset-0 z-[4]"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 100%, rgba(180,110,30,0.08) 0%, transparent 70%)",
+        }}
+      />
+    </motion.div>
+  );
+}
+
+export default function ServicesSection() {
+  const headingRef = useRef<HTMLDivElement>(null);
+  const headingInView = useInView(headingRef, { once: true, margin: "-8%" });
+
+  return (
+    <section
+      className="relative w-full min-h-screen flex flex-col"
+      style={{ background: "#060402" }}
+    >
+      {/* Top heading strip */}
+      <div
+        ref={headingRef}
+        className="relative flex items-end justify-between px-[clamp(24px,5vw,72px)] pt-[clamp(48px,8vh,96px)] pb-[clamp(24px,4vh,48px)]"
+        style={{ borderBottom: "0.5px solid rgba(200,160,80,0.1)" }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={headingInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col gap-3"
+        >
+          <span
+            className="font-mono text-[10px] tracking-[0.4em] uppercase"
+            style={{ color: "rgba(200,160,80,0.5)" }}
+          >
+            What we do
+          </span>
+          <h2
+            className="font-serif tracking-[0.02em] leading-none"
+            style={{
+              fontSize: "clamp(28px,4.5vw,64px)",
+              color: "#e8d8b8",
+            }}
+          >
+            Services
+          </h2>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={headingInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          style={{
+            fontSize: "clamp(10px,0.85vw,13px)",
+            color: "rgba(200,180,150,0.45)",
+            maxWidth: "260px",
+            textAlign: "right",
+            lineHeight: 1.7,
+          }}
+        >
+          Six disciplines, one studio. Each practised with the same attention to craft, material, and duration.
+        </motion.p>
+      </div>
+
+      {/* Panels row */}
+      <div
+        className="flex flex-1"
+        style={{
+          perspective: "1200px",
+          perspectiveOrigin: "50% 60%",
+          minHeight: "clamp(480px,72vh,780px)",
+        }}
+      >
+        {SERVICES.map((service, i) => (
+          <ServicePanel
+            key={service.id}
+            service={service}
+            index={i}
+            total={SERVICES.length}
+          />
+        ))}
+      </div>
+
+      {/* Bottom rule */}
+      <div
+        className="w-full"
+        style={{
+          height: "0.5px",
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(200,160,80,0.18) 20%, rgba(200,160,80,0.18) 80%, transparent 100%)",
+        }}
+      />
+    </section>
+  );
+}
