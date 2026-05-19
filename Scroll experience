@@ -11,36 +11,55 @@ import SelectedWork from "@/components/SelectedWork";
 import About from "@/components/About";
 import ContactSection from "@/components/Contact";
 
+// ─────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────
+
+type ActiveSegment =
+  | "intro"
+  | "landing"
+  | "services"
+  | "work"
+  | "about"
+  | "contact";
+
+// ─────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────
+
 export default function ScrollExperience() {
   const containerRef = useRef<HTMLElement | null>(null);
-  const [showNavbar, setShowNavbar] = useState(false);
+  const [showNavbar, setShowNavbar] = useState<boolean>(false);
+  const [activeSegment, setActiveSegment] = useState<ActiveSegment>("intro");
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  const [activeSegment, setActiveSegment] = useState
-    "intro" | "landing" | "services" | "work" | "about" | "contact"
-  >("intro");
-
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+  // ----------------------------------------
+  // Active segment tracker
+  // ----------------------------------------
+  useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
     if (latest < 0.22) {
       setActiveSegment("intro");
-    } else if (latest >= 0.22 && latest < 0.38) {
+    } else if (latest < 0.38) {
       setActiveSegment("landing");
-    } else if (latest >= 0.38 && latest < 0.58) {
+    } else if (latest < 0.58) {
       setActiveSegment("services");
-    } else if (latest >= 0.58 && latest < 0.82) {
+    } else if (latest < 0.82) {
       setActiveSegment("work");
-    } else if (latest >= 0.82 && latest < 0.92) {
+    } else if (latest < 0.92) {
       setActiveSegment("about");
     } else {
       setActiveSegment("contact");
     }
   });
 
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+  // ----------------------------------------
+  // Navbar visibility tracker
+  // ----------------------------------------
+  useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
     const previous = scrollYProgress.getPrevious() ?? 0;
     const isScrollingDown = latest > previous;
     const isScrollingUp = latest < previous;
@@ -49,7 +68,7 @@ export default function ScrollExperience() {
       setShowNavbar(false);
       return;
     }
-    if (latest >= 0.22 && latest < 0.54) {
+    if (latest < 0.54) {
       setShowNavbar(true);
       return;
     }
@@ -78,27 +97,21 @@ export default function ScrollExperience() {
    * 0.58 – 0.62   Selected Work enters from right
    * 0.62 – 0.68   Work heading moves up + scales
    * 0.68 – 0.74   Carousel appears
-   * 0.74 – 0.78   Carousel scrolls horizontally
+   * 0.74 – 0.80   Carousel scrolls horizontally
    * 0.78 – 0.82   Work exits up
    * 0.82 – 0.88   About slides in from below
    * 0.92 – 1.00   Contact slides in from below
    */
 
   // ----------------------------------------
-  // NAVBAR
-  // ----------------------------------------
-  const navOpacity = useTransform(scrollYProgress, [0.22, 0.30], [0, 1]);
-  const navY       = useTransform(scrollYProgress, [0.22, 0.30], ["-40vw", "0vw"]);
-
-  // ----------------------------------------
   // SEGMENT 1: WELCOME WINDOW
   // ----------------------------------------
-  const leftRotate  = useTransform(scrollYProgress, [0, 0.14], [0, -78]);
-  const rightRotate = useTransform(scrollYProgress, [0, 0.14], [0, 78]);
+  const leftRotate  = useTransform(scrollYProgress, [0.00, 0.14], [0, -78]);
+  const rightRotate = useTransform(scrollYProgress, [0.00, 0.14], [0,  78]);
 
-  const windowScale   = useTransform(scrollYProgress, [0.00, 0.20], [1, 2.4]);
-  const windowOpacity = useTransform(scrollYProgress, [0.08, 0.20], [1, 0]);
-  const frameOpacity  = useTransform(scrollYProgress, [0.06, 0.16], [1, 0]);
+  const windowScale   = useTransform(scrollYProgress, [0.00, 0.20], [1,   2.4]);
+  const windowOpacity = useTransform(scrollYProgress, [0.08, 0.20], [1,   0  ]);
+  const frameOpacity  = useTransform(scrollYProgress, [0.06, 0.16], [1,   0  ]);
 
   const scrollTextOpacity = useTransform(scrollYProgress, [0.00, 0.08], [1, 0]);
 
@@ -126,14 +139,12 @@ export default function ScrollExperience() {
   const landingOpacity = useTransform(
     scrollYProgress,
     [0.20, 0.24, 0.34, 0.38],
-    [0, 1, 1, 0]
+    [0,    1,    1,    0   ]
   );
 
   // ----------------------------------------
   // SEGMENT 3: SERVICES
   // ----------------------------------------
-
-  // Whole section fades + rises in after landing exits
   const servicesOpacity = useTransform(
     scrollYProgress,
     [0.36, 0.42, 0.54, 0.58],
@@ -146,7 +157,6 @@ export default function ScrollExperience() {
     ["60vh", "0vh"]
   );
 
-  // Section exits upward
   const servicesExitY = useTransform(
     scrollYProgress,
     [0.54, 0.58],
@@ -168,31 +178,35 @@ export default function ScrollExperience() {
     [0,    1,    1,    0   ]
   );
 
-  const workHeadingY     = useTransform(scrollYProgress, [0.62, 0.68], ["0vh",   "-22vh"]);
-  const workHeadingScale = useTransform(scrollYProgress, [0.66, 0.68], [1,       0.45  ]);
-  const workHeadingX     = useTransform(scrollYProgress, [0.66, 0.68], ["0vw",   "-14vw"]);
+  const workHeadingY     = useTransform(scrollYProgress, [0.62, 0.68], ["0vh",  "-22vh"]);
+  const workHeadingScale = useTransform(scrollYProgress, [0.66, 0.68], [1,       0.45 ]);
+  const workHeadingX     = useTransform(scrollYProgress, [0.66, 0.68], ["0vw",  "-14vw"]);
 
-  const carouselOpacity = useTransform(scrollYProgress, [0.68, 0.72], [0, 1]);
-  const carouselX       = useTransform(scrollYProgress, [0.72, 0.80], ["25vw", "-95vw"]);
+  const carouselOpacity  = useTransform(scrollYProgress, [0.68, 0.72], [0,       1    ]);
+  const carouselX        = useTransform(scrollYProgress, [0.72, 0.80], ["25vw", "-95vw"]);
 
-  const workExitY = useTransform(scrollYProgress, [0.78, 0.82], ["0vh", "-100vh"]);
+  const workExitY = useTransform(
+    scrollYProgress,
+    [0.78, 0.82],
+    ["0vh", "-100vh"]
+  );
 
   // ----------------------------------------
   // SEGMENT 5: ABOUT
   // ----------------------------------------
-  const aboutOpacity = useTransform(scrollYProgress, [0.80, 0.88], [0, 1]);
+  const aboutOpacity = useTransform(scrollYProgress, [0.80, 0.88], [0,      1    ]);
   const aboutY       = useTransform(scrollYProgress, [0.80, 0.88], ["90vh", "0vh"]);
 
   // ----------------------------------------
   // SEGMENT 6: CONTACT
   // ----------------------------------------
-  const contactOpacity = useTransform(scrollYProgress, [0.92, 1.00], [0, 1]);
+  const contactOpacity = useTransform(scrollYProgress, [0.92, 1.00], [0,       1    ]);
   const contactY       = useTransform(scrollYProgress, [0.92, 1.00], ["100vh", "0vh"]);
 
   // ----------------------------------------
   // HELPERS
   // ----------------------------------------
-  const scrollToProgress = (progress: number) => {
+  const scrollToProgress = (progress: number): void => {
     if (!containerRef.current) return;
     const container = containerRef.current;
     const scrollableDistance = container.offsetHeight - window.innerHeight;
@@ -202,8 +216,11 @@ export default function ScrollExperience() {
     });
   };
 
-  const handleEnterClick = () => scrollToProgress(0.32);
+  const handleEnterClick = (): void => scrollToProgress(0.32);
 
+  // ----------------------------------------
+  // RENDER
+  // ----------------------------------------
   return (
     <section
       id="top"
@@ -211,8 +228,10 @@ export default function ScrollExperience() {
       className="relative h-[1350vh] bg-[#f5f2eb] md:h-[1450vh] xl:h-[1550vh] 2xl:h-[1650vh]"
     >
       <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
+
         <Navbar showNavbar={showNavbar} />
 
+        {/* SEGMENT 1 — Welcome Window */}
         <WelcomeWindow
           isActive={isIntroActive}
           leftRotate={leftRotate}
@@ -225,6 +244,7 @@ export default function ScrollExperience() {
           onEnterClick={handleEnterClick}
         />
 
+        {/* SEGMENT 2 — Studio Landing */}
         <StudioLanding
           isActive={isLandingActive}
           landingOpacity={landingOpacity}
@@ -232,19 +252,15 @@ export default function ScrollExperience() {
           landingExitX={landingExitX}
         />
 
-        {/* SERVICES — sits in the stack, driven by scroll */}
-        <motion.div
-          style={{
-            opacity: servicesOpacity,
-            y: isServicesActive ? servicesExitY : servicesY,
-          }}
-          className={`absolute inset-0 z-[70] ${
-            isServicesActive ? "pointer-events-auto" : "pointer-events-none"
-          }`}
-        >
-          <ServicesSection />
-        </motion.div>
+        {/* SEGMENT 3 — Services */}
+        <ServicesSection
+          isActive={isServicesActive}
+          servicesOpacity={servicesOpacity}
+          servicesY={servicesY}
+          servicesExitY={servicesExitY}
+        />
 
+        {/* SEGMENT 4 — Selected Work */}
         <SelectedWork
           isActive={isWorkActive}
           workX={workX}
@@ -257,17 +273,20 @@ export default function ScrollExperience() {
           workExitY={workExitY}
         />
 
+        {/* SEGMENT 5 — About */}
         <About
           isActive={isAboutActive}
           aboutOpacity={aboutOpacity}
           aboutY={aboutY}
         />
 
+        {/* SEGMENT 6 — Contact */}
         <ContactSection
           isActive={isContactActive}
           contactOpacity={contactOpacity}
           contactY={contactY}
         />
+
       </div>
     </section>
   );
