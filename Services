@@ -980,3 +980,74 @@ const droppedServices = SERVICES.filter((s) => droppedIds.includes(s.id));
           zIndex: 70,
           pointerEvents: isActive ? "auto" : "none",
           background: "#000000",
+}}
+        aria-hidden={!isActive}
+      >
+        {/* Section label */}
+        <div
+          className="absolute z-[10] flex items-center gap-3"
+          style={{
+            top: "clamp(20px,3.5vh,36px)",
+            left: "clamp(24px,4vw,56px)",
+          }}
+        >
+          <span
+            className="font-mono uppercase tracking-[0.4em]"
+            style={{
+              fontSize: "clamp(7px,0.62vw,9px)",
+              color: "rgba(200,160,80,0.38)",
+            }}
+          >
+            Services
+          </span>
+          <div
+            style={{
+              width: "clamp(20px,2.5vw,36px)",
+              height: "0.5px",
+background: "rgba(200,160,80,0.18)",
+            }}
+          />
+        </div>
+
+        {/* Instruction */}
+        <div
+          className="absolute z-[10]"
+          style={{
+            top: "clamp(20px,3.5vh,36px)",
+            right: "clamp(24px,4vw,56px)",
+          }}
+        >
+          <span
+            className="font-mono"
+            style={{
+              fontSize: "clamp(6px,0.58vw,8px)",
+              color: "rgba(200,160,80,0.28)",
+              letterSpacing: "0.25em",
+            }}
+          >
+            HOVER TO EXPLORE · DRAG TO BRIEF
+          </span>
+        </div>
+{/* Scattered pinned service cards */}
+        <AnimatePresence>
+          {remainingServices.map((service) => (
+            <PinnedServiceCard
+              key={service.id}
+              service={service}
+              onDragToBoard={handleDragToBoard}
+              isDropped={droppedIds.includes(service.id)}
+            />
+          ))}
+        </AnimatePresence>
+
+        {/* Drafting board drop target */}
+        <DraftingBoard
+          droppedServices={droppedServices}
+          isDragOver={isDragOver}
+        />
+
+        {/* Board glow when services dropped */}
+        {droppedServices.length > 0 && (
+          <div
+            className="absolute pointer-events-none"
+            style={{
