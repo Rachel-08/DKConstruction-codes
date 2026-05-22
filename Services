@@ -1051,3 +1051,27 @@ background: "rgba(200,160,80,0.18)",
           <div
             className="absolute pointer-events-none"
             style={{
+right: "clamp(0px,2vw,30px)",
+              bottom: "clamp(0px,2vh,30px)",
+              width: "clamp(240px,34vw,420px)",
+              height: "clamp(200px,32vh,360px)",
+              background:
+                "radial-gradient(ellipse at 70% 80%, rgba(200,160,80,0.06) 0%, transparent 70%)",
+              zIndex: 5,
+            }}
+          />
+        )}
+      </motion.section>
+
+      {/* Contact popup — outside section so it overlays everything */}
+      <AnimatePresence>
+        {showPopup && (
+          <ContactPopup
+            services={droppedServices}
+            onClose={() => setShowPopup(false)}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
