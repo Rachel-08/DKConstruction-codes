@@ -43,9 +43,9 @@ export default function ScrollExperience() {
   useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
     if      (latest < 0.22) setActiveSegment("intro");
     else if (latest < 0.38) setActiveSegment("landing");
-    else if (latest < 0.72) setActiveSegment("services"); // expanded
-    else if (latest < 0.88) setActiveSegment("work");
-    else if (latest < 0.95) setActiveSegment("about");
+    else if (latest < 0.70) setActiveSegment("services");
+    else if (latest < 0.86) setActiveSegment("work");
+    else if (latest < 0.94) setActiveSegment("about");
     else                    setActiveSegment("contact");
   });
 
@@ -53,12 +53,12 @@ export default function ScrollExperience() {
   // Navbar visibility tracker
   // ----------------------------------------
   useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
-    const previous      = scrollYProgress.getPrevious() ?? 0;
+    const previous        = scrollYProgress.getPrevious() ?? 0;
     const isScrollingDown = latest > previous;
     const isScrollingUp   = latest < previous;
 
-    if (latest < 0.22)             { setShowNavbar(false); return; }
-    if (latest >= 0.22 && latest < 0.60) { setShowNavbar(true);  return; }
+    if (latest < 0.22)               { setShowNavbar(false); return; }
+    if (latest >= 0.22 && latest < 0.58) { setShowNavbar(true);  return; }
     if (isScrollingDown) setShowNavbar(false);
     if (isScrollingUp)   setShowNavbar(true);
   });
@@ -79,21 +79,18 @@ export default function ScrollExperience() {
    * 0.24 – 0.34   Landing rests
    * 0.34 – 0.38   Landing + window exit left
    *
-   * 0.36 – 0.72   Services  ← expanded (6 services × 0.06 each)
-   *   0.36 – 0.40   Service 01 enters
-   *   0.40 – 0.46   Service 01 rests
-   *   0.46 – 0.48   Service 01 exits / 02 enters
-   *   0.48 – 0.54   Service 02 rests
-   *   ... and so on
-   * 0.70 – 0.74   Services exit up
+   * 0.36 – 0.70   Services (scattered pinned notes + drafting board)
+   *               ServicesDriver remaps [0.36, 0.70] → [0, 1] internally
+   * 0.68 – 0.72   Services exit upward
    *
-   * 0.72 – 0.76   Selected Work enters from right
+   * 0.70 – 0.76   Selected Work enters from right
    * 0.76 – 0.80   Work heading moves up + scales
-   * 0.80 – 0.84   Carousel appears
-   * 0.84 – 0.88   Carousel scrolls horizontally
-   * 0.86 – 0.88   Work exits up
+   * 0.80 – 0.83   Carousel appears
+   * 0.83 – 0.87   Carousel scrolls horizontally
+   * 0.85 – 0.88   Work exits up
+   *
    * 0.88 – 0.92   About slides in from below
-   * 0.95 – 1.00   Contact slides in from below
+   * 0.94 – 1.00   Contact slides in from below
    */
 
   // ----------------------------------------
@@ -102,10 +99,10 @@ export default function ScrollExperience() {
   const leftRotate  = useTransform(scrollYProgress, [0.00, 0.14], [0, -78]);
   const rightRotate = useTransform(scrollYProgress, [0.00, 0.14], [0,  78]);
 
-  const windowScale        = useTransform(scrollYProgress, [0.00, 0.20], [1,   2.4]);
-  const windowOpacity      = useTransform(scrollYProgress, [0.08, 0.20], [1,   0  ]);
-  const frameOpacity       = useTransform(scrollYProgress, [0.06, 0.16], [1,   0  ]);
-  const scrollTextOpacity  = useTransform(scrollYProgress, [0.00, 0.08], [1,   0  ]);
+  const windowScale       = useTransform(scrollYProgress, [0.00, 0.20], [1,   2.4]);
+  const windowOpacity     = useTransform(scrollYProgress, [0.08, 0.20], [1,   0  ]);
+  const frameOpacity      = useTransform(scrollYProgress, [0.06, 0.16], [1,   0  ]);
+  const scrollTextOpacity = useTransform(scrollYProgress, [0.00, 0.08], [1,   0  ]);
 
   const windowExitX = useTransform(
     scrollYProgress,
@@ -136,67 +133,69 @@ export default function ScrollExperience() {
 
   // ----------------------------------------
   // SEGMENT 3: SERVICES
-  // Expanded: 0.36 → 0.72 (6 services, ~0.06 each)
-  // ServicesDriver internally remaps [0.36, 0.72] → [0, 1]
+  // The scattered pinned-notes section lives
+  // at rest the entire [0.36 → 0.70] range.
+  // It fades in at entry and exits upward.
+  // Internal ServicesDriver remaps this range
+  // to [0, 1] for its own scroll-driven logic.
   // ----------------------------------------
   const servicesOpacity = useTransform(
     scrollYProgress,
-    [0.34, 0.40, 0.68, 0.72],
+    [0.34, 0.40, 0.66, 0.70],
     [0,    1,    1,    0   ]
   );
 
   const servicesY = useTransform(
     scrollYProgress,
     [0.34, 0.40],
-    ["50vh", "0vh"]
+    ["55vh", "0vh"]
   );
 
   const servicesExitY = useTransform(
     scrollYProgress,
-    [0.68, 0.72],
-    ["0vh", "-60vh"]
+    [0.66, 0.70],
+    ["0vh", "-65vh"]
   );
 
   // ----------------------------------------
   // SEGMENT 4: SELECTED WORK
-  // Shifted to start after services: 0.72 →
   // ----------------------------------------
   const workX = useTransform(
     scrollYProgress,
-    [0.70, 0.76],
+    [0.68, 0.74],
     ["100vw", "0vw"]
   );
 
   const workOpacity = useTransform(
     scrollYProgress,
-    [0.70, 0.76, 0.86, 0.88],
+    [0.68, 0.74, 0.84, 0.88],
     [0,    1,    1,    0   ]
   );
 
-  const workHeadingY     = useTransform(scrollYProgress, [0.76, 0.80], ["0vh",  "-22vh"]);
-  const workHeadingScale = useTransform(scrollYProgress, [0.78, 0.80], [1,       0.45 ]);
-  const workHeadingX     = useTransform(scrollYProgress, [0.78, 0.80], ["0vw",  "-14vw"]);
+  const workHeadingY     = useTransform(scrollYProgress, [0.74, 0.78], ["0vh",  "-22vh"]);
+  const workHeadingScale = useTransform(scrollYProgress, [0.76, 0.78], [1,       0.45 ]);
+  const workHeadingX     = useTransform(scrollYProgress, [0.76, 0.78], ["0vw",  "-14vw"]);
 
-  const carouselOpacity  = useTransform(scrollYProgress, [0.80, 0.82], [0,       1    ]);
-  const carouselX        = useTransform(scrollYProgress, [0.82, 0.87], ["25vw", "-95vw"]);
+  const carouselOpacity  = useTransform(scrollYProgress, [0.78, 0.81], [0,       1    ]);
+  const carouselX        = useTransform(scrollYProgress, [0.81, 0.86], ["25vw", "-95vw"]);
 
   const workExitY = useTransform(
     scrollYProgress,
-    [0.86, 0.88],
+    [0.84, 0.88],
     ["0vh", "-100vh"]
   );
 
   // ----------------------------------------
   // SEGMENT 5: ABOUT
   // ----------------------------------------
-  const aboutOpacity = useTransform(scrollYProgress, [0.88, 0.93], [0,      1    ]);
-  const aboutY       = useTransform(scrollYProgress, [0.88, 0.93], ["90vh", "0vh"]);
+  const aboutOpacity = useTransform(scrollYProgress, [0.87, 0.92], [0,      1    ]);
+  const aboutY       = useTransform(scrollYProgress, [0.87, 0.92], ["90vh", "0vh"]);
 
   // ----------------------------------------
   // SEGMENT 6: CONTACT
   // ----------------------------------------
-  const contactOpacity = useTransform(scrollYProgress, [0.95, 1.00], [0,       1    ]);
-  const contactY       = useTransform(scrollYProgress, [0.95, 1.00], ["100vh", "0vh"]);
+  const contactOpacity = useTransform(scrollYProgress, [0.94, 1.00], [0,       1    ]);
+  const contactY       = useTransform(scrollYProgress, [0.94, 1.00], ["100vh", "0vh"]);
 
   // ----------------------------------------
   // HELPERS
@@ -220,7 +219,7 @@ export default function ScrollExperience() {
     <section
       id="top"
       ref={containerRef}
-      className="relative h-[1800vh] bg-[#f5f2eb] md:h-[1900vh] xl:h-[2000vh] 2xl:h-[2100vh]"
+      className="relative h-[1700vh] bg-[#f5f2eb] md:h-[1800vh] xl:h-[1900vh] 2xl:h-[2000vh]"
     >
       <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
 
@@ -247,7 +246,7 @@ export default function ScrollExperience() {
           landingExitX={landingExitX}
         />
 
-        {/* SEGMENT 3 — Services */}
+        {/* SEGMENT 3 — Services (scattered pinned notes) */}
         <ServicesSection
           isActive={isServicesActive}
           servicesOpacity={servicesOpacity}
