@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState } from "react";
 import { motion, AnimatePresence, type MotionValue } from "motion/react";
 
 // ─────────────────────────────────────────────
@@ -10,13 +10,10 @@ import { motion, AnimatePresence, type MotionValue } from "motion/react";
 type Service = {
   id: number;
   number: string;
-  shortTitle: string;
+  keyword: string;
   fullTitle: string;
   description: string;
-  detail: string[];
   image: string;
-  icon: React.ReactNode;
-  pin: { top: string; left: string; rotate: number };
 };
 
 type ServicesSectionProps = {
@@ -27,9 +24,8 @@ type ServicesSectionProps = {
 };
 
 type ContactForm = {
-  name: string;
   phone: string;
-  message: string;
+  email: string;
 };
 
 // ─────────────────────────────────────────────
@@ -40,713 +36,187 @@ const SERVICES: Service[] = [
   {
     id: 1,
     number: "01",
-    shortTitle: "Architecture",
-    fullTitle: "Architectural Design",
+    keyword: "BUILD",
+    fullTitle: "Complete Building Construction",
     description:
-      "End-to-end architectural design from initial concept through to construction documentation.",
-    detail: ["Site analysis", "Concept design", "Working drawings", "Planning submissions"],
-    image: "https://images.unsplash.com/photo-1486325212027-8081e485255e?q=80&w=800&auto=format&fit=crop",
-    icon: (
-      <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
-        <polyline points="4,26 16,6 28,26" stroke="currentColor" strokeWidth="1.4" />
-        <line x1="8" y1="20" x2="24" y2="20" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 2" />
-        <line x1="16" y1="6" x2="16" y2="26" stroke="currentColor" strokeWidth="0.6" strokeDasharray="1.5 2" />
-      </svg>
-    ),
-    pin: { top: "12%", left: "8%", rotate: -4 },
+      "Full-scale construction with premium materials. From foundation to finishing — every element sourced, managed, and delivered to specification.",
+    image:
+      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: 2,
     number: "02",
-    shortTitle: "Interiors",
-    fullTitle: "Interior Design",
+    keyword: "PLAN",
+    fullTitle: "Floor Planning & Design",
     description:
-      "Spatial planning and material curation for residential and commercial environments.",
-    detail: ["Space planning", "Material boards", "Furniture selection", "Lighting design"],
-    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800&auto=format&fit=crop",
-    icon: (
-      <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
-        <rect x="4" y="8" width="24" height="18" stroke="currentColor" strokeWidth="1.4" />
-        <line x1="4" y1="18" x2="28" y2="18" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 2" />
-        <line x1="16" y1="8" x2="16" y2="26" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 2" />
-      </svg>
-    ),
-    pin: { top: "8%", left: "38%", rotate: 3 },
+      "Precise spatial layouts that balance flow, function, and form. Every square foot considered with purpose.",
+    image:
+      "https://images.unsplash.com/photo-1486325212027-8081e485255e?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: 3,
     number: "03",
-    shortTitle: "Urban",
-    fullTitle: "Urban Planning",
+    keyword: "STRUCT",
+    fullTitle: "Structural Design",
     description:
-      "Master planning and urban design at district and city scale. Shaping built form and public life.",
-    detail: ["Master planning", "Public realm", "Transport integration", "Zoning strategy"],
-    image: "https://images.unsplash.com/photo-1486325212027-8081e485255e?q=80&w=800&auto=format&fit=crop",
-    icon: (
-      <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
-        <rect x="3" y="16" width="8" height="10" stroke="currentColor" strokeWidth="1.2" />
-        <rect x="12" y="10" width="8" height="16" stroke="currentColor" strokeWidth="1.2" />
-        <rect x="21" y="13" width="8" height="13" stroke="currentColor" strokeWidth="1.2" />
-        <line x1="3" y1="26" x2="29" y2="26" stroke="currentColor" strokeWidth="1" />
-      </svg>
-    ),
-    pin: { top: "10%", left: "66%", rotate: -2 },
+      "Engineering-grade structural systems designed for longevity, safety, and load integrity across all building typologies.",
+    image:
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: 4,
     number: "04",
-    shortTitle: "Restoration",
-    fullTitle: "Renovation & Restoration",
+    keyword: "DESIGN",
+    fullTitle: "3D Interior & Exterior Design",
     description:
-      "Sensitive restoration of heritage buildings alongside contemporary renovation.",
-    detail: ["Heritage assessment", "Adaptive reuse", "Material matching", "Conservation"],
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
-    icon: (
-      <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
-        <path d="M4 26 L4 12 L16 4 L28 12 L28 26" stroke="currentColor" strokeWidth="1.4" fill="none" />
-        <rect x="11" y="17" width="10" height="9" stroke="currentColor" strokeWidth="1" />
-        <line x1="4" y1="26" x2="28" y2="26" stroke="currentColor" strokeWidth="1.2" />
-      </svg>
-    ),
-    pin: { top: "48%", left: "5%", rotate: 5 },
+      "Photorealistic 3D visualisations of interiors and exteriors — complete with material selection, lighting simulation, and finish specification.",
+    image:
+      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: 5,
     number: "05",
-    shortTitle: "Landscape",
-    fullTitle: "Landscape Design",
+    keyword: "APPROVE",
+    fullTitle: "Municipality & Approval Services",
     description:
-      "Outdoor environments designed with the same rigour as interior space.",
-    detail: ["Site masterplan", "Planting design", "Water features", "Material specification"],
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800&auto=format&fit=crop",
-    icon: (
-      <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
-        <line x1="4" y1="24" x2="28" y2="24" stroke="currentColor" strokeWidth="1.2" />
-        <path d="M8 24 Q8 16 13 13 Q10 18 12 24" stroke="currentColor" strokeWidth="1" fill="none" />
-        <path d="M16 24 Q16 12 20 9 Q17 16 19 24" stroke="currentColor" strokeWidth="1" fill="none" />
-        <ellipse cx="13" cy="12" rx="4" ry="3" stroke="currentColor" strokeWidth="0.7" strokeDasharray="1.5 1.5" />
-      </svg>
-    ),
-    pin: { top: "52%", left: "72%", rotate: -6 },
+      "End-to-end handling of Municipal, N.A.C., Fire & BRIT approvals. We navigate the compliance landscape so your project moves without friction.",
+    image:
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop",
   },
   {
     id: 6,
     number: "06",
-    shortTitle: "Management",
-    fullTitle: "Project Management",
+    keyword: "RENEW",
+    fullTitle: "Renovation Work",
     description:
-      "On-site oversight and contractor coordination from groundbreaking to handover.",
-    detail: ["Programme management", "Cost control", "Contractor liaison", "Site inspection"],
-    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=800&auto=format&fit=crop",
-    icon: (
-      <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
-        <rect x="4" y="4" width="24" height="24" rx="1" stroke="currentColor" strokeWidth="1.2" />
-        <line x1="4" y1="11" x2="28" y2="11" stroke="currentColor" strokeWidth="0.8" />
-        <line x1="9" y1="16" x2="16" y2="16" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 1" />
-        <line x1="9" y1="20" x2="20" y2="20" stroke="currentColor" strokeWidth="0.8" strokeDasharray="2 1" />
-        <polyline points="18,15 21,19 26,13" stroke="currentColor" strokeWidth="1" fill="none" />
-      </svg>
-    ),
-    pin: { top: "50%", left: "38%", rotate: 2 },
+      "Considered renovation that respects existing character while introducing contemporary precision. Old bones, new life.",
+    image:
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
   },
 ];
 
 // ─────────────────────────────────────────────
-// PinnedServiceCard
+// Contact Overlay
 // ─────────────────────────────────────────────
 
-function PinnedServiceCard({
-  service,
-  onDragToBoard,
-  isDropped,
-}: {
-  service: Service;
-  onDragToBoard: (id: number) => void;
-  isDropped: boolean;
-}) {
-  const [hovered, setHovered] = useState(false);
-  const dragRef = useRef<HTMLDivElement>(null);
-
-  if (isDropped) return null;
-
-  return (
-    <motion.div
-      ref={dragRef}
-      drag
-      dragMomentum={false}
-      dragElastic={0.08}
-      onDragEnd={(_, info) => {
-        // Board zone: bottom-right quadrant roughly
-        // absolute position check against viewport
-        const el = dragRef.current;
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const boardZone = {
-          left: window.innerWidth * 0.55,
-          top: window.innerHeight * 0.55,
-          right: window.innerWidth,
-          bottom: window.innerHeight,
-        };
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        if (
-          cx > boardZone.left &&
-          cx < boardZone.right &&
-          cy > boardZone.top &&
-          cy < boardZone.bottom
-        ) {
-          onDragToBoard(service.id);
-        }
-      }}
-      initial={{ opacity: 0, scale: 0.85 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.7, transition: { duration: 0.3 } }}
-      whileDrag={{ scale: 1.06, zIndex: 100, cursor: "grabbing" }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      style={{
-        position: "absolute",
-        top: service.pin.top,
-        left: service.pin.left,
-        rotate: service.pin.rotate,
-        cursor: "grab",
-        zIndex: hovered ? 50 : 10,
-        transformOrigin: "top center",
-      }}
-      className="select-none"
-    >
-      {/* Pin head */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 -top-3 z-10"
-        style={{
-          width: 10,
-          height: 10,
-          borderRadius: "50%",
-          background: "radial-gradient(circle at 35% 35%, #f0c060, #8a6010)",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.6)",
-        }}
-      />
-      {/* Pin stem */}
-      <div
-        className="absolute left-1/2 -translate-x-1/2 -top-1 z-[9]"
-        style={{ width: 1.5, height: 10, background: "rgba(200,160,80,0.5)" }}
-      />
-
-      {/* Card */}
-      <motion.div
-        animate={{
-          width: hovered ? "clamp(200px,22vw,300px)" : "clamp(100px,11vw,150px)",
-          height: hovered ? "auto" : "clamp(100px,11vw,150px)",
-        }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        style={{
-          background: "linear-gradient(160deg, #0e0b07 0%, #080603 100%)",
-          border: "0.5px solid rgba(200,160,80,0.18)",
-          boxShadow: hovered
-            ? "0 20px 60px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(200,160,80,0.2)"
-            : "0 8px 28px rgba(0,0,0,0.55)",
-          overflow: "hidden",
-          borderRadius: 2,
-          minHeight: "clamp(100px,11vw,150px)",
-        }}
-      >
-        {/* Collapsed: icon + title */}
-        <div
-          className="flex flex-col items-center justify-center gap-2 p-3"
-          style={{ minHeight: "clamp(100px,11vw,150px)" }}
-        >
-          <div
-            style={{
-              width: "clamp(24px,2.5vw,34px)",
-              height: "clamp(24px,2.5vw,34px)",
-              color: hovered ? "rgba(200,160,80,0.9)" : "rgba(180,160,130,0.5)",
-              transition: "color 0.3s",
-            }}
-          >
-            {service.icon}
-          </div>
-          <span
-            className="font-mono text-center"
-            style={{
-              fontSize: "clamp(7px,0.65vw,9px)",
-              color: "rgba(200,160,80,0.55)",
-              letterSpacing: "0.25em",
-            }}
-          >
-            {service.number}
-          </span>
-          <span
-            className="font-serif text-center leading-tight"
-            style={{
-              fontSize: "clamp(9px,0.9vw,13px)",
-              color: hovered ? "#f0e0c0" : "#7a6a54",
-              transition: "color 0.3s",
-            }}
-          >
-            {service.shortTitle}
-          </span>
-        </div>
-
-        {/* Expanded: image + details */}
-        <AnimatePresence>
-          {hovered && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              style={{ overflow: "hidden" }}
-            >
-              {/* Image */}
-              <div
-                style={{
-                  position: "relative",
-                  height: "clamp(100px,14vw,180px)",
-                  overflow: "hidden",
-                }}
-              >
-                <img
-                  src={service.image}
-                  alt={service.fullTitle}
-                  draggable={false}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%)",
-                  }}
-                />
-                {/* Title over image */}
-                <div
-                  className="absolute bottom-0 left-0 right-0 px-3 pb-2"
-                  style={{
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
-                    background: "rgba(0,0,0,0.3)",
-                    borderTop: "0.5px solid rgba(200,160,80,0.15)",
-                  }}
-                >
-                  <p
-                    className="font-serif font-bold leading-tight"
-                    style={{
-                      fontSize: "clamp(10px,1.1vw,15px)",
-                      color: "#f0e0c0",
-                    }}
-                  >
-                    {service.fullTitle}
-                  </p>
-                </div>
-              </div>
-
-              {/* Description + details */}
-              <div className="p-3 flex flex-col gap-2">
-                <p
-                  style={{
-                    fontSize: "clamp(8px,0.7vw,10px)",
-                    color: "rgba(210,190,160,0.7)",
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {service.description}
-                </p>
-                <div className="flex flex-col gap-1">
-                  {service.detail.map((d, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-2 font-mono"
-                      style={{
-                        fontSize: "clamp(6px,0.6vw,8px)",
-                        color: "rgba(200,160,80,0.55)",
-                        letterSpacing: "0.15em",
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: 14,
-                          height: 0.5,
-                          background: "rgba(200,160,80,0.3)",
-                          flexShrink: 0,
-                          display: "inline-block",
-                        }}
-                      />
-                      {d.toUpperCase()}
-                    </div>
-                  ))}
-                </div>
-                {/* Drag hint */}
-                <div
-                  className="mt-1 font-mono text-center"
-                  style={{
-                    fontSize: "clamp(6px,0.55vw,8px)",
-                    color: "rgba(200,160,80,0.35)",
-                    letterSpacing: "0.2em",
-                    borderTop: "0.5px solid rgba(200,160,80,0.1)",
-                    paddingTop: 6,
-                  }}
-                >
-                  DRAG TO BOARD →
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// DraftingBoard
-// ─────────────────────────────────────────────
-
-function DraftingBoard({
-  droppedServices,
-  isDragOver,
-}: {
-  droppedServices: Service[];
-  isDragOver: boolean;
-}) {
-  return (
-    <div
-      className="absolute"
-      style={{
-        right: "clamp(24px,4vw,56px)",
-        bottom: "clamp(24px,4vh,48px)",
-        width: "clamp(200px,28vw,360px)",
-        height: "clamp(160px,26vh,300px)",
-      }}
-    >
-      {/* Board backing — wooden frame feel */}
-      <div
-        className="absolute inset-0 rounded-sm"
-        style={{
-          background:
-            "linear-gradient(145deg, #1a1108 0%, #0e0b06 50%, #120e08 100%)",
-          border: "0.5px solid rgba(200,160,80,0.2)",
-          boxShadow: isDragOver
-            ? "0 0 0 1.5px rgba(200,160,80,0.5), 0 24px 60px rgba(0,0,0,0.7)"
-            : "0 16px 48px rgba(0,0,0,0.65)",
-          transition: "box-shadow 0.3s",
-        }}
-      />
-
-      {/* Blueprint grid lines */}
-      <div
-        className="absolute inset-[8px] overflow-hidden"
-        style={{ opacity: isDragOver ? 0.35 : 0.14 }}
-      >
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div
-            key={`h-${i}`}
-            className="absolute left-0 right-0"
-            style={{
-              top: `${(i / 11) * 100}%`,
-              height: "0.5px",
-              background: "rgba(100,160,220,0.6)",
-            }}
-          />
-        ))}
-        {Array.from({ length: 16 }).map((_, i) => (
-          <div
-            key={`v-${i}`}
-            className="absolute top-0 bottom-0"
-            style={{
-              left: `${(i / 15) * 100}%`,
-              width: "0.5px",
-              background: "rgba(100,160,220,0.6)",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Corner marks */}
-      {[
-        { top: 8, left: 8 },
-        { top: 8, right: 8 },
-        { bottom: 8, left: 8 },
-        { bottom: 8, right: 8 },
-      ].map((pos, i) => (
-        <div
-          key={i}
-          className="absolute"
-          style={{
-            ...pos,
-            width: 10,
-            height: 10,
-            borderTop: i < 2 ? "1px solid rgba(200,160,80,0.4)" : undefined,
-            borderBottom: i >= 2 ? "1px solid rgba(200,160,80,0.4)" : undefined,
-            borderLeft: i % 2 === 0 ? "1px solid rgba(200,160,80,0.4)" : undefined,
-            borderRight: i % 2 === 1 ? "1px solid rgba(200,160,80,0.4)" : undefined,
-          }}
-        />
-      ))}
-
-      {/* Board label */}
-      <div
-        className="absolute font-mono"
-        style={{
-          top: 12,
-          left: "50%",
-          transform: "translateX(-50%)",
-          fontSize: "clamp(6px,0.6vw,8px)",
-          color: "rgba(200,160,80,0.4)",
-          letterSpacing: "0.35em",
-          whiteSpace: "nowrap",
-        }}
-      >
-        PROJECT BRIEF
-      </div>
-
-      {/* Drop hint when empty */}
-      {droppedServices.length === 0 && (
-        <motion.div
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0 flex items-center justify-center flex-col gap-2"
-        >
-          <svg
-            viewBox="0 0 32 32"
-            fill="none"
-            style={{ width: 28, height: 28, color: "rgba(200,160,80,0.35)" }}
-          >
-            <path
-              d="M16 4 L16 22 M10 16 L16 22 L22 16"
-              stroke="currentColor"
-              strokeWidth="1.2"
-            />
-            <line
-              x1="6"
-              y1="27"
-              x2="26"
-              y2="27"
-              stroke="currentColor"
-              strokeWidth="1"
-            />
-          </svg>
-          <span
-            className="font-mono text-center"
-            style={{
-              fontSize: "clamp(6px,0.6vw,8px)",
-              color: "rgba(200,160,80,0.3)",
-              letterSpacing: "0.3em",
-            }}
-          >
-            DROP SERVICES HERE
-          </span>
-        </motion.div>
-      )}
-
-      {/* Dropped service chips */}
-      {droppedServices.length > 0 && (
-        <div
-          className="absolute inset-[24px] top-[28px] flex flex-wrap gap-2 content-start overflow-hidden"
-        >
-          {droppedServices.map((s) => (
-            <motion.div
-              key={s.id}
-              initial={{ opacity: 0, scale: 0.7, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="flex items-center gap-1.5 font-mono"
-              style={{
-                background: "rgba(200,160,80,0.1)",
-                border: "0.5px solid rgba(200,160,80,0.3)",
-                borderRadius: 2,
-                padding: "3px 8px",
-                fontSize: "clamp(6px,0.6vw,8px)",
-                color: "rgba(200,160,80,0.75)",
-                letterSpacing: "0.2em",
-              }}
-            >
-              <span style={{ color: "rgba(200,160,80,0.4)" }}>{s.number}</span>
-              {s.shortTitle.toUpperCase()}
-            </motion.div>
-          ))}
-        </div>
-      )}
-
-      {/* Proceed CTA */}
-      <AnimatePresence>
-        {droppedServices.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
-            className="absolute bottom-3 right-3"
-          >
-            <span
-className="font-mono"
-              style={{
-                fontSize: "clamp(6px,0.55vw,8px)",
-                color: "rgba(200,160,80,0.45)",
-                letterSpacing: "0.25em",
-              }}
-            >
-              {droppedServices.length} SERVICE{droppedServices.length > 1 ? "S" : ""} SELECTED ↓
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────
-// Contact Popup
-// ─────────────────────────────────────────────
-
-function ContactPopup({
-  services,
-  onClose,
-}: {
-services: Service[];
-  onClose: () => void;
-}) {
-  const [form, setForm] = useState<ContactForm>({
-    name: "",
-    phone: "",
-    message: "",
-  });
+function ContactOverlay({ onClose }: { onClose: () => void }) {
+  const [form, setForm] = useState<ContactForm>({ phone: "", email: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   const handleSubmit = async () => {
-    if (!form.name || !form.phone) return;
+    if (!form.phone) return;
     setStatus("sending");
 
-    const serviceList = services.map((s) => s.fullTitle).join(", ");
-    const waMessage = `*New Project Enquiry*\n\n*Name:* ${form.name}\n*Phone:* ${form.phone}\n\n*Services Requested:*\n${services.map((s) => `• ${s.fullTitle}`).join("\n")}\n\n*Message:*\n${form.message || "—"}`;
-
     try {
-      // WhatsApp Business API call
-      // Replace PHONE_NUMBER_ID and ACCESS_TOKEN with your credentials
       const res = await fetch(
         `https://graph.facebook.com/v19.0/YOUR_PHONE_NUMBER_ID/messages`,
         {
           method: "POST",
           headers: {
-Authorization: `Bearer YOUR_WHATSAPP_ACCESS_TOKEN`,
+            Authorization: `Bearer YOUR_WHATSAPP_ACCESS_TOKEN`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             messaging_product: "whatsapp",
-            to: "YOUR_RECIPIENT_WHATSAPP_NUMBER", // e.g. "919876543210"
+            to: form.phone.replace(/\D/g, ""),
             type: "text",
-            text: { body: waMessage },
+            text: {
+              body: `Hello! Thank you for reaching out.\n\nWe've received your enquiry and our team will contact you shortly to discuss your project.\n\n— The Studio`,
+            },
           }),
         }
       );
-
-      if (res.ok) {
-        setStatus("sent");
-      } else {
-        setStatus("error");
-      }
+      setStatus(res.ok ? "sent" : "error");
     } catch {
       setStatus("error");
     }
   };
-return (
+
+  return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[200] flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
+      transition={{ duration: 0.3 }}
+      className="fixed inset-0 z-[300] flex items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.82)", backdropFilter: "blur(8px)" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 24 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.92, y: 24 }}
+        initial={{ opacity: 0, y: 40, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 40, scale: 0.96 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         style={{
-          width: "clamp(300px,42vw,540px)",
-          background: "linear-gradient(160deg,#0e0b07 0%,#060402 100%)",
-          border: "0.5px solid rgba(200,160,80,0.2)",
-          boxShadow: "0 40px 100px rgba(0,0,0,0.8)",
+          width: "clamp(300px, 40vw, 500px)",
+          background: "linear-gradient(160deg, #0c0a06 0%, #060402 100%)",
+          border: "0.5px solid rgba(200,160,80,0.22)",
           borderRadius: 2,
           overflow: "hidden",
+          boxShadow: "0 48px 120px rgba(0,0,0,0.9)",
         }}
       >
-
-{/* Header */}
+        {/* Header */}
         <div
-          className="flex items-start justify-between p-6"
+          className="flex items-start justify-between p-6 pb-5"
           style={{ borderBottom: "0.5px solid rgba(200,160,80,0.1)" }}
         >
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             <span
-              className="font-mono uppercase tracking-[0.35em]"
+              className="font-mono uppercase tracking-[0.38em]"
               style={{
-                fontSize: "clamp(7px,0.65vw,9px)",
-                color: "rgba(200,160,80,0.5)",
+                fontSize: "clamp(7px,0.62vw,9px)",
+                color: "rgba(200,160,80,0.45)",
               }}
             >
-              Project Brief
+              Let's Connect
             </span>
             <h3
               className="font-serif leading-tight"
+              style={{ fontSize: "clamp(20px,2.2vw,30px)", color: "#e8d8b8" }}
+            >
+              Let's Make Fortune
+            </h3>
+            <p
               style={{
-                fontSize: "clamp(18px,2vw,28px)",
-                color: "#e8d8b8",
+                fontSize: "clamp(9px,0.8vw,11px)",
+                color: "rgba(200,180,150,0.45)",
+                lineHeight: 1.6,
+                maxWidth: 280,
               }}
             >
-              Let's Start Building
-            </h3>
+              Drop your number and we'll reach out to start your project.
+            </p>
           </div>
-<button
+          <button
             onClick={onClose}
-            className="font-mono mt-1"
             style={{
-              fontSize: 11,
-              color: "rgba(200,160,80,0.35)",
-              letterSpacing: "0.2em",
               background: "none",
               border: "none",
               cursor: "pointer",
+              color: "rgba(200,160,80,0.3)",
+              fontSize: 13,
+              marginTop: 2,
+              padding: 4,
             }}
           >
             ✕
           </button>
         </div>
 
-        {/* Selected services */}
-        <div
-          className="px-6 py-4 flex flex-wrap gap-2"
-          style={{ borderBottom: "0.5px solid rgba(200,160,80,0.08)" }}
-        >
-          {services.map((s) => (
-            <div
-              key={s.id}
-              className="font-mono"
-style={{
-                background: "rgba(200,160,80,0.08)",
-                border: "0.5px solid rgba(200,160,80,0.25)",
-                borderRadius: 2,
-                padding: "3px 10px",
-                fontSize: "clamp(6px,0.6vw,8px)",
-                color: "rgba(200,160,80,0.65)",
-                letterSpacing: "0.2em",
-              }}
-            >
-              {s.number} {s.shortTitle.toUpperCase()}
-            </div>
-          ))}
-        </div>
-
-        {/* Form */}
         {status === "sent" ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-8 flex flex-col items-center gap-4 text-center"
+            className="p-8 flex flex-col items-center gap-5 text-center"
           >
-            <div
-style={{
-                width: 48,
-                height: 48,
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+              style={{
+                width: 52,
+                height: 52,
                 borderRadius: "50%",
                 border: "1px solid rgba(200,160,80,0.4)",
                 display: "flex",
@@ -754,78 +224,45 @@ style={{
                 justifyContent: "center",
               }}
             >
-              <svg viewBox="0 0 24 24" fill="none" style={{ width: 20, height: 20 }}>
+              <svg viewBox="0 0 24 24" fill="none" style={{ width: 22, height: 22 }}>
                 <polyline
                   points="4,12 9,17 20,7"
-                  stroke="rgba(200,160,80,0.8)"
+                  stroke="rgba(200,160,80,0.85)"
                   strokeWidth="1.5"
                 />
               </svg>
+            </motion.div>
+            <div className="flex flex-col gap-2">
+              <p
+                className="font-serif"
+                style={{ fontSize: "clamp(15px,1.5vw,20px)", color: "#e8d8b8" }}
+              >
+                Message sent
+              </p>
+              <p
+                className="font-mono"
+                style={{
+                  fontSize: "clamp(7px,0.62vw,9px)",
+                  color: "rgba(200,160,80,0.4)",
+                  letterSpacing: "0.25em",
+                }}
+              >
+                WE'LL BE IN TOUCH SHORTLY
+              </p>
             </div>
-            <p
-              className="font-serif"
-              style={{ fontSize: "clamp(14px,1.4vw,18px)", color: "#e8d8b8" }}
-            >
-              Brief received
-</p>
-            <p
-              className="font-mono"
-              style={{
-                fontSize: "clamp(7px,0.65vw,9px)",
-                color: "rgba(200,160,80,0.45)",
-                letterSpacing: "0.2em",
-              }}
-            >
-              WE'LL BE IN TOUCH SHORTLY
-            </p>
           </motion.div>
         ) : (
           <div className="p-6 flex flex-col gap-4">
-            {/* Name */}
-            <div className="flex flex-col gap-1.5">
+            {/* Phone */}
+            <div className="flex flex-col gap-2">
               <label
-                className="font-mono uppercase tracking-[0.25em]"
+                className="font-mono uppercase tracking-[0.28em]"
                 style={{
-                  fontSize: "clamp(6px,0.6vw,8px)",
+                  fontSize: "clamp(6px,0.58vw,8px)",
                   color: "rgba(200,160,80,0.4)",
                 }}
               >
-                Name
-</label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="Your full name"
-                style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "0.5px solid rgba(200,160,80,0.15)",
-                  borderRadius: 2,
-                  padding: "10px 14px",
-                  fontSize: "clamp(10px,0.9vw,13px)",
-                  color: "#e8d8b8",
-                  outline: "none",
-                  width: "100%",
-                  fontFamily: "inherit",
-                }}
-                onFocus={(e) =>
-                  (e.target.style.borderColor = "rgba(200,160,80,0.45)")
-                }
-                onBlur={(e) =>
-                  (e.target.style.borderColor = "rgba(200,160,80,0.15)")
-                }
-              />
-            </div>
-{/* Phone */}
-            <div className="flex flex-col gap-1.5">
-              <label
-                className="font-mono uppercase tracking-[0.25em]"
-                style={{
-                  fontSize: "clamp(6px,0.6vw,8px)",
-                  color: "rgba(200,160,80,0.4)",
-                }}
-              >
-                WhatsApp Number
+                Phone Number *
               </label>
               <input
                 type="tel"
@@ -833,94 +270,93 @@ style={{
                 onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                 placeholder="+91 98765 43210"
                 style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "0.5px solid rgba(200,160,80,0.15)",
+                  background: "rgba(255,255,255,0.025)",
+                  border: "0.5px solid rgba(200,160,80,0.14)",
                   borderRadius: 2,
-                  padding: "10px 14px",
+                  padding: "11px 14px",
                   fontSize: "clamp(10px,0.9vw,13px)",
                   color: "#e8d8b8",
                   outline: "none",
                   width: "100%",
-fontFamily: "inherit",
+                  fontFamily: "inherit",
+                  transition: "border-color 0.2s",
                 }}
                 onFocus={(e) =>
                   (e.target.style.borderColor = "rgba(200,160,80,0.45)")
                 }
                 onBlur={(e) =>
-                  (e.target.style.borderColor = "rgba(200,160,80,0.15)")
+                  (e.target.style.borderColor = "rgba(200,160,80,0.14)")
                 }
               />
             </div>
 
-            {/* Message */}
-            <div className="flex flex-col gap-1.5">
+            {/* Email — optional */}
+            <div className="flex flex-col gap-2">
               <label
-                className="font-mono uppercase tracking-[0.25em]"
+                className="font-mono uppercase tracking-[0.28em]"
                 style={{
-                  fontSize: "clamp(6px,0.6vw,8px)",
+                  fontSize: "clamp(6px,0.58vw,8px)",
                   color: "rgba(200,160,80,0.4)",
                 }}
               >
-                Message
+                Email{" "}
+                <span style={{ color: "rgba(200,160,80,0.22)", letterSpacing: "0.1em" }}>
+                  (optional)
+                </span>
               </label>
-              <textarea
-value={form.message}
-                onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                placeholder="Tell us about your project..."
-                rows={3}
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                placeholder="you@example.com"
                 style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "0.5px solid rgba(200,160,80,0.15)",
+                  background: "rgba(255,255,255,0.025)",
+                  border: "0.5px solid rgba(200,160,80,0.14)",
                   borderRadius: 2,
-                  padding: "10px 14px",
+                  padding: "11px 14px",
                   fontSize: "clamp(10px,0.9vw,13px)",
                   color: "#e8d8b8",
                   outline: "none",
                   width: "100%",
-                  resize: "none",
                   fontFamily: "inherit",
-                  lineHeight: 1.6,
+                  transition: "border-color 0.2s",
                 }}
                 onFocus={(e) =>
                   (e.target.style.borderColor = "rgba(200,160,80,0.45)")
                 }
                 onBlur={(e) =>
-                  (e.target.style.borderColor = "rgba(200,160,80,0.15)")
+                  (e.target.style.borderColor = "rgba(200,160,80,0.14)")
                 }
               />
             </div>
-{/* Submit */}
+
+            {/* Submit */}
             <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={form.phone ? { scale: 1.015 } : {}}
+              whileTap={form.phone ? { scale: 0.985 } : {}}
               onClick={handleSubmit}
-              disabled={status === "sending" || !form.name || !form.phone}
+              disabled={!form.phone || status === "sending"}
               style={{
-                marginTop: 4,
-                padding: "12px 24px",
-                background:
-                  form.name && form.phone
-                    ? "linear-gradient(90deg, #c8a052, #e8c070, #b88840)"
-                    : "rgba(200,160,80,0.15)",
+                marginTop: 6,
+                padding: "13px 24px",
+                background: form.phone
+                  ? "linear-gradient(90deg,#c8a052,#e8c070,#b88840)"
+                  : "rgba(200,160,80,0.1)",
                 border: "none",
                 borderRadius: 2,
-                cursor: form.name && form.phone ? "pointer" : "not-allowed",
+                cursor: form.phone ? "pointer" : "not-allowed",
                 fontFamily: "inherit",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8,
+                transition: "background 0.3s",
               }}
             >
-<span
-                className="font-mono uppercase tracking-[0.3em]"
+              <span
+                className="font-mono uppercase tracking-[0.32em]"
                 style={{
                   fontSize: "clamp(7px,0.65vw,9px)",
-                  color:
-                    form.name && form.phone ? "#0e0b07" : "rgba(200,160,80,0.35)",
+                  color: form.phone ? "#0e0b07" : "rgba(200,160,80,0.3)",
                 }}
               >
-                {status === "sending" ? "Sending..." : "Send Brief via WhatsApp"}
+                {status === "sending" ? "Sending..." : "Send Message"}
               </span>
             </motion.button>
 
@@ -928,17 +364,212 @@ value={form.message}
               <p
                 className="font-mono text-center"
                 style={{
-                  fontSize: "clamp(6px,0.6vw,8px)",
+                  fontSize: "clamp(6px,0.58vw,8px)",
                   color: "rgba(220,100,80,0.7)",
                   letterSpacing: "0.2em",
                 }}
               >
-                FAILED TO SEND — PLEASE TRY AGAIN
+                FAILED — PLEASE TRY AGAIN
               </p>
             )}
           </div>
         )}
       </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ServiceColumn
+// ─────────────────────────────────────────────
+
+function ServiceColumn({
+  service,
+  index,
+  total,
+}: {
+  service: Service;
+  index: number;
+  total: number;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 32 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.75,
+        delay: index * 0.08,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      className="relative flex-1 overflow-hidden cursor-default"
+      style={{
+        borderRight:
+          index < total - 1
+            ? "0.5px solid rgba(200,160,80,0.1)"
+            : undefined,
+      }}
+    >
+      {/* Background image */}
+      <motion.div
+        animate={{ scale: hovered ? 1.06 : 1 }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute inset-0"
+      >
+        <img
+          src={service.image}
+          alt={service.fullTitle}
+          draggable={false}
+          className="absolute inset-0 w-full h-full object-cover select-none"
+        />
+      </motion.div>
+
+      {/* Base dark overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.3) 40%,rgba(0,0,0,0.75) 100%)",
+        }}
+      />
+
+      {/* Hover warm tint */}
+      <motion.div
+        animate={{ opacity: hovered ? 1 : 0 }}
+        transition={{ duration: 0.45 }}
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg,rgba(20,12,4,0.4) 0%,rgba(30,18,6,0.2) 50%,rgba(10,6,2,0.6) 100%)",
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 h-full flex flex-col justify-between p-[clamp(14px,2vw,26px)]">
+
+        {/* Top — number */}
+        <div className="flex items-center gap-2">
+          <span
+            className="font-mono"
+            style={{
+              fontSize: "clamp(7px,0.62vw,9px)",
+              color: "rgba(200,160,80,0.5)",
+              letterSpacing: "0.32em",
+            }}
+          >
+            {service.number}
+          </span>
+          <motion.div
+            animate={{ scaleX: hovered ? 1 : 0.2, opacity: hovered ? 0.5 : 0.15 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              transformOrigin: "left",
+              flex: 1,
+              height: "0.5px",
+              background: "rgba(200,160,80,0.7)",
+            }}
+          />
+        </div>
+
+        {/* Bottom — keyword + title + details */}
+        <div className="flex flex-col gap-3">
+
+          {/* Keyword — large, always visible */}
+          <motion.div
+            animate={{ y: hovered ? -4 : 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div
+              className="absolute left-0 right-0"
+              style={{
+                bottom: hovered ? "auto" : undefined,
+                padding: `clamp(8px,1.2vh,14px) clamp(14px,2vw,26px)`,
+                backdropFilter: hovered ? "blur(12px) saturate(1.1)" : "blur(0px)",
+                WebkitBackdropFilter: hovered ? "blur(12px) saturate(1.1)" : "blur(0px)",
+                background: hovered ? "rgba(0,0,0,0.35)" : "transparent",
+                borderTop: hovered ? "0.5px solid rgba(200,160,80,0.12)" : "none",
+                transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
+                bottom: 0,
+              }}
+            >
+              <h3
+                className="font-serif font-bold leading-none"
+                style={{
+                  fontSize: "clamp(18px,2.8vw,44px)",
+                  color: hovered ? "#fff8ee" : "rgba(240,225,195,0.82)",
+                  letterSpacing: hovered ? "0.02em" : "0.06em",
+                  transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
+                  writingMode: "vertical-lr",
+                  textOrientation: "mixed",
+                  transform: "rotate(180deg)",
+                  height: "clamp(120px,20vh,260px)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {service.keyword}
+              </h3>
+            </div>
+          </motion.div>
+
+          {/* Hover details */}
+          <AnimatePresence>
+            {hovered && (
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+                className="flex flex-col gap-2"
+                style={{ paddingBottom: "clamp(80px,14vh,160px)" }}
+              >
+                <p
+                  className="font-serif leading-relaxed"
+                  style={{
+                    fontSize: "clamp(9px,0.82vw,12px)",
+                    color: "rgba(225,205,170,0.78)",
+                    lineHeight: 1.7,
+                  }}
+                >
+                  {service.description}
+                </p>
+                <div
+                  style={{
+                    width: "clamp(24px,3vw,40px)",
+                    height: "1px",
+                    background:
+                      "linear-gradient(90deg,rgba(200,160,80,0.6),transparent)",
+                    marginTop: 4,
+                  }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </div>
+      </div>
+
+      {/* Top brass rule on hover */}
+      <motion.div
+        animate={{ scaleX: hovered ? 1 : 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          transformOrigin: "left",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "1.5px",
+          background: "linear-gradient(90deg,#c8a052,#e8c070,transparent)",
+          zIndex: 20,
+        }}
+      />
     </motion.div>
   );
 }
@@ -953,21 +584,7 @@ export default function ServicesSection({
   servicesY,
   servicesExitY,
 }: ServicesSectionProps) {
-  const [droppedIds, setDroppedIds]     = useState<number[]>([]);
-  const [showPopup, setShowPopup]       = useState<boolean>(false);
-  const [isDragOver, setIsDragOver]     = useState<boolean>(false);
-const droppedServices = SERVICES.filter((s) => droppedIds.includes(s.id));
-  const remainingServices = SERVICES.filter((s) => !droppedIds.includes(s.id));
-
-  const handleDragToBoard = useCallback((id: number) => {
-    setDroppedIds((prev) => {
-      if (prev.includes(id)) return prev;
-      const next = [...prev, id];
-      // Open popup after brief settling animation
-      setTimeout(() => setShowPopup(true), 500);
-      return next;
-    });
-  }, []);
+  const [showOverlay, setShowOverlay] = useState(false);
 
   return (
     <>
@@ -979,97 +596,143 @@ const droppedServices = SERVICES.filter((s) => droppedIds.includes(s.id));
           inset: 0,
           zIndex: 70,
           pointerEvents: isActive ? "auto" : "none",
-          background: "#000000",
-}}
+          background: "#000",
+          display: "flex",
+          flexDirection: "column",
+        }}
         aria-hidden={!isActive}
       >
-        {/* Section label */}
+        {/* ── Main columns row ── */}
+        <div className="flex flex-1 min-h-0">
+          {SERVICES.map((service, i) => (
+            <ServiceColumn
+              key={service.id}
+              service={service}
+              index={i}
+              total={SERVICES.length}
+            />
+          ))}
+        </div>
+
+        {/* ── Bottom strip ── */}
         <div
-          className="absolute z-[10] flex items-center gap-3"
+          className="relative flex items-end justify-between shrink-0"
           style={{
-            top: "clamp(20px,3.5vh,36px)",
-            left: "clamp(24px,4vw,56px)",
+            padding: "clamp(16px,2.8vh,32px) clamp(24px,4vw,56px)",
+            borderTop: "0.5px solid rgba(200,160,80,0.1)",
+            background:
+              "linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0.7) 100%)",
+            minHeight: "clamp(72px,12vh,110px)",
+          }}
+        >
+          {/* Left — quote + tagline */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-col gap-1.5"
+            style={{ maxWidth: "clamp(200px,38vw,480px)" }}
+          >
+            <p
+              className="font-serif italic"
+              style={{
+fontSize: "clamp(11px,1.2vw,17px)",
+                color: "rgba(232,216,184,0.7)",
+                lineHeight: 1.45,
+              }}
+            >
+              "Architecture is the art of how to waste space."
+            </p>
+            <span
+              className="font-mono"
+              style={{
+                fontSize: "clamp(7px,0.6vw,9px)",
+                color: "rgba(200,160,80,0.35)",
+                letterSpacing: "0.3em",
+              }}
+            >
+              WE BUILD WHAT OTHERS ONLY IMAGINE.
+            </span>
+          </motion.div>
+
+          {/* Right — CTA button */}
+          <motion.div
+initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setShowOverlay(true)}
+              style={{
+                background: "transparent",
+                border: "0.5px solid rgba(200,160,80,0.45)",
+                borderRadius: 2,
+                padding: "clamp(10px,1.4vh,16px) clamp(20px,2.8vw,38px)",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              {/* Button fill on hover */}
+<motion.div
+                whileHover={{ scaleX: 1 }}
+                initial={{ scaleX: 0 }}
+                style={{
+                  transformOrigin: "left",
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(90deg,rgba(200,160,80,0.12),rgba(200,160,80,0.06))",
+                }}
+              />
+              <span
+                className="relative font-mono uppercase tracking-[0.32em]"
+                style={{
+                  fontSize: "clamp(7px,0.7vw,10px)",
+                  color: "rgba(200,160,80,0.8)",
+                }}
+              >
+                Let's Make Fortune
+              </span>
+            </motion.button>
+          </motion.div>
+</div>
+
+        {/* Section label — top left */}
+        <div
+          className="absolute flex items-center gap-3"
+          style={{
+            top: "clamp(16px,2.8vh,28px)",
+            left: "clamp(20px,3.5vw,48px)",
+            zIndex: 30,
           }}
         >
           <span
             className="font-mono uppercase tracking-[0.4em]"
             style={{
-              fontSize: "clamp(7px,0.62vw,9px)",
-              color: "rgba(200,160,80,0.38)",
+              fontSize: "clamp(6px,0.58vw,8px)",
+              color: "rgba(200,160,80,0.32)",
             }}
           >
             Services
           </span>
           <div
             style={{
-              width: "clamp(20px,2.5vw,36px)",
+width: "clamp(18px,2.2vw,32px)",
               height: "0.5px",
-background: "rgba(200,160,80,0.18)",
+              background: "rgba(200,160,80,0.16)",
             }}
           />
         </div>
-
-        {/* Instruction */}
-        <div
-          className="absolute z-[10]"
-          style={{
-            top: "clamp(20px,3.5vh,36px)",
-            right: "clamp(24px,4vw,56px)",
-          }}
-        >
-          <span
-            className="font-mono"
-            style={{
-              fontSize: "clamp(6px,0.58vw,8px)",
-              color: "rgba(200,160,80,0.28)",
-              letterSpacing: "0.25em",
-            }}
-          >
-            HOVER TO EXPLORE · DRAG TO BRIEF
-          </span>
-        </div>
-{/* Scattered pinned service cards */}
-        <AnimatePresence>
-          {remainingServices.map((service) => (
-            <PinnedServiceCard
-              key={service.id}
-              service={service}
-              onDragToBoard={handleDragToBoard}
-              isDropped={droppedIds.includes(service.id)}
-            />
-          ))}
-        </AnimatePresence>
-
-        {/* Drafting board drop target */}
-        <DraftingBoard
-          droppedServices={droppedServices}
-          isDragOver={isDragOver}
-        />
-
-        {/* Board glow when services dropped */}
-        {droppedServices.length > 0 && (
-          <div
-            className="absolute pointer-events-none"
-            style={{
-right: "clamp(0px,2vw,30px)",
-              bottom: "clamp(0px,2vh,30px)",
-              width: "clamp(240px,34vw,420px)",
-              height: "clamp(200px,32vh,360px)",
-              background:
-                "radial-gradient(ellipse at 70% 80%, rgba(200,160,80,0.06) 0%, transparent 70%)",
-              zIndex: 5,
-            }}
-          />
-        )}
       </motion.section>
 
-      {/* Contact popup — outside section so it overlays everything */}
+      {/* Contact overlay */}
       <AnimatePresence>
-        {showPopup && (
-          <ContactPopup
-            services={droppedServices}
-            onClose={() => setShowPopup(false)}
-          />
+        {showOverlay && (
+          <ContactOverlay onClose={() => setShowOverlay(false)} />
         )}
       </AnimatePresence>
     </>
