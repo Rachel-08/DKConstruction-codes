@@ -13,6 +13,7 @@ type Service = {
   keyword: string;
   fullTitle: string;
   description: string;
+  detail: string[];
   image: string;
 };
 
@@ -39,7 +40,8 @@ const SERVICES: Service[] = [
     keyword: "BUILD",
     fullTitle: "Complete Building Construction",
     description:
-      "Full-scale construction with premium materials. From foundation to finishing — every element sourced, managed, and delivered to specification.",
+      "Full-scale construction with premium materials. From foundation to finishing — every element sourced, managed, and delivered.",
+    detail: ["Foundation", "Structure", "Finishing", "Materials"],
     image:
       "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=800&auto=format&fit=crop",
   },
@@ -50,6 +52,7 @@ const SERVICES: Service[] = [
     fullTitle: "Floor Planning & Design",
     description:
       "Precise spatial layouts that balance flow, function, and form. Every square foot considered with purpose.",
+    detail: ["Layouts", "Zoning", "Flow", "Function"],
     image:
       "https://images.unsplash.com/photo-1486325212027-8081e485255e?q=80&w=800&auto=format&fit=crop",
   },
@@ -59,7 +62,8 @@ const SERVICES: Service[] = [
     keyword: "STRUCT",
     fullTitle: "Structural Design",
     description:
-      "Engineering-grade structural systems designed for longevity, safety, and load integrity across all building typologies.",
+      "Engineering-grade structural systems designed for longevity, safety, and load integrity across all typologies.",
+    detail: ["Engineering", "Safety", "Loads", "Systems"],
     image:
       "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?q=80&w=800&auto=format&fit=crop",
   },
@@ -69,7 +73,8 @@ const SERVICES: Service[] = [
     keyword: "DESIGN",
     fullTitle: "3D Interior & Exterior Design",
     description:
-      "Photorealistic 3D visualisations of interiors and exteriors — complete with material selection, lighting simulation, and finish specification.",
+      "Photorealistic 3D visualisations with material selection, lighting simulation, and finish specification.",
+    detail: ["3D Renders", "Materials", "Lighting", "Exteriors"],
     image:
       "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800&auto=format&fit=crop",
   },
@@ -79,7 +84,8 @@ const SERVICES: Service[] = [
     keyword: "APPROVE",
     fullTitle: "Municipality & Approval Services",
     description:
-      "End-to-end handling of Municipal, N.A.C., Fire & BRIT approvals. We navigate the compliance landscape so your project moves without friction.",
+      "End-to-end handling of Municipal, N.A.C., Fire & BRIT approvals. We navigate compliance so your project moves without friction.",
+    detail: ["Municipal", "N.A.C.", "Fire NOC", "BRIT"],
     image:
       "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop",
   },
@@ -90,6 +96,7 @@ const SERVICES: Service[] = [
     fullTitle: "Renovation Work",
     description:
       "Considered renovation that respects existing character while introducing contemporary precision. Old bones, new life.",
+    detail: ["Restoration", "Remodel", "Retrofit", "Refresh"],
     image:
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
   },
@@ -101,12 +108,13 @@ const SERVICES: Service[] = [
 
 function ContactOverlay({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState<ContactForm>({ phone: "", email: "" });
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [status, setStatus] = useState
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
 
   const handleSubmit = async () => {
     if (!form.phone) return;
     setStatus("sending");
-
     try {
       const res = await fetch(
         `https://graph.facebook.com/v19.0/YOUR_PHONE_NUMBER_ID/messages`,
@@ -121,7 +129,7 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
             to: form.phone.replace(/\D/g, ""),
             type: "text",
             text: {
-              body: `Hello! Thank you for reaching out.\n\nWe've received your enquiry and our team will contact you shortly to discuss your project.\n\n— The Studio`,
+              body: `Hello! Thank you for reaching out.\n\nWe've received your enquiry and our team will contact you shortly.\n\n— The Studio`,
             },
           }),
         }
@@ -139,18 +147,18 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
       className="fixed inset-0 z-[300] flex items-center justify-center"
-      style={{ background: "rgba(0,0,0,0.82)", backdropFilter: "blur(8px)" }}
+      style={{ background: "rgba(0,0,0,0.8)", backdropFilter: "blur(10px)" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
-        initial={{ opacity: 0, y: 40, scale: 0.96 }}
+        initial={{ opacity: 0, y: 36, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 40, scale: 0.96 }}
+        exit={{ opacity: 0, y: 36, scale: 0.95 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         style={{
-          width: "clamp(300px, 40vw, 500px)",
-          background: "linear-gradient(160deg, #0c0a06 0%, #060402 100%)",
-          border: "0.5px solid rgba(200,160,80,0.22)",
+          width: "clamp(300px,38vw,480px)",
+          background: "linear-gradient(160deg,#0c0a06 0%,#060402 100%)",
+          border: "0.5px solid rgba(200,160,80,0.2)",
           borderRadius: 2,
           overflow: "hidden",
           boxShadow: "0 48px 120px rgba(0,0,0,0.9)",
@@ -158,7 +166,7 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
       >
         {/* Header */}
         <div
-          className="flex items-start justify-between p-6 pb-5"
+          className="flex items-start justify-between p-6"
           style={{ borderBottom: "0.5px solid rgba(200,160,80,0.1)" }}
         >
           <div className="flex flex-col gap-2">
@@ -173,19 +181,22 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
             </span>
             <h3
               className="font-serif leading-tight"
-              style={{ fontSize: "clamp(20px,2.2vw,30px)", color: "#e8d8b8" }}
+              style={{
+                fontSize: "clamp(20px,2.2vw,30px)",
+                color: "#e8d8b8",
+              }}
             >
               Let's Make Fortune
             </h3>
             <p
               style={{
-                fontSize: "clamp(9px,0.8vw,11px)",
-                color: "rgba(200,180,150,0.45)",
-                lineHeight: 1.6,
-                maxWidth: 280,
+                fontSize: "clamp(9px,0.78vw,11px)",
+                color: "rgba(200,180,150,0.42)",
+                lineHeight: 1.65,
+                maxWidth: 260,
               }}
             >
-              Drop your number and we'll reach out to start your project.
+              Drop your number and we'll reach out to begin your project.
             </p>
           </div>
           <button
@@ -196,7 +207,6 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
               cursor: "pointer",
               color: "rgba(200,160,80,0.3)",
               fontSize: 13,
-              marginTop: 2,
               padding: 4,
             }}
           >
@@ -253,7 +263,6 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
           </motion.div>
         ) : (
           <div className="p-6 flex flex-col gap-4">
-            {/* Phone */}
             <div className="flex flex-col gap-2">
               <label
                 className="font-mono uppercase tracking-[0.28em]"
@@ -267,7 +276,9 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
               <input
                 type="tel"
                 value={form.phone}
-                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, phone: e.target.value }))
+                }
                 placeholder="+91 98765 43210"
                 style={{
                   background: "rgba(255,255,255,0.025)",
@@ -279,7 +290,6 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
                   outline: "none",
                   width: "100%",
                   fontFamily: "inherit",
-                  transition: "border-color 0.2s",
                 }}
                 onFocus={(e) =>
                   (e.target.style.borderColor = "rgba(200,160,80,0.45)")
@@ -289,8 +299,6 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
                 }
               />
             </div>
-
-            {/* Email — optional */}
             <div className="flex flex-col gap-2">
               <label
                 className="font-mono uppercase tracking-[0.28em]"
@@ -300,14 +308,21 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
                 }}
               >
                 Email{" "}
-                <span style={{ color: "rgba(200,160,80,0.22)", letterSpacing: "0.1em" }}>
+                <span
+                  style={{
+                    color: "rgba(200,160,80,0.22)",
+                    letterSpacing: "0.1em",
+                  }}
+                >
                   (optional)
                 </span>
               </label>
               <input
                 type="email"
                 value={form.email}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, email: e.target.value }))
+                }
                 placeholder="you@example.com"
                 style={{
                   background: "rgba(255,255,255,0.025)",
@@ -319,7 +334,6 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
                   outline: "none",
                   width: "100%",
                   fontFamily: "inherit",
-                  transition: "border-color 0.2s",
                 }}
                 onFocus={(e) =>
                   (e.target.style.borderColor = "rgba(200,160,80,0.45)")
@@ -329,8 +343,6 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
                 }
               />
             </div>
-
-            {/* Submit */}
             <motion.button
               whileHover={form.phone ? { scale: 1.015 } : {}}
               whileTap={form.phone ? { scale: 0.985 } : {}}
@@ -346,7 +358,6 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
                 borderRadius: 2,
                 cursor: form.phone ? "pointer" : "not-allowed",
                 fontFamily: "inherit",
-                transition: "background 0.3s",
               }}
             >
               <span
@@ -359,7 +370,6 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
                 {status === "sending" ? "Sending..." : "Send Message"}
               </span>
             </motion.button>
-
             {status === "error" && (
               <p
                 className="font-mono text-center"
@@ -393,183 +403,195 @@ function ServiceColumn({
   total: number;
 }) {
   const [hovered, setHovered] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 32 }}
+      initial={{ opacity: 0, y: 28 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.75,
-        delay: index * 0.08,
+        duration: 0.7,
+        delay: index * 0.07,
         ease: [0.22, 1, 0.36, 1],
       }}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
-      className="relative flex-1 overflow-hidden cursor-default"
+      className="relative flex-1 flex flex-col overflow-hidden cursor-default"
       style={{
         borderRight:
           index < total - 1
-            ? "0.5px solid rgba(200,160,80,0.1)"
+            ? "0.5px solid rgba(255,255,255,0.06)"
             : undefined,
       }}
     >
-      {/* Background image */}
-      <motion.div
-        animate={{ scale: hovered ? 1.06 : 1 }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute inset-0"
+      {/* ── IMAGE — top anchored, bleeds into black ── */}
+      <div
+        className="relative w-full shrink-0"
+        style={{ height: "62vh" }}
       >
-        <img
+        {/* Photo */}
+        <motion.img
           src={service.image}
           alt={service.fullTitle}
           draggable={false}
-          className="absolute inset-0 w-full h-full object-cover select-none"
+          animate={{ scale: hovered ? 1.05 : 1 }}
+          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute inset-0 w-full h-full object-cover object-top select-none"
+          style={{ transformOrigin: "top center" }}
         />
-      </motion.div>
 
-      {/* Base dark overlay */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.3) 40%,rgba(0,0,0,0.75) 100%)",
-        }}
-      />
+        {/* Bottom blend — image fades into black */}
+        <div
+          className="absolute left-0 right-0 bottom-0"
+          style={{
+            height: "55%",
+            background:
+              "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.55) 40%, #000 100%)",
+            pointerEvents: "none",
+          }}
+        />
 
-      {/* Hover warm tint */}
-      <motion.div
-        animate={{ opacity: hovered ? 1 : 0 }}
-        transition={{ duration: 0.45 }}
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg,rgba(20,12,4,0.4) 0%,rgba(30,18,6,0.2) 50%,rgba(10,6,2,0.6) 100%)",
-        }}
-      />
+        {/* Side darkening for depth */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: hovered
+              ? "rgba(0,0,0,0.15)"
+              : "rgba(0,0,0,0.32)",
+            transition: "background 0.45s ease",
+          }}
+        />
 
-      {/* Content */}
-      <div className="relative z-10 h-full flex flex-col justify-between p-[clamp(14px,2vw,26px)]">
+        {/* Top brass rule on hover */}
+        <motion.div
+          animate={{ scaleX: hovered ? 1 : 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            transformOrigin: "left",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "1.5px",
+            background:
+              "linear-gradient(90deg,#c8a052,#e8c070,transparent)",
+            zIndex: 10,
+          }}
+        />
 
-        {/* Top — number */}
-        <div className="flex items-center gap-2">
-          <span
-            className="font-mono"
-            style={{
-              fontSize: "clamp(7px,0.62vw,9px)",
-              color: "rgba(200,160,80,0.5)",
-              letterSpacing: "0.32em",
-            }}
-          >
-            {service.number}
-          </span>
-          <motion.div
-            animate={{ scaleX: hovered ? 1 : 0.2, opacity: hovered ? 0.5 : 0.15 }}
-            transition={{ duration: 0.4 }}
-            style={{
-              transformOrigin: "left",
-              flex: 1,
-              height: "0.5px",
-              background: "rgba(200,160,80,0.7)",
-            }}
-          />
-        </div>
-
-        {/* Bottom — keyword + title + details */}
-        <div className="flex flex-col gap-3">
-
-          {/* Keyword — large, always visible */}
-          <motion.div
-            animate={{ y: hovered ? -4 : 0 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div
-              className="absolute left-0 right-0"
-              style={{
-                bottom: hovered ? "auto" : undefined,
-                padding: `clamp(8px,1.2vh,14px) clamp(14px,2vw,26px)`,
-                backdropFilter: hovered ? "blur(12px) saturate(1.1)" : "blur(0px)",
-                WebkitBackdropFilter: hovered ? "blur(12px) saturate(1.1)" : "blur(0px)",
-                background: hovered ? "rgba(0,0,0,0.35)" : "transparent",
-                borderTop: hovered ? "0.5px solid rgba(200,160,80,0.12)" : "none",
-                transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
-                bottom: 0,
-              }}
-            >
-              <h3
-                className="font-serif font-bold leading-none"
-                style={{
-                  fontSize: "clamp(18px,2.8vw,44px)",
-                  color: hovered ? "#fff8ee" : "rgba(240,225,195,0.82)",
-                  letterSpacing: hovered ? "0.02em" : "0.06em",
-                  transition: "all 0.4s cubic-bezier(0.22,1,0.36,1)",
-                  writingMode: "vertical-lr",
-                  textOrientation: "mixed",
-                  transform: "rotate(180deg)",
-                  height: "clamp(120px,20vh,260px)",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {service.keyword}
-              </h3>
-            </div>
-          </motion.div>
-
-          {/* Hover details */}
-          <AnimatePresence>
-            {hovered && (
-              <motion.div
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-                className="flex flex-col gap-2"
-                style={{ paddingBottom: "clamp(80px,14vh,160px)" }}
-              >
-                <p
-                  className="font-serif leading-relaxed"
-                  style={{
-                    fontSize: "clamp(9px,0.82vw,12px)",
-                    color: "rgba(225,205,170,0.78)",
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {service.description}
-                </p>
-                <div
-                  style={{
-                    width: "clamp(24px,3vw,40px)",
-                    height: "1px",
-                    background:
-                      "linear-gradient(90deg,rgba(200,160,80,0.6),transparent)",
-                    marginTop: 4,
-                  }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
+        {/* Service number — top */}
+        <div
+          className="absolute font-mono"
+          style={{
+            top: "clamp(12px,2vh,20px)",
+            left: "clamp(10px,1.4vw,18px)",
+            fontSize: "clamp(7px,0.6vw,9px)",
+            color: "rgba(200,160,80,0.5)",
+            letterSpacing: "0.32em",
+            zIndex: 10,
+          }}
+        >
+          {service.number}
         </div>
       </div>
 
-      {/* Top brass rule on hover */}
-      <motion.div
-        animate={{ scaleX: hovered ? 1 : 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      {/* ── LABEL PANEL — transparent, below image blend ── */}
+      <div
+        className="relative flex flex-col"
         style={{
-          transformOrigin: "left",
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "1.5px",
-          background: "linear-gradient(90deg,#c8a052,#e8c070,transparent)",
-          zIndex: 20,
+          background: "rgba(0,0,0,0)",
+          flex: 1,
+          padding: "clamp(10px,1.6vh,18px) clamp(10px,1.4vw,18px)",
         }}
-      />
+      >
+        {/* Transparent label chip */}
+        <div
+          style={{
+            display: "inline-block",
+            background: "rgba(255,255,255,0.04)",
+            border: "0.5px solid rgba(200,160,80,0.14)",
+            borderRadius: 2,
+            padding: "clamp(5px,0.8vh,9px) clamp(8px,1vw,14px)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            marginBottom: "clamp(8px,1.2vh,14px)",
+          }}
+        >
+          <h3
+            className="font-serif font-bold leading-none"
+            style={{
+              fontSize: "clamp(13px,1.6vw,22px)",
+              color: hovered ? "#fff8ee" : "rgba(240,224,192,0.82)",
+              letterSpacing: "0.03em",
+              transition: "color 0.35s ease",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {service.keyword}
+          </h3>
+        </div>
+
+        {/* Full title */}
+        <p
+          className="font-serif leading-snug"
+          style={{
+            fontSize: "clamp(9px,0.85vw,12px)",
+            color: "rgba(220,200,165,0.55)",
+            marginBottom: "clamp(6px,1vh,10px)",
+            lineHeight: 1.45,
+          }}
+        >
+          {service.fullTitle}
+        </p>
+
+        {/* Details — fade in on hover */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="flex flex-col gap-2"
+            >
+              <p
+                style={{
+                  fontSize: "clamp(8px,0.72vw,10px)",
+                  color: "rgba(210,190,158,0.65)",
+                  lineHeight: 1.65,
+                }}
+              >
+                {service.description}
+              </p>
+              <div className="flex flex-col gap-1 mt-1">
+                {service.detail.map((d, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 font-mono"
+                    style={{
+                      fontSize: "clamp(6px,0.58vw,8px)",
+                      color: "rgba(200,160,80,0.48)",
+                      letterSpacing: "0.18em",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 12,
+                        height: "0.5px",
+                        background: "rgba(200,160,80,0.3)",
+                        flexShrink: 0,
+                        display: "inline-block",
+                      }}
+                    />
+                    {d.toUpperCase()}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </motion.div>
   );
 }
@@ -602,8 +624,38 @@ export default function ServicesSection({
         }}
         aria-hidden={!isActive}
       >
-        {/* ── Main columns row ── */}
-        <div className="flex flex-1 min-h-0">
+        {/* Section label — top left */}
+        <div
+          className="absolute flex items-center gap-3"
+          style={{
+ top: "clamp(14px,2.2vh,24px)",
+            left: "clamp(18px,3vw,42px)",
+            zIndex: 30,
+          }}
+        >
+          <span
+            className="font-mono uppercase tracking-[0.42em]"
+            style={{
+              fontSize: "clamp(6px,0.55vw,8px)",
+              color: "rgba(200,160,80,0.28)",
+            }}
+          >
+            Services
+          </span>
+          <div
+            style={{
+              width: "clamp(16px,2vw,28px)",
+              height: "0.5px",
+              background: "rgba(200,160,80,0.14)",
+            }}
+          />
+        </div>
+
+        {/* ── Columns — full height minus bottom strip ── */}
+        <div
+className="flex"
+          style={{ flex: 1, minHeight: 0, paddingTop: 0 }}
+        >
           {SERVICES.map((service, i) => (
             <ServiceColumn
               key={service.id}
@@ -615,118 +667,88 @@ export default function ServicesSection({
         </div>
 
         {/* ── Bottom strip ── */}
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.75, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="relative flex items-end justify-between shrink-0"
           style={{
-            padding: "clamp(16px,2.8vh,32px) clamp(24px,4vw,56px)",
-            borderTop: "0.5px solid rgba(200,160,80,0.1)",
+            padding:
+              "clamp(14px,2.4vh,28px) clamp(22px,3.8vw,52px) clamp(16px,2.8vh,30px)",
+            borderTop: "0.5px solid rgba(255,255,255,0.05)",
             background:
-              "linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0.7) 100%)",
-            minHeight: "clamp(72px,12vh,110px)",
+"linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0.85) 100%)",
           }}
         >
-          {/* Left — quote + tagline */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col gap-1.5"
-            style={{ maxWidth: "clamp(200px,38vw,480px)" }}
-          >
-            <p
-              className="font-serif italic"
-              style={{
-fontSize: "clamp(11px,1.2vw,17px)",
-                color: "rgba(232,216,184,0.7)",
-                lineHeight: 1.45,
-              }}
-            >
-              "Architecture is the art of how to waste space."
-            </p>
-            <span
-              className="font-mono"
-              style={{
-                fontSize: "clamp(7px,0.6vw,9px)",
-                color: "rgba(200,160,80,0.35)",
-                letterSpacing: "0.3em",
-              }}
-            >
-              WE BUILD WHAT OTHERS ONLY IMAGINE.
-            </span>
-          </motion.div>
-
-          {/* Right — CTA button */}
-          <motion.div
-initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => setShowOverlay(true)}
-              style={{
-                background: "transparent",
-                border: "0.5px solid rgba(200,160,80,0.45)",
-                borderRadius: 2,
-                padding: "clamp(10px,1.4vh,16px) clamp(20px,2.8vw,38px)",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                position: "relative",
-                overflow: "hidden",
-              }}
-            >
-              {/* Button fill on hover */}
-<motion.div
-                whileHover={{ scaleX: 1 }}
-                initial={{ scaleX: 0 }}
-                style={{
-                  transformOrigin: "left",
-                  position: "absolute",
-                  inset: 0,
-                  background:
-                    "linear-gradient(90deg,rgba(200,160,80,0.12),rgba(200,160,80,0.06))",
-                }}
-              />
-              <span
-                className="relative font-mono uppercase tracking-[0.32em]"
-                style={{
-                  fontSize: "clamp(7px,0.7vw,10px)",
-                  color: "rgba(200,160,80,0.8)",
-                }}
-              >
-                Let's Make Fortune
-              </span>
-            </motion.button>
-          </motion.div>
-</div>
-
-        {/* Section label — top left */}
-        <div
-          className="absolute flex items-center gap-3"
-          style={{
-            top: "clamp(16px,2.8vh,28px)",
-            left: "clamp(20px,3.5vw,48px)",
-            zIndex: 30,
-          }}
-        >
-          <span
-            className="font-mono uppercase tracking-[0.4em]"
-            style={{
-              fontSize: "clamp(6px,0.58vw,8px)",
-              color: "rgba(200,160,80,0.32)",
-            }}
-          >
-            Services
-          </span>
+          {/* Left — "What we do" cursive + paragraph */}
           <div
+            className="flex flex-col gap-2"
+            style={{ maxWidth: "clamp(180px,32vw,420px)" }}
+          >
+            <span
+              style={{
+                fontFamily: "'Dancing Script', 'Pacifico', cursive",
+                fontSize: "clamp(20px,2.8vw,42px)",
+                color: "rgba(255,255,255,0.88)",
+                lineHeight: 1.1,
+                fontWeight: 600,
+              }}
+            >
+              What we do
+            </span>
+            <p
+              style={{
+                fontSize: "clamp(8px,0.72vw,11px)",
+                color: "rgba(200,180,150,0.42)",
+lineHeight: 1.7,
+                maxWidth: "clamp(160px,24vw,340px)",
+              }}
+            >
+              Six disciplines practised under one roof — from the first sketch to the final handover. Every project built with the same commitment to precision, material, and craft.
+            </p>
+          </div>
+
+          {/* Right — CTA */}
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setShowOverlay(true)}
             style={{
-width: "clamp(18px,2.2vw,32px)",
-              height: "0.5px",
-              background: "rgba(200,160,80,0.16)",
+              background: "transparent",
+              border: "0.5px solid rgba(200,160,80,0.42)",
+              borderRadius: 2,
+              padding:
+                "clamp(10px,1.4vh,16px) clamp(18px,2.6vw,36px)",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              position: "relative",
+              overflow: "hidden",
+flexShrink: 0,
             }}
-          />
-        </div>
+          >
+            {/* Hover fill */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileHover={{ scaleX: 1 }}
+              style={{
+                transformOrigin: "left",
+                position: "absolute",
+                inset: 0,
+                background:
+                  "linear-gradient(90deg,rgba(200,160,80,0.14),rgba(200,160,80,0.06))",
+              }}
+            />
+            <span
+              className="relative font-mono uppercase tracking-[0.32em]"
+              style={{
+                fontSize: "clamp(7px,0.68vw,10px)",
+                color: "rgba(200,160,80,0.78)",
+              }}
+            >
+              Let's Make Fortune
+            </span>
+          </motion.button>
+</motion.div>
       </motion.section>
 
       {/* Contact overlay */}
