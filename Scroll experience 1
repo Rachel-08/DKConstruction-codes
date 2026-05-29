@@ -1,0 +1,83 @@
+// Add to imports
+import HowWeWork from "@/components/HowWeWork";
+
+// Add to ActiveSegment type
+type ActiveSegment =
+  | "intro"
+  | "landing"
+  | "services"
+  | "howwework"     // ← new
+  | "work"
+  | "about"
+  | "contact";
+
+// ── Segment tracker — updated boundaries ──
+useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
+  if      (latest < 0.22) setActiveSegment("intro");
+  else if (latest < 0.38) setActiveSegment("landing");
+  else if (latest < 0.56) setActiveSegment("services");
+  else if (latest < 0.70) setActiveSegment("howwework");  // ← new
+  else if (latest < 0.84) setActiveSegment("work");
+  else if (latest < 0.93) setActiveSegment("about");
+  else                    setActiveSegment("contact");
+});
+
+// ── Navbar tracker — updated ──
+if (latest >= 0.22 && latest < 0.62) { setShowNavbar(true); return; }
+
+// ── After servicesExitY, add: ──
+
+// ----------------------------------------
+// SEGMENT 4: HOW WE WORK
+// ----------------------------------------
+const howWeWorkOpacity = useTransform(
+  scrollYProgress,
+  [0.54, 0.60, 0.66, 0.70],
+  [0,    1,    1,    0   ]
+);
+
+const howWeWorkY = useTransform(
+  scrollYProgress,
+  [0.54, 0.60],
+  ["55vh", "0vh"]
+);
+
+const howWeWorkExitY = useTransform(
+  scrollYProgress,
+  [0.66, 0.70],
+  ["0vh", "-55vh"]
+);
+
+// ── Shift SelectedWork to 0.68 ──
+const workX = useTransform(scrollYProgress, [0.68, 0.74], ["100vw", "0vw"]);
+const workOpacity = useTransform(
+  scrollYProgress,
+  [0.68, 0.74, 0.80, 0.84],
+  [0,    1,    1,    0   ]
+);
+const workHeadingY     = useTransform(scrollYProgress, [0.74, 0.78], ["0vh",  "-22vh"]);
+const workHeadingScale = useTransform(scrollYProgress, [0.76, 0.78], [1,       0.45 ]);
+const workHeadingX     = useTransform(scrollYProgress, [0.76, 0.78], ["0vw",  "-14vw"]);
+const carouselOpacity  = useTransform(scrollYProgress, [0.78, 0.81], [0,       1    ]);
+const carouselX        = useTransform(scrollYProgress, [0.81, 0.84], ["25vw", "-95vw"]);
+const workExitY        = useTransform(scrollYProgress, [0.82, 0.84], ["0vh",  "-100vh"]);
+
+// ── About + Contact unchanged ──
+const aboutOpacity = useTransform(scrollYProgress, [0.84, 0.89], [0,      1    ]);
+const aboutY       = useTransform(scrollYProgress, [0.84, 0.89], ["90vh", "0vh"]);
+const contactOpacity = useTransform(scrollYProgress, [0.93, 1.00], [0,       1    ]);
+const contactY       = useTransform(scrollYProgress, [0.93, 1.00], ["100vh", "0vh"]);
+
+// ── Scroll height — add 200vh for new segment ──
+// h-[1700vh] md:h-[1800vh] xl:h-[1900vh] 2xl:h-[2000vh]
+
+// ── isHowWeWorkActive ──
+const isHowWeWorkActive = activeSegment === "howwework";
+
+// ── In JSX, between ServicesSection and SelectedWork ──
+<HowWeWork
+  isActive={isHowWeWorkActive}
+  howWeWorkOpacity={howWeWorkOpacity}
+  howWeWorkY={howWeWorkY}
+  howWeWorkExitY={howWeWorkExitY}
+/>
