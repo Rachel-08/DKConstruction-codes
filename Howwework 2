@@ -1,0 +1,127 @@
+<div
+  className="relative z-10 mx-auto grid grid-cols-1 lg:grid-cols-[0.42fr_0.58fr] gap-[clamp(48px,7vw,120px)]"
+  style={{
+    maxWidth: "clamp(320px,86vw,1280px)",
+    padding:
+      "clamp(64px,10vh,120px) clamp(24px,5vw,72px) clamp(72px,12vh,140px)",
+  }}
+>
+  {/* Left heading */}
+  <div ref={headingRef} className="lg:sticky lg:top-[clamp(80px,12vh,140px)] self-start">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={headingInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+      className="flex flex-col gap-4"
+    >
+      <div className="flex items-center gap-4">
+        <span
+          className="font-mono uppercase tracking-[0.42em]"
+          style={{
+            fontSize: "clamp(7px,0.62vw,9px)",
+            color: "rgba(200,160,80,0.4)",
+          }}
+        >
+          Process
+        </span>
+
+        <div
+          style={{
+            flex: 1,
+            height: "0.5px",
+            background:
+              "linear-gradient(90deg,rgba(200,160,80,0.25),transparent)",
+          }}
+        />
+      </div>
+
+      <h2
+        className="font-serif leading-none tracking-tight"
+        style={{
+          fontSize: "clamp(42px,7vw,104px)",
+          color: "#e8d8b8",
+        }}
+      >
+        How It
+        <br />
+        Works
+      </h2>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={headingInView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.75, delay: 0.2 }}
+        style={{
+          fontSize: "clamp(11px,0.9vw,14px)",
+          color: "rgba(200,180,150,0.48)",
+          lineHeight: 1.8,
+          maxWidth: "clamp(260px,28vw,420px)",
+          marginTop: 8,
+        }}
+      >
+        A transparent, phased process designed to keep you informed and in
+        control at every stage — from first meeting to final handover.
+      </motion.p>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={headingInView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.6, delay: 0.35 }}
+        style={{
+          width: "clamp(32px,3.5vw,56px)",
+          height: "clamp(32px,3.5vw,56px)",
+          borderLeft: "1px solid rgba(200,160,80,0.2)",
+          borderBottom: "1px solid rgba(200,160,80,0.2)",
+          marginTop: "clamp(20px,3.5vh,36px)",
+        }}
+      />
+    </motion.div>
+  </div>
+
+  {/* Right process */}
+  <div className="relative">
+    <div className="flex flex-col">
+      {STEPS.map((step, i) => (
+        <StepCard
+          key={step.id}
+          step={step}
+          index={i}
+          isLast={i === STEPS.length - 1}
+        />
+      ))}
+    </div>
+
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={headingInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, delay: 0.6 }}
+      className="mt-[clamp(32px,6vh,64px)] flex items-start gap-4"
+      style={{
+        borderTop: "0.5px solid rgba(200,160,80,0.1)",
+        paddingTop: "clamp(20px,3.5vh,36px)",
+      }}
+    >
+      <div
+        style={{
+          width: "clamp(18px,2.2vw,28px)",
+          height: "0.5px",
+          background: "rgba(200,160,80,0.25)",
+          flexShrink: 0,
+          marginTop: 8,
+        }}
+      />
+
+      <p
+        style={{
+          fontSize: "clamp(9px,0.8vw,11px)",
+          color: "rgba(200,180,150,0.35)",
+          lineHeight: 1.75,
+        }}
+      >
+        Payment milestones are structured to align with verified project
+        progress. All timelines and schedules are confirmed in writing prior to
+        commencement.
+      </p>
+    </motion.div>
+  </div>
+</div>
