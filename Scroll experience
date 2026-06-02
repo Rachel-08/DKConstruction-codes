@@ -6,7 +6,7 @@ import { useScroll, useTransform, useMotionValueEvent } from "motion/react";
 import Navbar from "@/components/Navbar";
 import WelcomeWindow from "@/components/WelcomeWindow";
 import StudioLanding from "@/components/StudioLanding";
-import ServicesSection from "@/components/ServicesSection";
+import ServicesSection from "@/components/ServiceSection";
 import SelectedWork from "@/components/SelectedWork";
 import About from "@/components/About";
 import ContactSection from "@/components/Contact";
@@ -20,7 +20,7 @@ type ActiveSegment =
   | "landing"
   | "services"
   | "work"
-  | "about"
+  | "howwework"
   | "contact";
 
 // ─────────────────────────────────────────────
@@ -45,7 +45,7 @@ export default function ScrollExperience() {
     else if (latest < 0.38) setActiveSegment("landing");
     else if (latest < 0.62) setActiveSegment("services");
     else if (latest < 0.82) setActiveSegment("work");
-    else if (latest < 0.93) setActiveSegment("about");
+    else if (latest < 0.93) setActiveSegment("howwework");
     else                    setActiveSegment("contact");
   });
 
@@ -58,7 +58,7 @@ export default function ScrollExperience() {
     const isScrollingUp   = latest < previous;
 
     if (latest < 0.22)                    { setShowNavbar(false); return; }
-    if (latest >= 0.22 && latest < 0.55)  { setShowNavbar(true);  return; }
+    if (latest >= 0.22 && latest < 0.36)  { setShowNavbar(true);  return; }
     if (isScrollingDown) setShowNavbar(false);
     if (isScrollingUp)   setShowNavbar(true);
   });
@@ -67,7 +67,7 @@ export default function ScrollExperience() {
   const isLandingActive  = activeSegment === "landing";
   const isServicesActive = activeSegment === "services";
   const isWorkActive     = activeSegment === "work";
-  const isAboutActive    = activeSegment === "about";
+  const isHowWeWorkActive = activeSegment === "howwework";
   const isContactActive  = activeSegment === "contact";
 
   /**
@@ -95,108 +95,187 @@ export default function ScrollExperience() {
    * 0.82 – 0.88   About slides in from below
    * 0.93 – 1.00   Contact slides in from below
    */
+const navOpacity = useTransform(
+    scrollYProgress,
+    [0.22, 0.3],
+    [0, 1]
+  );
 
+  const navY = useTransform(
+    scrollYProgress,
+    [0.22, 0.3],
+    ["-40vw", "0vw"]
+  );
+
+    // ----------------------------------------
+  // SEGMENT 1: WELCOME WINDOW (Compressed slightly)
   // ----------------------------------------
-  // SEGMENT 1: WELCOME WINDOW
-  // ----------------------------------------
-  const leftRotate  = useTransform(scrollYProgress, [0.00, 0.14], [0, -78]);
-  const rightRotate = useTransform(scrollYProgress, [0.00, 0.14], [0,  78]);
 
-  const windowScale       = useTransform(scrollYProgress, [0.00, 0.20], [1,   2.4]);
-  const windowOpacity     = useTransform(scrollYProgress, [0.08, 0.20], [1,   0  ]);
-  const frameOpacity      = useTransform(scrollYProgress, [0.06, 0.16], [1,   0  ]);
-  const scrollTextOpacity = useTransform(scrollYProgress, [0.00, 0.08], [1,   0  ]);
+  // Master: 0.00 – 0.10 (Panels rotate open quicker)
+  const leftRotate = useTransform(
+    scrollYProgress,
+    [0.00, 0.10],
+    [0, -78]
+  );
 
+  const rightRotate = useTransform(
+    scrollYProgress,
+    [0.00, 0.10],
+    [0, 78]
+  );
+
+  // Master: 0.05 – 0.14 (Window zooms + fades earlier)
+  const windowScale = useTransform(
+    scrollYProgress,
+    [0.05, 0.14],
+    [1, 2.1]
+  );
+
+  const windowOpacity = useTransform(
+    scrollYProgress,
+    [0.05, 0.14],
+    [1, 0]
+  );
+
+  // Master: 0.20 – 0.24 (Window exits left immediately as next section hits peak)
   const windowExitX = useTransform(
     scrollYProgress,
-    [0.34, 0.38],
-    ["0vw", "-130vw"]
-  );
-
-  // ----------------------------------------
-  // SEGMENT 2: STUDIO LANDING
-  // ----------------------------------------
-  const landingY = useTransform(
-    scrollYProgress,
     [0.20, 0.24],
-    ["130vh", "0vh"]
+    ["0vw", "-180vw"]
   );
 
-  const landingExitX = useTransform(
+  // Master: 0.04 – 0.10 (Frame fades out)
+  const frameOpacity = useTransform(
     scrollYProgress,
-    [0.34, 0.38],
-    ["0vw", "-130vw"]
+    [0.04, 0.10],
+    [1, 0]
   );
 
+  // Master: 0.00 – 0.05 (Scroll hint disappears rapidly)
+  const scrollTextOpacity = useTransform(
+    scrollYProgress,
+    [0.00, 0.05],
+    [1, 0]
+  );
+
+  // ----------------------------------------
+  // SEGMENT 2: STUDIO LANDING (Tightened duration)
+  // ----------------------------------------
+
+  // Master: 0.14 (Enters) -> 0.20 (Stays visible briefly) -> 0.24 (Exits left)
   const landingOpacity = useTransform(
     scrollYProgress,
-    [0.20, 0.24, 0.34, 0.38],
-    [0,    1,    1,    0   ]
+    [0.14, 0.17, 0.20, 0.24],
+    [0, 1, 1, 0]
+  );
+
+  // Master: 0.14 – 0.17 (Slides up immediately after window fade)
+  const landingY = useTransform(
+    scrollYProgress,
+    [0.14, 0.17],
+    ["120vh", "0vh"]
+  );
+
+  // Master: 0.20 – 0.24 (Exits side-by-side with the welcome window)
+  const landingExitX = useTransform(
+    scrollYProgress,
+    [0.20, 0.24],
+    ["0vw", "-140vw"]
   );
 
   // ----------------------------------------
-  // SEGMENT 3: SERVICES
-  // Static layout — no internal scroll driver
-  // needed. Section fades in, rests, fades out.
-  // Users hover columns to explore details.
+  // SEGMENT 3: SERVICES (Snappy transition)
   // ----------------------------------------
+
+  // Master: 0.22 (Enters) -> 0.32 (Stays visible) -> 0.36 (Exits)
   const servicesOpacity = useTransform(
     scrollYProgress,
-    [0.36, 0.42, 0.56, 0.62],
-    [0,    1,    1,    0   ]
+    [0.22, 0.26, 0.32, 0.36],
+    [0, 1, 1, 0]
   );
 
+  // Master: 0.22 – 0.26 (Overlaps landing exit for fluid tracking)
   const servicesY = useTransform(
     scrollYProgress,
-    [0.36, 0.42],
-    ["52vh", "0vh"]
+    [0.22, 0.26],
+    ["40vh", "0vh"]
   );
 
+  // Master: 0.32 – 0.36 (Quickly exits up)
   const servicesExitY = useTransform(
     scrollYProgress,
-    [0.56, 0.62],
-    ["0vh", "-58vh"]
+    [0.32, 0.36],
+    ["0vh", "-60vh"]
   );
 
   // ----------------------------------------
-  // SEGMENT 4: SELECTED WORK
+  // SEGMENT 4: HOW WE WORK (Fast simple text layout)
   // ----------------------------------------
+
+  // Master: 0.34 (Enters) -> 0.44 (Stays visible) -> 0.48 (Exits)
+  const howWeWorkOpacity = useTransform(
+    scrollYProgress,
+    [0.34, 0.38, 0.44, 0.48],
+    [0, 1, 1, 0]
+  );
+
+  const howWeWorkY = useTransform(
+    scrollYProgress,
+    [0.34, 0.38],
+    ["55vh", "0vh"]
+  );
+
+  const howWeWorkExitY = useTransform(
+    scrollYProgress,
+    [0.44, 0.48],
+    ["0vh", "-55vh"]
+  );
+
+  // ----------------------------------------
+  // SEGMENT 5: SELECTED WORK (High-density spacing for horizontal scroll)
+  // ----------------------------------------
+
+  // Master: 0.46 – 0.52 (Slides in right)
   const workX = useTransform(
     scrollYProgress,
-    [0.60, 0.66],
+    [0.46, 0.52],
     ["100vw", "0vw"]
   );
 
+  // Master: 0.46 (Enters) -> 0.82 (Preserved long duration for complex interaction) -> 0.86 (Exits up)
   const workOpacity = useTransform(
     scrollYProgress,
-    [0.60, 0.66, 0.78, 0.82],
-    [0,    1,    1,    0   ]
+    [0.46, 0.52, 0.82, 0.86],
+    [0, 1, 1, 0]
   );
 
-  const workHeadingY     = useTransform(scrollYProgress, [0.66, 0.70], ["0vh",  "-22vh"]);
-  const workHeadingScale = useTransform(scrollYProgress, [0.68, 0.70], [1,       0.45 ]);
-  const workHeadingX     = useTransform(scrollYProgress, [0.68, 0.70], ["0vw",  "-14vw"]);
+  // Master: 0.52 – 0.56 (Heading adjustment)
+  const workHeadingY     = useTransform(scrollYProgress, [0.52, 0.56], ["0vh",  "-22vh"]);
+  const workHeadingScale = useTransform(scrollYProgress, [0.52, 0.56], [1,       0.45 ]);
+  const workHeadingX     = useTransform(scrollYProgress, [0.52, 0.56], ["0vw",  "-14vw"]);
 
-  const carouselOpacity  = useTransform(scrollYProgress, [0.70, 0.73], [0,       1    ]);
-  const carouselX        = useTransform(scrollYProgress, [0.73, 0.78], ["25vw", "-95vw"]);
+  // Master: 0.56 – 0.60 (Carousel panel fades in)
+  const carouselOpacity  = useTransform(scrollYProgress, [0.56, 0.60], [0, 1]);
+  
+  // Master: 0.60 – 0.82 (Given maximum tracking range to keep execution smooth)
+  const carouselX        = useTransform(scrollYProgress, [0.60, 0.82], ["25vw", "-95vw"]);
 
+  // Master: 0.82 – 0.86 (Leaves stage upward)
   const workExitY = useTransform(
     scrollYProgress,
-    [0.78, 0.82],
+    [0.82, 0.86],
     ["0vh", "-100vh"]
   );
 
   // ----------------------------------------
-  // SEGMENT 5: ABOUT
+  // SEGMENT 6: CONTACT (Swift landing page wrap-up)
   // ----------------------------------------
-  const aboutOpacity = useTransform(scrollYProgress, [0.82, 0.88], [0,      1    ]);
-  const aboutY       = useTransform(scrollYProgress, [0.82, 0.88], ["90vh", "0vh"]);
 
-  // ----------------------------------------
-  // SEGMENT 6: CONTACT
-  // ----------------------------------------
-  const contactOpacity = useTransform(scrollYProgress, [0.93, 1.00], [0,       1    ]);
-  const contactY       = useTransform(scrollYProgress, [0.93, 1.00], ["100vh", "0vh"]);
+  // Master: 0.86 – 1.00 (Fades up nicely to complete scroll container)
+  const contactOpacity = useTransform(scrollYProgress, [0.86, 1.00], [0, 1]);
+  const contactY       = useTransform(scrollYProgress, [0.86, 1.00], ["50vh", "0vh"]);
+
+
 
   // ----------------------------------------
   // HELPERS
@@ -211,7 +290,9 @@ export default function ScrollExperience() {
     });
   };
 
-  const handleEnterClick = (): void => scrollToProgress(0.32);
+  // Adjusted button click destination to match the new Segment 2 timeline settle point
+  const handleEnterClick = (): void => scrollToProgress(0.24);
+
 
   // ----------------------------------------
   // RENDER
@@ -220,7 +301,7 @@ export default function ScrollExperience() {
     <section
       id="top"
       ref={containerRef}
-      className="relative h-[1500vh] bg-[#f5f2eb] md:h-[1600vh] xl:h-[1700vh] 2xl:h-[1800vh]"
+      className="relative  h-[1700vh] bg-[#f5f2eb] md:h-[1800vh] xl:h-[1900vh] 2xl:h-[2000vh]"
     >
       <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
 
@@ -268,12 +349,13 @@ export default function ScrollExperience() {
           workExitY={workExitY}
         />
 
-        {/* SEGMENT 5 — About */}
+        {/* SEGMENT 5 — Howwework */}
         <About
-          isActive={isAboutActive}
-          aboutOpacity={aboutOpacity}
-          aboutY={aboutY}
-        />
+  isActive={isHowWeWorkActive}
+  howWeWorkOpacity={howWeWorkOpacity}
+  howWeWorkY={howWeWorkY}
+  howWeWorkExitY={howWeWorkExitY}
+/>
 
         {/* SEGMENT 6 — Contact */}
         <ContactSection
