@@ -1,0 +1,201 @@
+function StepCard({
+  step,
+  index,
+  isLast,
+}: {
+  step: Step;
+  index: number;
+  isLast: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-8%" });
+
+  const Icon = step.icon;
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, x: 36 }}
+      animate={inView ? { opacity: 1, x: 0 } : {}}
+      transition={{
+        duration: 0.75,
+        delay: index * 0.1,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      className="relative pl-[clamp(64px,6vw,96px)]"
+    >
+      {/* Process flow line */}
+      {!isLast && (
+        <div
+          className="absolute left-[clamp(24px,2.8vw,36px)] top-[clamp(62px,7vh,78px)] z-0"
+          style={{
+            width: "1px",
+            height: "calc(100% - 28px)",
+            background:
+              "linear-gradient(180deg, rgba(200,160,80,0.45), rgba(200,160,80,0.06))",
+          }}
+        />
+      )}
+
+      {/* Flow icon */}
+      <motion.div
+        animate={{
+          borderColor: expanded
+            ? "rgba(200,160,80,0.65)"
+            : "rgba(200,160,80,0.22)",
+          background: expanded
+            ? "rgba(200,160,80,0.1)"
+            : "rgba(255,255,255,0.025)",
+        }}
+        transition={{ duration: 0.35 }}
+        className="absolute left-0 top-[clamp(18px,2.5vh,28px)] z-10 flex items-center justify-center"
+        style={{
+          width: "clamp(48px,4.8vw,64px)",
+          height: "clamp(48px,4.8vw,64px)",
+          border: "1px solid rgba(200,160,80,0.22)",
+          borderRadius: 999,
+          color: expanded
+            ? "rgba(232,192,112,0.95)"
+            : "rgba(180,160,130,0.5)",
+        }}
+      >
+        <Icon className="h-[42%] w-[42%]" />
+      </motion.div>
+
+      <motion.div
+        onClick={() => setExpanded((v) => !v)}
+        whileHover={{ x: 4 }}
+        transition={{ duration: 0.3 }}
+        className="relative z-10 cursor-pointer"
+        style={{ padding: "clamp(18px,2.8vh,32px) 0" }}
+      >
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <span
+              className="font-mono uppercase tracking-[0.32em]"
+              style={{
+                fontSize: "clamp(6px,0.58vw,8px)",
+                color: "rgba(200,160,80,0.45)",
+              }}
+            >
+              Phase {step.number} — {step.phase}
+            </span>
+
+            {step.payment && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={inView ? { opacity: 1, scale: 1 } : {}}
+                transition={{ delay: index * 0.1 + 0.3, duration: 0.4 }}
+                style={{
+                  background: "rgba(200,160,80,0.08)",
+                  border: "0.5px solid rgba(200,160,80,0.3)",
+                  borderRadius: 2,
+                  padding: "3px 10px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <span
+                  className="font-mono"
+                  style={{
+                    fontSize: "clamp(8px,0.75vw,11px)",
+                    color: "rgba(200,160,80,0.8)",
+                    letterSpacing: "0.15em",
+                    fontWeight: 600,
+                  }}
+                >
+                  {step.payment}
+                </span>
+
+                <span
+                  className="font-mono"
+                  style={{
+                    fontSize: "clamp(6px,0.55vw,7px)",
+                    color: "rgba(200,160,80,0.4)",
+                    letterSpacing: "0.18em",
+                  }}
+                >
+                  {step.paymentLabel?.toUpperCase()}
+                </span>
+              </motion.div>
+            )}
+          </div>
+
+          <motion.h3
+            animate={{ color: expanded ? "#f0e0c0" : "#8a7a62" }}
+            transition={{ duration: 0.35 }}
+            className="font-serif leading-snug"
+            style={{ fontSize: "clamp(17px,1.85vw,28px)" }}
+          >
+            {step.title}
+          </motion.h3>
+
+          <motion.div
+            animate={{
+              scaleX: expanded ? 1 : 0.22,
+              opacity: expanded ? 0.5 : 0.18,
+            }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              transformOrigin: "left",
+              height: "0.5px",
+              width: "clamp(48px,8vw,110px)",
+              background:
+                "linear-gradient(90deg,#c8a052,#e8c070,transparent)",
+            }}
+          />
+
+          <AnimatePresence initial={false}>
+            {expanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                style={{ overflow: "hidden" }}
+              >
+                <p
+                  className="leading-relaxed"
+                  style={{
+                    fontSize: "clamp(10px,0.9vw,13px)",
+                    color: "rgba(210,190,160,0.7)",
+                    lineHeight: 1.75,
+                    paddingTop: 8,
+                    paddingBottom: 4,
+                  }}
+                >
+                  {step.description}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <motion.span
+            animate={{ opacity: expanded ? 0.3 : 0.18 }}
+            className="font-mono"
+            style={{
+              fontSize: "clamp(6px,0.55vw,7px)",
+              color: "rgba(200,160,80,0.4)",
+              letterSpacing: "0.3em",
+              marginTop: 2,
+            }}
+          >
+            {expanded ? "— COLLAPSE" : "+ EXPAND"}
+          </motion.span>
+        </div>
+      </motion.div>
+
+      {!isLast && (
+        <div
+          style={{
+            height: "0.5px",
+            background:
+              "linear-gradient(90deg,rgba(200,160,80,0.12),rgba(200,160,80,0.04),transparent)",
+          }}
+        />
+      )}
+    </motion.div>
+  );
+}
