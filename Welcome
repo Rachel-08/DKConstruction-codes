@@ -11,6 +11,7 @@ type WelcomeWindowProps = {
   windowExitX: MotionValue<string>;
   frameOpacity: MotionValue<number>;
   scrollTextOpacity: MotionValue<number>;
+  // backgroundImageExitX: MotionValue<string>;
   onEnterClick: () => void;
 };
 
@@ -218,6 +219,7 @@ export default function WelcomeWindow({
   windowExitX,
   frameOpacity,
   scrollTextOpacity,
+  // backgroundImageExitX,
   onEnterClick,
 }: WelcomeWindowProps) {
   return (
@@ -243,6 +245,7 @@ export default function WelcomeWindow({
         <div className="relative h-[58vh] w-[84vw] max-w-5xl overflow-hidden rounded-[18px] bg-[#080503] shadow-[0_40px_120px_rgba(0,0,0,0.5)] [perspective:1400px] md:h-[65vh] md:w-[78vw]">
           {/* Background image */}
           <motion.img
+          // style={{x: backgroundImageExitX}}
             src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
             alt="Architecture view"
             draggable={false}
@@ -269,7 +272,7 @@ export default function WelcomeWindow({
       </motion.div>
 
       <motion.p
-        style={{ opacity: scrollTextOpacity }}
+        style={{ opacity: scrollTextOpacity, x: windowExitX}}
         className="pointer-events-none absolute bottom-8 left-1/2 z-[90] -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] text-black/60 md:bottom-10 md:text-xs"
       >
         Click anywhere on the window to enter
