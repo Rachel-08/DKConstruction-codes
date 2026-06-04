@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useScroll, useTransform, useMotionValueEvent } from "motion/react";
 
-import Navbar from "@/components/Navbar";
-import WelcomeWindow from "@/components/WelcomeWindow";
-import StudioLanding from "@/components/StudioLanding";
+import LoadingScreen   from "@/components/LoadingScreen";
+import Navbar          from "@/components/Navbar";
+import WelcomeWindow   from "@/components/WelcomeWindow";
+import StudioLanding   from "@/components/StudioLanding";
 import ServicesSection from "@/components/ServiceSection";
-import SelectedWork from "@/components/SelectedWork";
-import About from "@/components/About";
-import ContactSection from "@/components/Contact";
+import SelectedWork    from "@/components/SelectedWork";
+import HowWeWork       from "@/components/HowWeWork";
+import ContactSection  from "@/components/Contact";
 
 // ─────────────────────────────────────────────
 // Types
@@ -19,22 +20,59 @@ type ActiveSegment =
   | "intro"
   | "landing"
   | "services"
-  | "work"
   | "howwework"
+  | "work"
   | "contact";
+
+// ─────────────────────────────────────────────
+// Scroll nudge — shown on every section after
+// 2 s of idle. User still controls scroll.
+// ─────────────────────────────────────────────
+
+// Per-section nudge logic lives inside each
+// section component or is handled generically
+// here via a shared hook below.
 
 // ─────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────
 
 export default function ScrollExperience() {
-  const containerRef = useRef<HTMLElement | null>(null);
-  const [showNavbar, setShowNavbar]       = useState<boolean>(false);
+  const containerRef  = useRef<HTMLElement | null>(null);
+  const idleTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [loadingDone, setLoadingDone]     = useState<boolean>(false);
+  const [showNavbar,  setShowNavbar]      = useState<boolean>(false);
+  const [showNudge,   setShowNudge]       = useState<boolean>(false);
   const [activeSegment, setActiveSegment] = useState<ActiveSegment>("intro");
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
+  });
+
+  // ----------------------------------------
+  // Loading complete callback
+  // ----------------------------------------
+  const handleLoadingComplete = useCallback(() => {
+    setLoadingDone(true);
+  }, []);
+
+  // ----------------------------------------
+  // Idle nudge — reset on every scroll event
+  // Show nudge arrow after 2 s of no scrolling
+  // ----------------------------------------
+  const resetNudge = useCallback(() => {
+    setShowNudge(false);
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => {
+      // Only nudge if not on the last section
+      if (activeSegment !== "contact") setShowNudge(true);
+    }, 2000);
+  }, [activeSegment]);
+
+  useMotionValueEvent(scrollYProgress, "change", () => {
+    resetNudge();
   });
 
   // ----------------------------------------
@@ -57,229 +95,130 @@ export default function ScrollExperience() {
     const isScrollingDown = latest > previous;
     const isScrollingUp   = latest < previous;
 
-    if (latest < 0.19)                    { setShowNavbar(false); return; }
-    if (latest >= 0.19 && latest < 0.24)  { setShowNavbar(true);  return; }
+    if (latest < 0.19)                   { setShowNavbar(false); return; }
+    if (latest >= 0.19 && latest < 0.24) { setShowNavbar(true);  return; }
     if (isScrollingDown) setShowNavbar(false);
     if (isScrollingUp)   setShowNavbar(true);
   });
 
-  const isIntroActive    = activeSegment === "intro";
-  const isLandingActive  = activeSegment === "landing";
-  const isServicesActive = activeSegment === "services";
-  const isWorkActive     = activeSegment === "work";
+  const isIntroActive     = activeSegment === "intro";
+  const isLandingActive   = activeSegment === "landing";
+  const isServicesActive  = activeSegment === "services";
   const isHowWeWorkActive = activeSegment === "howwework";
-  const isContactActive  = activeSegment === "contact";
+  const isWorkActive      = activeSegment === "work";
+  const isContactActive   = activeSegment === "contact";
 
   /**
-   * MASTER TIMELINE
+   * MASTER TIMELINE (unchanged from your version)
    *
-   * 0.00 – 0.14   Window panels rotate open
-   * 0.06 – 0.16   Frame fades out
-   * 0.08 – 0.20   Window zooms + fades
-   * 0.00 – 0.08   Scroll hint fades
-   * 0.20 – 0.24   Landing slides up from below
-   * 0.24 – 0.34   Landing rests
-   * 0.34 – 0.38   Landing + window exit left
-   *
-   * 0.36 – 0.62   Services
-   *   0.36 – 0.42   Fade + rise in
-   *   0.42 – 0.56   Rest (user reads / hovers)
-   *   0.56 – 0.62   Fade + rise out
-   *
-   * 0.60 – 0.66   Selected Work enters from right
-   * 0.66 – 0.70   Heading moves up + scales
-   * 0.70 – 0.73   Carousel fades in
-   * 0.73 – 0.78   Carousel scrolls horizontally
-   * 0.78 – 0.82   Work exits up
-   *
-   * 0.82 – 0.88   About slides in from below
-   * 0.93 – 1.00   Contact slides in from below
+   * 0.00 – 0.10   Window panels rotate open
+   * 0.04 – 0.10   Frame fades out
+   * 0.05 – 0.14   Window zooms + fades
+   * 0.00 – 0.05   Scroll hint fades
+   * 0.14 – 0.17   Landing slides up
+   * 0.17 – 0.20   Landing rests
+   * 0.20 – 0.24   Landing + window exit left
+   * 0.22 – 0.26   Services rise in
+   * 0.26 – 0.32   Services rest
+   * 0.32 – 0.36   Services exit up
+   * 0.34 – 0.38   HowWeWork rises in
+   * 0.38 – 0.44   HowWeWork rests
+   * 0.44 – 0.48   HowWeWork exits up
+   * 0.46 – 0.52   SelectedWork slides in
+   * 0.52 – 0.82   Carousel scrolls
+   * 0.82 – 0.86   Work exits up
+   * 0.86 – 1.00   Contact fades up
    */
-const navOpacity = useTransform(
-    scrollYProgress,
-    [0.22, 0.3],
-    [0, 1]
-  );
 
-  const navY = useTransform(
-    scrollYProgress,
-    [0.22, 0.3],
-    ["-40vw", "0vw"]
-  );
+  // ── Segment 1: Welcome Window ──
+  const leftRotate  = useTransform(scrollYProgress, [0.00, 0.10], [0, -78]);
+  const rightRotate = useTransform(scrollYProgress, [0.00, 0.10], [0,  78]);
 
-    // ----------------------------------------
-  // SEGMENT 1: WELCOME WINDOW (Compressed slightly)
-  // ----------------------------------------
+  const windowScale       = useTransform(scrollYProgress, [0.05, 0.14], [1,   2.1]);
+  const windowOpacity     = useTransform(scrollYProgress, [0.05, 0.14], [1,   0  ]);
+  const frameOpacity      = useTransform(scrollYProgress, [0.04, 0.10], [1,   0  ]);
+  const scrollTextOpacity = useTransform(scrollYProgress, [0.00, 0.05], [1,   0  ]);
 
-  // Master: 0.00 – 0.10 (Panels rotate open quicker)
-  const leftRotate = useTransform(
-    scrollYProgress,
-    [0.00, 0.10],
-    [0, -78]
-  );
-
-  const rightRotate = useTransform(
-    scrollYProgress,
-    [0.00, 0.10],
-    [0, 78]
-  );
-
-  // Master: 0.05 – 0.14 (Window zooms + fades earlier)
-  const windowScale = useTransform(
-    scrollYProgress,
-    [0.05, 0.14],
-    [1, 2.1]
-  );
-
-  const windowOpacity = useTransform(
-    scrollYProgress,
-    [0.05, 0.14],
-    [1, 0]
-  );
-
-  // Master: 0.20 – 0.24 (Window exits left immediately as next section hits peak)
   const windowExitX = useTransform(
     scrollYProgress,
     [0.20, 0.24],
     ["0vw", "-180vw"]
   );
 
-  // Master: 0.04 – 0.10 (Frame fades out)
-  const frameOpacity = useTransform(
-    scrollYProgress,
-    [0.04, 0.10],
-    [1, 0]
-  );
-
-  // Master: 0.00 – 0.05 (Scroll hint disappears rapidly)
-  const scrollTextOpacity = useTransform(
-    scrollYProgress,
-    [0.00, 0.05],
-    [1, 0]
-  );
-
-  // ----------------------------------------
-  // SEGMENT 2: STUDIO LANDING (Tightened duration)
-  // ----------------------------------------
-
-  // Master: 0.14 (Enters) -> 0.20 (Stays visible briefly) -> 0.24 (Exits left)
+  // ── Segment 2: Studio Landing ──
   const landingOpacity = useTransform(
     scrollYProgress,
     [0.14, 0.17, 0.20, 0.24],
-    [0, 1, 1, 0]
+    [0,    1,    1,    0   ]
   );
-
-  // Master: 0.14 – 0.17 (Slides up immediately after window fade)
   const landingY = useTransform(
     scrollYProgress,
     [0.14, 0.17],
     ["120vh", "0vh"]
   );
-
-  // Master: 0.20 – 0.24 (Exits side-by-side with the welcome window)
   const landingExitX = useTransform(
     scrollYProgress,
     [0.20, 0.24],
     ["0vw", "-140vw"]
   );
 
-  // ----------------------------------------
-  // SEGMENT 3: SERVICES (Snappy transition)
-  // ----------------------------------------
-
-  // Master: 0.22 (Enters) -> 0.32 (Stays visible) -> 0.36 (Exits)
+  // ── Segment 3: Services ──
   const servicesOpacity = useTransform(
     scrollYProgress,
     [0.22, 0.26, 0.32, 0.36],
-    [0, 1, 1, 0]
+    [0,    1,    1,    0   ]
   );
-
-  // Master: 0.22 – 0.26 (Overlaps landing exit for fluid tracking)
   const servicesY = useTransform(
     scrollYProgress,
     [0.22, 0.26],
     ["40vh", "0vh"]
   );
-
-  // Master: 0.32 – 0.36 (Quickly exits up)
   const servicesExitY = useTransform(
     scrollYProgress,
     [0.32, 0.36],
     ["0vh", "-60vh"]
   );
 
-  // ----------------------------------------
-  // SEGMENT 4: HOW WE WORK (Fast simple text layout)
-  // ----------------------------------------
-
-  // Master: 0.34 (Enters) -> 0.44 (Stays visible) -> 0.48 (Exits)
+  // ── Segment 4: How We Work ──
   const howWeWorkOpacity = useTransform(
     scrollYProgress,
     [0.34, 0.38, 0.44, 0.48],
-    [0, 1, 1, 0]
+    [0,    1,    1,    0   ]
   );
-
   const howWeWorkY = useTransform(
     scrollYProgress,
     [0.34, 0.38],
     ["55vh", "0vh"]
   );
-
   const howWeWorkExitY = useTransform(
     scrollYProgress,
     [0.44, 0.48],
     ["0vh", "-55vh"]
   );
 
-  // ----------------------------------------
-  // SEGMENT 5: SELECTED WORK (High-density spacing for horizontal scroll)
-  // ----------------------------------------
-
-  // Master: 0.46 – 0.52 (Slides in right)
+  // ── Segment 5: Selected Work ──
   const workX = useTransform(
     scrollYProgress,
     [0.46, 0.52],
     ["100vw", "0vw"]
   );
-
-  // Master: 0.46 (Enters) -> 0.82 (Preserved long duration for complex interaction) -> 0.86 (Exits up)
   const workOpacity = useTransform(
     scrollYProgress,
     [0.46, 0.52, 0.86, 0.88],
-    [0, 1, 1, 0]
+    [0,    1,    1,    0   ]
   );
-
-  // Master: 0.52 – 0.56 (Heading adjustment)
   const workHeadingY     = useTransform(scrollYProgress, [0.48, 0.52], ["0vh",  "-22vh"]);
   const workHeadingScale = useTransform(scrollYProgress, [0.50, 0.54], [1,       0.45 ]);
   const workHeadingX     = useTransform(scrollYProgress, [0.50, 0.54], ["0vw",  "-14vw"]);
-
-  // Master: 0.56 – 0.60 (Carousel panel fades in)
-  const carouselOpacity  = useTransform(scrollYProgress, [0.52, 0.54], [0, 1]);
-  
-  // Master: 0.60 – 0.82 (Given maximum tracking range to keep execution smooth)
+  const carouselOpacity  = useTransform(scrollYProgress, [0.52, 0.54], [0,       1    ]);
   const carouselX        = useTransform(scrollYProgress, [0.57, 0.82], ["25vw", "-95vw"]);
+  const workExitY        = useTransform(scrollYProgress, [0.82, 0.86], ["0vh",  "-100vh"]);
 
-  // Master: 0.82 – 0.86 (Leaves stage upward)
-  const workExitY = useTransform(
-    scrollYProgress,
-    [0.82, 0.86],
-    ["0vh", "-100vh"]
-  );
-
-  // ----------------------------------------
-  // SEGMENT 6: CONTACT (Swift landing page wrap-up)
-  // ----------------------------------------
-
-  // Master: 0.86 – 1.00 (Fades up nicely to complete scroll container)
-  const contactOpacity = useTransform(scrollYProgress, [0.86, 1.00], [0, 1]);
+  // ── Segment 6: Contact ──
+  const contactOpacity = useTransform(scrollYProgress, [0.86, 1.00], [0,      1    ]);
   const contactY       = useTransform(scrollYProgress, [0.86, 1.00], ["50vh", "0vh"]);
 
-
-
-  // ----------------------------------------
-  // HELPERS
-  // ----------------------------------------
+  // ── Helpers ──
   const scrollToProgress = (progress: number): void => {
     if (!containerRef.current) return;
     const container = containerRef.current;
@@ -290,81 +229,128 @@ const navOpacity = useTransform(
     });
   };
 
-  // Adjusted button click destination to match the new Segment 2 timeline settle point
-  const handleEnterClick = (): void => scrollToProgress(0.20);
+  const handleEnterClick = useCallback(
+    (): void => scrollToProgress(0.20),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-
-  // ----------------------------------------
+  // ─────────────────────────────────────────
   // RENDER
-  // ----------------------------------------
+  // ─────────────────────────────────────────
   return (
-    <section
-      id="top"
-      ref={containerRef}
-      className="relative  h-[1700vh] bg-[#f5f2eb] md:h-[1800vh] xl:h-[1900vh] 2xl:h-[2000vh]"
-    >
-      <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
-
-        <Navbar showNavbar={showNavbar} />
-
-        {/* SEGMENT 1 — Welcome Window */}
-        <WelcomeWindow
-          isActive={isIntroActive}
-          leftRotate={leftRotate}
-          rightRotate={rightRotate}
-          windowScale={windowScale}
-          windowOpacity={windowOpacity}
-          windowExitX={windowExitX}
-          frameOpacity={frameOpacity}
-          scrollTextOpacity={scrollTextOpacity}
-          onEnterClick={handleEnterClick}
+    <>
+      {/* Loading screen — unmounts itself via onComplete */}
+      {!loadingDone && (
+        <LoadingScreen
+          onComplete={handleLoadingComplete}
+          studioName="Your Studio"
         />
+      )}
 
-        {/* SEGMENT 2 — Studio Landing */}
-        <StudioLanding
-          isActive={isLandingActive}
-          landingOpacity={landingOpacity}
-          landingY={landingY}
-          landingExitX={landingExitX}
-        />
+      <section
+        id="top"
+        ref={containerRef}
+        className="relative h-[1700vh] bg-[#f5f2eb] md:h-[1800vh] xl:h-[1900vh] 2xl:h-[2000vh]"
+      >
+        <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
 
-        {/* SEGMENT 3 — Services */}
-        <ServicesSection
-          isActive={isServicesActive}
-          servicesOpacity={servicesOpacity}
-          servicesY={servicesY}
-          servicesExitY={servicesExitY}
-        />
+          <Navbar showNavbar={showNavbar} />
 
-        {/* SEGMENT 4 — Selected Work */}
-        <SelectedWork
-          isActive={isWorkActive}
-          workX={workX}
-          workOpacity={workOpacity}
-          workHeadingY={workHeadingY}
-          workHeadingScale={workHeadingScale}
-          workHeadingX={workHeadingX}
-          carouselX={carouselX}
-          carouselOpacity={carouselOpacity}
-          workExitY={workExitY}
-        />
+          {/* SEGMENT 1 — Welcome Window */}
+          <WelcomeWindow
+            isActive={isIntroActive}
+            leftRotate={leftRotate}
+            rightRotate={rightRotate}
+            windowScale={windowScale}
+            windowOpacity={windowOpacity}
+            windowExitX={windowExitX}
+            frameOpacity={frameOpacity}
+            scrollTextOpacity={scrollTextOpacity}
+            onEnterClick={handleEnterClick}
+            loadingComplete={loadingDone}
+          />
 
-        {/* SEGMENT 5 — Howwework */}
-        <About
-  isActive={isHowWeWorkActive}
-  howWeWorkOpacity={howWeWorkOpacity}
-  howWeWorkY={howWeWorkY}
-  howWeWorkExitY={howWeWorkExitY}
-/>
+          {/* SEGMENT 2 — Studio Landing */}
+          <StudioLanding
+            isActive={isLandingActive}
+            landingOpacity={landingOpacity}
+            landingY={landingY}
+            landingExitX={landingExitX}
+          />
 
-        {/* SEGMENT 6 — Contact */}
-        <ContactSection
-          isActive={isContactActive}
-          contactOpacity={contactOpacity}
-          contactY={contactY}
-        />
+          {/* SEGMENT 3 — Services */}
+          <ServicesSection
+            isActive={isServicesActive}
+            servicesOpacity={servicesOpacity}
+            servicesY={servicesY}
+            servicesExitY={servicesExitY}
+          />
 
-      </div>
-    </section>
+          {/* SEGMENT 4 — How We Work */}
+          <HowWeWork
+            isActive={isHowWeWorkActive}
+            howWeWorkOpacity={howWeWorkOpacity}
+            howWeWorkY={howWeWorkY}
+            howWeWorkExitY={howWeWorkExitY}
+          />
+
+          {/* SEGMENT 5 — Selected Work */}
+          <SelectedWork
+            isActive={isWorkActive}
+            workX={workX}
+            workOpacity={workOpacity}
+            workHeadingY={workHeadingY}
+            workHeadingScale={workHeadingScale}
+            workHeadingX={workHeadingX}
+            carouselX={carouselX}
+            carouselOpacity={carouselOpacity}
+            workExitY={workExitY}
+          />
+
+          {/* SEGMENT 6 — Contact */}
+          <ContactSection
+            isActive={isContactActive}
+            contactOpacity={contactOpacity}
+            contactY={contactY}
+          />
+
+          {/* Global idle scroll nudge — shown on all sections except contact */}
+          {showNudge && activeSegment !== "contact" && (
+            <div className="pointer-events-none absolute bottom-8 left-1/2 z-[200] -translate-x-1/2 flex flex-col items-center gap-1.5">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  animate={{ opacity: [0.12, 0.55, 0.12], y: [0, 5, 0] }}
+                  transition={{
+                    duration: 1.4,
+                    repeat: Infinity,
+                    delay: i * 0.18,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <svg viewBox="0 0 16 9" fill="none" style={{ width: 14, height: 8 }}>
+                    <polyline
+                      points="1,1 8,8 15,1"
+                      stroke="rgba(200,160,80,0.7)"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </motion.div>
+              ))}
+              <span
+                className="font-mono uppercase tracking-[0.32em]"
+                style={{ fontSize: 7, color: "rgba(200,160,80,0.38)" }}
+              >
+                Scroll
+              </span>
+            </div>
+          )}
+
+        </div>
+      </section>
+    </>
   );
 }
