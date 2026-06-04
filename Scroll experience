@@ -41,11 +41,11 @@ export default function ScrollExperience() {
   // Active segment tracker
   // ----------------------------------------
   useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
-    if      (latest < 0.22) setActiveSegment("intro");
-    else if (latest < 0.38) setActiveSegment("landing");
-    else if (latest < 0.62) setActiveSegment("services");
-    else if (latest < 0.82) setActiveSegment("work");
-    else if (latest < 0.93) setActiveSegment("howwework");
+    if      (latest < 0.15) setActiveSegment("intro");
+    else if (latest < 0.26) setActiveSegment("landing");
+    else if (latest < 0.36) setActiveSegment("services");
+    else if (latest < 0.48) setActiveSegment("howwework");
+    else if (latest < 0.83) setActiveSegment("work");
     else                    setActiveSegment("contact");
   });
 
@@ -57,8 +57,8 @@ export default function ScrollExperience() {
     const isScrollingDown = latest > previous;
     const isScrollingUp   = latest < previous;
 
-    if (latest < 0.22)                    { setShowNavbar(false); return; }
-    if (latest >= 0.22 && latest < 0.36)  { setShowNavbar(true);  return; }
+    if (latest < 0.19)                    { setShowNavbar(false); return; }
+    if (latest >= 0.19 && latest < 0.24)  { setShowNavbar(true);  return; }
     if (isScrollingDown) setShowNavbar(false);
     if (isScrollingUp)   setShowNavbar(true);
   });
@@ -245,20 +245,20 @@ const navOpacity = useTransform(
   // Master: 0.46 (Enters) -> 0.82 (Preserved long duration for complex interaction) -> 0.86 (Exits up)
   const workOpacity = useTransform(
     scrollYProgress,
-    [0.46, 0.52, 0.82, 0.86],
+    [0.46, 0.52, 0.86, 0.88],
     [0, 1, 1, 0]
   );
 
   // Master: 0.52 – 0.56 (Heading adjustment)
-  const workHeadingY     = useTransform(scrollYProgress, [0.52, 0.56], ["0vh",  "-22vh"]);
-  const workHeadingScale = useTransform(scrollYProgress, [0.52, 0.56], [1,       0.45 ]);
-  const workHeadingX     = useTransform(scrollYProgress, [0.52, 0.56], ["0vw",  "-14vw"]);
+  const workHeadingY     = useTransform(scrollYProgress, [0.48, 0.52], ["0vh",  "-22vh"]);
+  const workHeadingScale = useTransform(scrollYProgress, [0.50, 0.54], [1,       0.45 ]);
+  const workHeadingX     = useTransform(scrollYProgress, [0.50, 0.54], ["0vw",  "-14vw"]);
 
   // Master: 0.56 – 0.60 (Carousel panel fades in)
-  const carouselOpacity  = useTransform(scrollYProgress, [0.56, 0.60], [0, 1]);
+  const carouselOpacity  = useTransform(scrollYProgress, [0.52, 0.54], [0, 1]);
   
   // Master: 0.60 – 0.82 (Given maximum tracking range to keep execution smooth)
-  const carouselX        = useTransform(scrollYProgress, [0.60, 0.82], ["25vw", "-95vw"]);
+  const carouselX        = useTransform(scrollYProgress, [0.57, 0.82], ["25vw", "-95vw"]);
 
   // Master: 0.82 – 0.86 (Leaves stage upward)
   const workExitY = useTransform(
@@ -291,7 +291,7 @@ const navOpacity = useTransform(
   };
 
   // Adjusted button click destination to match the new Segment 2 timeline settle point
-  const handleEnterClick = (): void => scrollToProgress(0.24);
+  const handleEnterClick = (): void => scrollToProgress(0.20);
 
 
   // ----------------------------------------
