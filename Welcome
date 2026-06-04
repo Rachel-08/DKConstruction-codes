@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, type MotionValue } from "motion/react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { motion, AnimatePresence, type MotionValue } from "motion/react";
 
 type WelcomeWindowProps = {
   isActive: boolean;
@@ -11,9 +12,12 @@ type WelcomeWindowProps = {
   windowExitX: MotionValue<string>;
   frameOpacity: MotionValue<number>;
   scrollTextOpacity: MotionValue<number>;
-  // backgroundImageExitX: MotionValue<string>;
   onEnterClick: () => void;
+  // Passed from parent so WelcomeWindow knows loading is done
+  loadingComplete: boolean;
 };
+
+// ─── Hinge ───────────────────────────────────
 
 function Hinge({ top, side }: { top: string; side: "left" | "right" }) {
   const isLeft = side === "left";
@@ -37,40 +41,46 @@ function Hinge({ top, side }: { top: string; side: "left" | "right" }) {
       >
         <defs>
           <linearGradient id={`hf-${side}-${top}`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#111" />
-            <stop offset="22%" stopColor="#4a4a4a" />
-            <stop offset="48%" stopColor="#7a7a7a" />
-            <stop offset="65%" stopColor="#595959" />
-            <stop offset="85%" stopColor="#2e2e2e" />
+            <stop offset="0%"   stopColor="#111" />
+            <stop offset="22%"  stopColor="#4a4a4a" />
+            <stop offset="48%"  stopColor="#7a7a7a" />
+            <stop offset="65%"  stopColor="#595959" />
+            <stop offset="85%"  stopColor="#2e2e2e" />
             <stop offset="100%" stopColor="#0d0d0d" />
           </linearGradient>
           <linearGradient id={`hk-${side}-${top}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#888" />
-            <stop offset="28%" stopColor="#3a3a3a" />
-            <stop offset="62%" stopColor="#666" />
+            <stop offset="0%"   stopColor="#888" />
+            <stop offset="28%"  stopColor="#3a3a3a" />
+            <stop offset="62%"  stopColor="#666" />
             <stop offset="100%" stopColor="#1a1a1a" />
           </linearGradient>
         </defs>
-        <rect x="1" y="1" width="16" height="48" rx="1.5" fill={`url(#hf-${side}-${top})`} />
-        <rect x="1" y="1" width="16" height="48" rx="1.5" fill="none" stroke="#888" strokeWidth="0.3" opacity="0.35" />
-        <line x1="1" y1="1" x2="17" y2="1" stroke="#999" strokeWidth="0.4" opacity="0.5" />
-        <rect x="5" y="15" width="8" height="20" rx="2" fill={`url(#hk-${side}-${top})`} />
+        <rect x="1" y="1" width="16" height="48" rx="1.5"
+          fill={`url(#hf-${side}-${top})`} />
+        <rect x="1" y="1" width="16" height="48" rx="1.5"
+          fill="none" stroke="#888" strokeWidth="0.3" opacity="0.35" />
+        <line x1="1" y1="1" x2="17" y2="1"
+          stroke="#999" strokeWidth="0.4" opacity="0.5" />
+        <rect x="5" y="15" width="8" height="20" rx="2"
+          fill={`url(#hk-${side}-${top})`} />
         <ellipse cx="9" cy="15" rx="4" ry="3" fill="#777" />
         <ellipse cx="9" cy="35" rx="4" ry="3" fill="#2a2a2a" />
         <circle cx="9" cy="25" r="1.8" fill="#111" />
         <circle cx="9" cy="25" r="0.8" fill="#555" />
-        <circle cx="4.5" cy="6.5" r="2" fill="#333" />
-        <line x1="2.8" y1="6.5" x2="6.2" y2="6.5" stroke="#111" strokeWidth="0.7" />
-        <circle cx="13.5" cy="6.5" r="2" fill="#333" />
-        <line x1="11.8" y1="6.5" x2="15.2" y2="6.5" stroke="#111" strokeWidth="0.7" />
-        <circle cx="4.5" cy="43.5" r="2" fill="#333" />
-        <line x1="2.8" y1="43.5" x2="6.2" y2="43.5" stroke="#111" strokeWidth="0.7" />
+        <circle cx="4.5"  cy="6.5"  r="2" fill="#333" />
+        <line x1="2.8"  y1="6.5"  x2="6.2"  y2="6.5"  stroke="#111" strokeWidth="0.7" />
+        <circle cx="13.5" cy="6.5"  r="2" fill="#333" />
+        <line x1="11.8" y1="6.5"  x2="15.2" y2="6.5"  stroke="#111" strokeWidth="0.7" />
+        <circle cx="4.5"  cy="43.5" r="2" fill="#333" />
+        <line x1="2.8"  y1="43.5" x2="6.2"  y2="43.5" stroke="#111" strokeWidth="0.7" />
         <circle cx="13.5" cy="43.5" r="2" fill="#333" />
         <line x1="11.8" y1="43.5" x2="15.2" y2="43.5" stroke="#111" strokeWidth="0.7" />
       </svg>
     </div>
   );
 }
+
+// ─── Handle ──────────────────────────────────
 
 function Handle({ side }: { side: "left" | "right" }) {
   const isLeft = side === "left";
@@ -79,7 +89,7 @@ function Handle({ side }: { side: "left" | "right" }) {
       className="pointer-events-none absolute z-[50] top-1/2 -translate-y-1/2"
       style={{
         [isLeft ? "right" : "left"]: "clamp(5px, 0.9vw, 9px)",
-        width: "clamp(7px, 0.9vw, 11px)",
+        width:  "clamp(7px, 0.9vw, 11px)",
         height: "clamp(40px, 7vh, 62px)",
       }}
     >
@@ -92,26 +102,31 @@ function Handle({ side }: { side: "left" | "right" }) {
       >
         <defs>
           <linearGradient id={`hd-${side}`} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#111" />
-            <stop offset="22%" stopColor="#585858" />
-            <stop offset="50%" stopColor="#909090" />
-            <stop offset="74%" stopColor="#484848" />
+            <stop offset="0%"   stopColor="#111" />
+            <stop offset="22%"  stopColor="#585858" />
+            <stop offset="50%"  stopColor="#909090" />
+            <stop offset="74%"  stopColor="#484848" />
             <stop offset="100%" stopColor="#111" />
           </linearGradient>
           <linearGradient id={`hd-cap-${side}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#777" />
+            <stop offset="0%"   stopColor="#777" />
             <stop offset="100%" stopColor="#222" />
           </linearGradient>
         </defs>
-        <ellipse cx="5.5" cy="5" rx="3.5" ry="2.5" fill={`url(#hd-cap-${side})`} />
-        <rect x="2" y="5" width="7" height="52" rx="3.5" fill={`url(#hd-${side})`} />
-        <rect x="4" y="8" width="2" height="46" rx="1" fill="white" opacity="0.09" />
+        <ellipse cx="5.5" cy="5"  rx="3.5" ry="2.5" fill={`url(#hd-cap-${side})`} />
+        <rect    x="2"   y="5"  width="7" height="52" rx="3.5"
+          fill={`url(#hd-${side})`} />
+        <rect x="4" y="8" width="2" height="46" rx="1"
+          fill="white" opacity="0.09" />
         <ellipse cx="5.5" cy="57" rx="3.5" ry="2.5" fill="#1e1e1e" />
-        <ellipse cx="5.5" cy="57" rx="3.5" ry="2.5" fill="none" stroke="#444" strokeWidth="0.4" />
+        <ellipse cx="5.5" cy="57" rx="3.5" ry="2.5"
+          fill="none" stroke="#444" strokeWidth="0.4" />
       </svg>
     </div>
   );
 }
+
+// ─── WindowPane ──────────────────────────────
 
 function WindowPane({
   side,
@@ -123,7 +138,6 @@ function WindowPane({
   opacity: MotionValue<number>;
 }) {
   const isLeft = side === "left";
-
   return (
     <motion.div
       style={{
@@ -135,7 +149,6 @@ function WindowPane({
         isLeft ? "left-0" : "right-0"
       }`}
     >
-      {/* Outer frame — very dark brown */}
       <div
         className="absolute inset-0"
         style={{
@@ -144,8 +157,6 @@ function WindowPane({
             : "linear-gradient(270deg,#080503 0%,#180c05 9%,#241006 20%,#110803 35%,#1c0d05 50%,#130804 68%,#200e06 82%,#100703 94%,#080503 100%)",
         }}
       />
-
-      {/* Glass */}
       <div
         className="absolute"
         style={{
@@ -154,15 +165,14 @@ function WindowPane({
             ? "linear-gradient(135deg,rgba(155,195,218,0.46) 0%,rgba(115,170,198,0.26) 42%,rgba(180,218,236,0.16) 72%,rgba(95,155,188,0.36) 100%)"
             : "linear-gradient(225deg,rgba(155,195,218,0.46) 0%,rgba(115,170,198,0.26) 42%,rgba(180,218,236,0.16) 72%,rgba(95,155,188,0.36) 100%)",
           backdropFilter: "blur(2px) saturate(1.1)",
-          boxShadow:
-            "inset 0 0 0 0.5px rgba(170,210,232,0.2), inset 0 0 22px rgba(0,0,0,0.18)",
+          boxShadow: "inset 0 0 0 0.5px rgba(170,210,232,0.2), inset 0 0 22px rgba(0,0,0,0.18)",
         }}
       >
         <div
           className="absolute"
           style={{
             top: 0,
-            left: isLeft ? "10%" : "auto",
+            left:  isLeft ? "10%" : "auto",
             right: isLeft ? "auto" : "10%",
             width: "24%",
             height: "100%",
@@ -170,45 +180,88 @@ function WindowPane({
           }}
         />
       </div>
-
-      {/* Horizontal muntin — dark brown + metal sheen */}
       <div
         className="absolute left-0 right-0"
         style={{
           top: "50%",
           height: "clamp(6px, 1.1vh, 11px)",
           transform: "translateY(-50%)",
-          background:
-            "linear-gradient(180deg,#2e2418 0%,#14100a 20%,#080604 42%,#181209 62%,#241a10 80%,#0a0806 100%)",
-          boxShadow:
-            "0 1px 0 rgba(255,255,255,0.055), 0 -1px 0 rgba(255,255,255,0.035), 0 3px 9px rgba(0,0,0,0.65), inset 0 1px 0 rgba(90,65,35,0.28)",
+          background: "linear-gradient(180deg,#2e2418 0%,#14100a 20%,#080604 42%,#181209 62%,#241a10 80%,#0a0806 100%)",
+          boxShadow: "0 1px 0 rgba(255,255,255,0.055),0 -1px 0 rgba(255,255,255,0.035),0 3px 9px rgba(0,0,0,0.65),inset 0 1px 0 rgba(90,65,35,0.28)",
         }}
       />
-
-      {/* Vertical muntin — dark brown + metal sheen */}
       <div
         className="absolute top-0 bottom-0"
         style={{
           left: "50%",
           width: "clamp(5px, 0.9vw, 9px)",
           transform: "translateX(-50%)",
-          background:
-            "linear-gradient(90deg,#080604 0%,#241a10 20%,#0a0806 42%,#181209 62%,#2e2418 80%,#080604 100%)",
-          boxShadow:
-            "1px 0 0 rgba(255,255,255,0.05), -1px 0 0 rgba(255,255,255,0.03), 3px 0 9px rgba(0,0,0,0.55), inset 1px 0 0 rgba(90,65,35,0.22)",
+          background: "linear-gradient(90deg,#080604 0%,#241a10 20%,#0a0806 42%,#181209 62%,#2e2418 80%,#080604 100%)",
+          boxShadow: "1px 0 0 rgba(255,255,255,0.05),-1px 0 0 rgba(255,255,255,0.03),3px 0 9px rgba(0,0,0,0.55),inset 1px 0 0 rgba(90,65,35,0.22)",
         }}
       />
-
-      {/* Hinges on outer edge */}
       <Hinge top="16%" side={side} />
       <Hinge top="50%" side={side} />
       <Hinge top="84%" side={side} />
-
-      {/* Minimal metal handle on inner edge */}
       <Handle side={side} />
     </motion.div>
   );
 }
+
+// ─── ScrollNudge indicator ───────────────────
+
+function ScrollNudge({ visible }: { visible: boolean }) {
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          key="nudge"
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 6 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="pointer-events-none absolute bottom-8 left-1/2 -translate-x-1/2 z-[90] flex flex-col items-center gap-2"
+        >
+          {/* Pulsing chevrons */}
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              animate={{ opacity: [0.15, 0.7, 0.15], y: [0, 5, 0] }}
+              transition={{
+                duration: 1.4,
+                repeat: Infinity,
+                delay: i * 0.18,
+                ease: "easeInOut",
+              }}
+            >
+              <svg
+                viewBox="0 0 16 9"
+                fill="none"
+                style={{ width: 14, height: 8 }}
+              >
+                <polyline
+                  points="1,1 8,8 15,1"
+                  stroke="rgba(0,0,0,0.45)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </motion.div>
+          ))}
+          <span
+            className="font-mono uppercase tracking-[0.32em]"
+            style={{ fontSize: 8, color: "rgba(0,0,0,0.35)" }}
+          >
+            Scroll
+          </span>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ─── WelcomeWindow ───────────────────────────
 
 export default function WelcomeWindow({
   isActive,
@@ -219,9 +272,51 @@ export default function WelcomeWindow({
   windowExitX,
   frameOpacity,
   scrollTextOpacity,
-  // backgroundImageExitX,
   onEnterClick,
+  loadingComplete,
 }: WelcomeWindowProps) {
+  const idleTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [nudgeVisible, setNudgeVisible] = useState(false);
+
+  // Auto-open the window shortly after loading completes
+  useEffect(() => {
+    if (!loadingComplete) return;
+    const t = setTimeout(() => {
+      onEnterClick();
+    }, 1800); // 1.8s after loader exits — user sees the window briefly first
+    return () => clearTimeout(t);
+  }, [loadingComplete, onEnterClick]);
+
+  // Idle nudge — show scroll hint after 2s of no scroll activity
+  const resetIdleTimer = useCallback(() => {
+    setNudgeVisible(false);
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    if (autoTimer.current) clearTimeout(autoTimer.current);
+
+    idleTimer.current = setTimeout(() => {
+      if (isActive) setNudgeVisible(true);
+    }, 2000);
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isActive) {
+      setNudgeVisible(false);
+      return;
+    }
+    resetIdleTimer();
+    window.addEventListener("scroll", resetIdleTimer, { passive: true });
+    window.addEventListener("wheel",  resetIdleTimer, { passive: true });
+    window.addEventListener("touchmove", resetIdleTimer, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", resetIdleTimer);
+      window.removeEventListener("wheel",  resetIdleTimer);
+      window.removeEventListener("touchmove", resetIdleTimer);
+      if (idleTimer.current)  clearTimeout(idleTimer.current);
+      if (autoTimer.current)  clearTimeout(autoTimer.current);
+    };
+  }, [isActive, resetIdleTimer]);
+
   return (
     <section
       className={`absolute inset-0 z-[80] ${
@@ -239,44 +334,44 @@ export default function WelcomeWindow({
             onEnterClick();
           }
         }}
-        style={{ scale: windowScale, opacity: windowOpacity, x: windowExitX }}
+        style={{
+          scale:   windowScale,
+          opacity: windowOpacity,
+          x:       windowExitX,
+        }}
         className="absolute inset-0 flex cursor-pointer items-center justify-center outline-none"
       >
         <div className="relative h-[58vh] w-[84vw] max-w-5xl overflow-hidden rounded-[18px] bg-[#080503] shadow-[0_40px_120px_rgba(0,0,0,0.5)] [perspective:1400px] md:h-[65vh] md:w-[78vw]">
-          {/* Background image */}
           <motion.img
-          // style={{x: backgroundImageExitX}}
             src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
             alt="Architecture view"
             draggable={false}
             className="absolute inset-0 h-full w-full select-none object-cover"
           />
-
           <div className="absolute inset-0 bg-black/10" />
-
-          {/* Outer frame */}
           <motion.div
             style={{ opacity: frameOpacity }}
             className="pointer-events-none absolute inset-0 z-[20] rounded-[18px] border-[12px] border-[#0d0805] md:border-[14px]"
           />
-
-          {/* Centre divider */}
           <motion.div
             style={{ opacity: frameOpacity }}
             className="pointer-events-none absolute left-1/2 top-0 z-[25] h-full w-[10px] -translate-x-1/2 bg-[#0d0805] md:w-[12px]"
           />
-
-          <WindowPane side="left" rotateY={leftRotate} opacity={frameOpacity} />
+          <WindowPane side="left"  rotateY={leftRotate}  opacity={frameOpacity} />
           <WindowPane side="right" rotateY={rightRotate} opacity={frameOpacity} />
         </div>
       </motion.div>
 
+      {/* Original scroll text — fades out as you scroll */}
       <motion.p
-        style={{ opacity: scrollTextOpacity, x: windowExitX}}
+        style={{ opacity: scrollTextOpacity, x: windowExitX }}
         className="pointer-events-none absolute bottom-8 left-1/2 z-[90] -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] text-black/60 md:bottom-10 md:text-xs"
       >
         Click anywhere on the window to enter
       </motion.p>
+
+      {/* Idle scroll nudge */}
+      <ScrollNudge visible={nudgeVisible} />
     </section>
   );
 }
