@@ -12,37 +12,49 @@ export default function LoadingScreen({
   onComplete,
   studioName = "Studio",
 }: LoadingScreenProps) {
-  const [phase, setPhase] = useState<"enter" | "hold" | "exit">("enter");
+  const [visible, setVisible] = useState<boolean>(false);
+  const [exiting, setExiting] = useState<boolean>(false);
 
   useEffect(() => {
-    // enter → hold after 1.2s
-    const t1 = setTimeout(() => setPhase("hold"), 1200);
-    // hold → exit after 2.4s
-    const t2 = setTimeout(() => setPhase("exit"), 2400);
-    // notify parent after exit animation completes (~3.2s total)
-    const t3 = setTimeout(() => onComplete(), 3200);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
+    // If page is already fully loaded — skip the loader entirely
+    if (document.readyState === "complete") {
+      onComplete();
+      return;
+    }
+
+    // Page is still loading — show the loader
+    setVisible(true);
+
+    const handleLoad = () => {
+      // Give the exit animation time to play (600ms)
+      setExiting(true);
+      const t = setTimeout(() => {
+        setVisible(false);
+        onComplete();
+      }, 600);
+      return () => clearTimeout(t);
     };
+
+    window.addEventListener("load", handleLoad);
+    return () => window.removeEventListener("load", handleLoad);
   }, [onComplete]);
 
   return (
     <AnimatePresence>
-      {phase !== "exit" ? (
+      {visible && (
         <motion.div
           key="loader"
           initial={{ opacity: 1 }}
+          animate={{ opacity: exiting ? 0 : 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="fixed inset-0 z-[999] flex flex-col items-center justify-center"
           style={{ background: "#060402" }}
         >
-          {/* Top + bottom thin brass rules that draw in */}
+          {/* Top rule */}
           <motion.div
             initial={{ scaleX: 0 }}
-            animate={{ scaleX: phase === "hold" || phase === "exit" ? 1 : 0 }}
+            animate={{ scaleX: 1 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             style={{
               transformOrigin: "center",
@@ -55,9 +67,11 @@ export default function LoadingScreen({
                 "linear-gradient(90deg,transparent,rgba(200,160,80,0.35) 30%,rgba(200,160,80,0.35) 70%,transparent)",
             }}
           />
+
+          {/* Bottom rule */}
           <motion.div
             initial={{ scaleX: 0 }}
-            animate={{ scaleX: phase === "hold" || phase === "exit" ? 1 : 0 }}
+            animate={{ scaleX: 1 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             style={{
               transformOrigin: "center",
@@ -75,12 +89,7 @@ export default function LoadingScreen({
           <div className="flex flex-col items-center gap-4">
             <motion.h1
               initial={{ opacity: 0, y: 18, letterSpacing: "0.5em" }}
-              animate={{
-                opacity: phase === "hold" || phase === "exit" ? 1 : 0,
-                y: phase === "hold" || phase === "exit" ? 0 : 18,
-                letterSpacing:
-                  phase === "hold" || phase === "exit" ? "0.28em" : "0.5em",
-              }}
+              animate={{ opacity: 1, y: 0, letterSpacing: "0.28em" }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               className="font-serif uppercase"
               style={{
@@ -92,17 +101,11 @@ export default function LoadingScreen({
               {studioName}
             </motion.h1>
 
-            {/* Thin line beneath name */}
+            {/* Line beneath name */}
             <motion.div
               initial={{ scaleX: 0 }}
-              animate={{
-                scaleX: phase === "hold" || phase === "exit" ? 1 : 0,
-              }}
-              transition={{
-                duration: 0.6,
-                delay: 0.2,
-                ease: [0.22, 1, 0.36, 1],
-              }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 transformOrigin: "center",
                 width: "clamp(40px,8vw,100px)",
@@ -115,9 +118,7 @@ export default function LoadingScreen({
             {/* Tagline */}
             <motion.span
               initial={{ opacity: 0 }}
-              animate={{
-                opacity: phase === "hold" || phase === "exit" ? 0.38 : 0,
-              }}
+              animate={{ opacity: 0.38 }}
               transition={{ duration: 0.6, delay: 0.35 }}
               className="font-mono uppercase tracking-[0.45em]"
               style={{
@@ -132,11 +133,7 @@ export default function LoadingScreen({
           {/* Pulsing dot */}
           <motion.div
             animate={{ opacity: [0.2, 0.7, 0.2], scale: [0.8, 1.1, 0.8] }}
-            transition={{
-              duration: 1.4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
             style={{
               position: "absolute",
               bottom: "clamp(52px,8vh,80px)",
@@ -147,7 +144,7 @@ export default function LoadingScreen({
             }}
           />
         </motion.div>
-      ) : null}
+      )}
     </AnimatePresence>
   );
 }
