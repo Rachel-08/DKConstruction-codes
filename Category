@@ -1,0 +1,749 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { motion, AnimatePresence, useMotionValue, useSpring } from "motion/react";
+
+// ─────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────
+
+type Project = {
+  id: number;
+  title: string;
+  year: string;
+  location: string;
+  area: string;
+  tags: string[];
+  image: string;
+};
+
+type CategoryMeta = {
+  label: string;
+  description: string;
+  tagline: string;
+};
+
+// ─────────────────────────────────────────────
+// Data — dummy, replace with real data/CMS
+// ─────────────────────────────────────────────
+
+const CATEGORY_META: Record<string, CategoryMeta> = {
+  residential: {
+    label: "Residential",
+    description:
+      "Private homes and living environments designed around the people who inhabit them. Each project begins with listening.",
+    tagline: "Homes that hold meaning",
+  },
+  commercial: {
+    label: "Commercial",
+    description:
+      "Office, retail, and public spaces that balance brand identity with human experience at every scale.",
+    tagline: "Spaces that perform",
+  },
+  "3d-design": {
+    label: "3D Design",
+    description:
+      "Photorealistic visualisations, walkthroughs, and material studies that bring unbuilt architecture to life.",
+    tagline: "Vision before construction",
+  },
+};
+
+const PROJECTS: Record<string, Project[]> = {
+  residential: [
+    {
+      id: 1,
+      title: "The Lattice House",
+      year: "2024",
+      location: "Ahmedabad, GJ",
+      area: "3,400 sq ft",
+      tags: ["Villa", "Contemporary"],
+      image:
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 2,
+      title: "Courtyard Residence",
+      year: "2023",
+      location: "Surat, GJ",
+      area: "2,800 sq ft",
+      tags: ["Bungalow", "Traditional"],
+      image:
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 3,
+      title: "Skyline Penthouse",
+      year: "2023",
+      location: "Mumbai, MH",
+      area: "4,200 sq ft",
+      tags: ["Penthouse", "Luxury"],
+      image:
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 4,
+      title: "Garden Pavilion",
+      year: "2022",
+      location: "Vadodara, GJ",
+      area: "1,900 sq ft",
+      tags: ["Compact", "Landscape"],
+      image:
+        "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 5,
+      title: "The Stone Farmhouse",
+      year: "2022",
+      location: "Rajkot, GJ",
+      area: "5,100 sq ft",
+      tags: ["Farmhouse", "Heritage"],
+      image:
+        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 6,
+      title: "Minimal Row House",
+      year: "2021",
+      location: "Pune, MH",
+      area: "1,600 sq ft",
+      tags: ["Row House", "Minimal"],
+      image:
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=900&auto=format&fit=crop",
+    },
+  ],
+  commercial: [
+    {
+      id: 1,
+      title: "The Weave Office",
+      year: "2024",
+      location: "Ahmedabad, GJ",
+      area: "8,200 sq ft",
+      tags: ["Office", "Tech"],
+      image:
+        "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 2,
+      title: "Rera Showroom",
+      year: "2023",
+      location: "Surat, GJ",
+      area: "3,400 sq ft",
+      tags: ["Retail", "Showroom"],
+      image:
+        "https://images.unsplash.com/photo-1604328698692-f76ea9498e76?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 3,
+      title: "Meridian Clinic",
+      year: "2023",
+      location: "Vadodara, GJ",
+      area: "2,100 sq ft",
+      tags: ["Healthcare", "Interior"],
+      image:
+        "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 4,
+      title: "Prism Restaurant",
+      year: "2022",
+      location: "Mumbai, MH",
+      area: "4,800 sq ft",
+      tags: ["F&B", "Hospitality"],
+      image:
+        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=900&auto=format&fit=crop",
+    },
+  ],
+  "3d-design": [
+    {
+      id: 1,
+      title: "Villa Render Series",
+      year: "2024",
+      location: "Ahmedabad, GJ",
+      area: "Full Exterior + Interior",
+      tags: ["3D", "Exterior"],
+      image:
+        "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 2,
+      title: "Office Walkthrough",
+      year: "2024",
+      location: "Surat, GJ",
+      area: "Animation + Still",
+      tags: ["3D", "Animation"],
+      image:
+        "https://images.unsplash.com/photo-1486325212027-8081e485255e?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 3,
+      title: "Kitchen Material Study",
+      year: "2023",
+      location: "Remote",
+      area: "Material Visualisation",
+      tags: ["3D", "Interior"],
+      image:
+        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 4,
+      title: "Façade Concept",
+      year: "2023",
+      location: "Mumbai, MH",
+      area: "Concept + Render",
+      tags: ["3D", "Facade"],
+      image:
+        "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?q=80&w=900&auto=format&fit=crop",
+    },
+    {
+      id: 5,
+      title: "Landscape Visualisation",
+      year: "2022",
+      location: "Rajkot, GJ",
+      area: "Full Site Render",
+      tags: ["3D", "Landscape"],
+      image:
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=900&auto=format&fit=crop",
+    },
+  ],
+};
+
+// ─────────────────────────────────────────────
+// Cursor-following image
+// ─────────────────────────────────────────────
+
+function CursorImage({
+  src,
+  visible,
+}: {
+  src: string;
+  visible: boolean;
+}) {
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+  const x = useSpring(rawX, { stiffness: 160, damping: 22 });
+  const y = useSpring(rawY, { stiffness: 160, damping: 22 });
+
+  useEffect(() => {
+    const move = (e: MouseEvent) => {
+      rawX.set(e.clientX);
+      rawY.set(e.clientY);
+    };
+    window.addEventListener("mousemove", move);
+    return () => window.removeEventListener("mousemove", move);
+  }, [rawX, rawY]);
+
+  return (
+    <motion.div
+      style={{
+        x,
+        y,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        pointerEvents: "none",
+        zIndex: 200,
+        translateX: "12px",
+        translateY: "-50%",
+      }}
+    >
+      <AnimatePresence>
+        {visible && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.88, rotate: -2 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            exit={{ opacity: 0, scale: 0.88, rotate: 2 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              width: "clamp(160px,18vw,240px)",
+              height: "clamp(110px,14vw,180px)",
+              borderRadius: 4,
+              overflow: "hidden",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.45)",
+            }}
+          >
+            <img
+              src={src}
+              alt=""
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ProjectRow
+// ─────────────────────────────────────────────
+
+function ProjectRow({
+  project,
+  index,
+  onHover,
+  onLeave,
+}: {
+  project: Project;
+  index: number;
+  onHover: (image: string) => void;
+  onLeave: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.65,
+        delay: 0.3 + index * 0.07,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      onMouseEnter={() => onHover(project.image)}
+      onMouseLeave={onLeave}
+      className="group relative cursor-default"
+      style={{
+        borderBottom: "0.5px solid rgba(200,160,80,0.1)",
+      }}
+    >
+      <div
+        className="flex items-center justify-between gap-6 py-5 md:py-6"
+        style={{ paddingLeft: "clamp(0px,2vw,32px)" }}
+      >
+        {/* Left — index + title */}
+        <div className="flex items-baseline gap-5 min-w-0">
+          <span
+            className="font-mono shrink-0"
+            style={{
+              fontSize: "clamp(7px,0.6vw,9px)",
+              color: "rgba(200,160,80,0.4)",
+              letterSpacing: "0.3em",
+            }}
+          >
+            {String(index + 1).padStart(2, "0")}
+          </span>
+
+          <motion.h3
+            animate={{}}
+            className="font-serif truncate"
+            style={{
+              fontSize: "clamp(18px,2.4vw,34px)",
+              color: "#e8d8b8",
+              letterSpacing: "-0.02em",
+              lineHeight: 1,
+            }}
+          >
+            {project.title}
+          </motion.h3>
+        </div>
+
+        {/* Right — meta */}
+        <div className="hidden md:flex items-center gap-8 shrink-0">
+          {/* Tags */}
+          <div className="flex gap-2">
+            {project.tags.map((tag) => (
+              <span
+                key={tag}
+                className="font-mono uppercase"
+                style={{
+                  fontSize: "clamp(6px,0.55vw,7px)",
+                  color: "rgba(200,160,80,0.4)",
+                  letterSpacing: "0.22em",
+                  background: "rgba(200,160,80,0.06)",
+                  border: "0.5px solid rgba(200,160,80,0.15)",
+                  borderRadius: 2,
+                  padding: "2px 8px",
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          {/* Location */}
+          <span
+            className="font-mono"
+            style={{
+              fontSize: "clamp(7px,0.6vw,9px)",
+              color: "rgba(200,180,150,0.38)",
+              letterSpacing: "0.2em",
+              minWidth: 120,
+              textAlign: "right",
+            }}
+          >
+            {project.location}
+          </span>
+
+          {/* Area */}
+          <span
+            className="font-mono"
+            style={{
+              fontSize: "clamp(7px,0.6vw,9px)",
+              color: "rgba(200,180,150,0.32)",
+              letterSpacing: "0.18em",
+              minWidth: 100,
+              textAlign: "right",
+            }}
+          >
+            {project.area}
+          </span>
+
+          {/* Year */}
+          <span
+            className="font-mono"
+            style={{
+              fontSize: "clamp(7px,0.6vw,9px)",
+              color: "rgba(200,160,80,0.35)",
+              letterSpacing: "0.28em",
+            }}
+          >
+            {project.year}
+          </span>
+        </div>
+      </div>
+
+      {/* Hover brass rule — sweeps in from left */}
+      <motion.div
+        initial={{ scaleX: 0 }}
+        whileHover={{ scaleX: 1 }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          transformOrigin: "left",
+          position: "absolute",
+          bottom: -0.5,
+          left: 0,
+          right: 0,
+          height: "1px",
+          background:
+            "linear-gradient(90deg,#c8a052,#e8c070 50%,transparent)",
+          zIndex: 5,
+        }}
+      />
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// Page
+// ─────────────────────────────────────────────
+
+export default function CategoryPage() {
+  const params   = useParams();
+  const router   = useRouter();
+  const category = (params?.category as string) ?? "";
+
+  const meta     = CATEGORY_META[category];
+  const projects = PROJECTS[category] ?? [];
+
+  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+
+  // Redirect if unknown category
+  useEffect(() => {
+    if (!meta) router.replace("/");
+  }, [meta, router]);
+
+  if (!meta) return null;
+
+  return (
+    <>
+      {/* Cursor-following image */}
+      <CursorImage src={hoveredImage ?? ""} visible={!!hoveredImage} />
+
+      <main
+        className="min-h-screen"
+        style={{ background: "#060402" }}
+      >
+        {/* ── Header ── */}
+        <motion.header
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="sticky top-0 z-50 flex items-center justify-between"
+          style={{
+            padding: "clamp(16px,2.8vh,28px) clamp(24px,5vw,72px)",
+            borderBottom: "0.5px solid rgba(200,160,80,0.1)",
+            background: "rgba(6,4,2,0.92)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+          }}
+        >
+          {/* Back */}
+          <motion.button
+            onClick={() => router.back()}
+            whileHover={{ x: -3 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center gap-2 font-mono uppercase"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "clamp(7px,0.62vw,9px)",
+              color: "rgba(200,160,80,0.45)",
+              letterSpacing: "0.3em",
+              fontFamily: "inherit",
+            }}
+          >
+            <svg viewBox="0 0 14 10" fill="none" style={{ width: 12 }}>
+              <line x1="14" y1="5" x2="1" y2="5"
+                stroke="currentColor" strokeWidth="1" />
+              <polyline points="5,1 0,5 5,9"
+                stroke="currentColor" strokeWidth="1"
+                fill="none" strokeLinecap="round" />
+            </svg>
+            Back
+          </motion.button>
+
+          {/* Studio name */}
+          <span
+            className="font-serif"
+            style={{
+              fontSize: "clamp(11px,1vw,14px)",
+              color: "rgba(232,216,184,0.55)",
+              letterSpacing: "0.08em",
+            }}
+          >
+            Studio
+          </span>
+
+          {/* Category label */}
+          <span
+            className="font-mono uppercase"
+            style={{
+              fontSize: "clamp(7px,0.62vw,9px)",
+              color: "rgba(200,160,80,0.38)",
+              letterSpacing: "0.35em",
+            }}
+          >
+            {meta.label}
+          </span>
+        </motion.header>
+
+        {/* ── Hero ── */}
+        <section
+          style={{
+            padding:
+              "clamp(56px,10vh,110px) clamp(24px,5vw,72px) clamp(40px,7vh,80px)",
+          }}
+        >
+          <div className="flex flex-col gap-5 max-w-4xl">
+            {/* Eyebrow */}
+            <motion.div
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="flex items-center gap-4"
+            >
+              <span
+                className="font-mono uppercase tracking-[0.42em]"
+                style={{
+                  fontSize: "clamp(7px,0.62vw,9px)",
+                  color: "rgba(200,160,80,0.45)",
+                }}
+              >
+                Work — {meta.label}
+              </span>
+              <div
+                style={{
+                  width: "clamp(24px,3vw,48px)",
+                  height: "0.5px",
+                  background: "rgba(200,160,80,0.2)",
+                }}
+              />
+            </motion.div>
+
+            {/* Heading */}
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.8,
+                delay: 0.1,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="font-serif leading-none tracking-tight"
+              style={{
+                fontSize: "clamp(36px,7vw,100px)",
+                color: "#e8d8b8",
+              }}
+            >
+              {meta.label}
+            </motion.h1>
+
+            {/* Tagline */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.7, delay: 0.25 }}
+              className="font-serif italic"
+              style={{
+                fontSize: "clamp(14px,1.4vw,20px)",
+                color: "rgba(232,216,184,0.45)",
+                lineHeight: 1.5,
+              }}
+            >
+              {meta.tagline}
+            </motion.p>
+
+            {/* Description */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.7, delay: 0.35 }}
+              style={{
+                fontSize: "clamp(10px,0.88vw,13px)",
+                color: "rgba(200,180,150,0.42)",
+                lineHeight: 1.75,
+                maxWidth: "clamp(280px,44vw,560px)",
+                marginTop: 4,
+              }}
+            >
+              {meta.description}
+            </motion.p>
+          </div>
+
+          {/* Stats row */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.45 }}
+            className="flex items-center gap-10 mt-12"
+            style={{ borderTop: "0.5px solid rgba(200,160,80,0.1)", paddingTop: 24 }}
+          >
+            <div className="flex flex-col gap-1">
+              <span
+                className="font-serif"
+                style={{ fontSize: "clamp(22px,3vw,40px)", color: "#e8d8b8" }}
+              >
+                {projects.length}
+              </span>
+              <span
+                className="font-mono uppercase tracking-[0.3em]"
+                style={{
+                  fontSize: "clamp(6px,0.55vw,8px)",
+                  color: "rgba(200,160,80,0.38)",
+                }}
+              >
+                Projects
+              </span>
+            </div>
+
+            <div
+              style={{
+                width: "0.5px",
+                height: 36,
+                background: "rgba(200,160,80,0.15)",
+              }}
+            />
+
+            <div className="flex flex-col gap-1">
+              <span
+                className="font-serif"
+                style={{ fontSize: "clamp(22px,3vw,40px)", color: "#e8d8b8" }}
+              >
+                {new Date().getFullYear() - 2018}+
+              </span>
+              <span
+                className="font-mono uppercase tracking-[0.3em]"
+                style={{
+                  fontSize: "clamp(6px,0.55vw,8px)",
+                  color: "rgba(200,160,80,0.38)",
+                }}
+              >
+                Years
+              </span>
+            </div>
+          </motion.div>
+        </section>
+
+        {/* ── Project list ── */}
+        <section
+          style={{
+            padding: "0 clamp(24px,5vw,72px) clamp(80px,14vh,140px)",
+          }}
+        >
+          {/* Column headers */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="hidden md:flex items-center justify-between font-mono uppercase pb-4"
+            style={{
+              borderBottom: "0.5px solid rgba(200,160,80,0.15)",
+              fontSize: "clamp(6px,0.55vw,7px)",
+              color: "rgba(200,160,80,0.28)",
+              letterSpacing: "0.35em",
+              paddingLeft: "clamp(0px,2vw,32px)",
+            }}
+          >
+            <span>Project</span>
+            <div className="flex gap-8">
+              <span style={{ minWidth: 80 }}>Category</span>
+              <span style={{ minWidth: 120, textAlign: "right" }}>Location</span>
+              <span style={{ minWidth: 100, textAlign: "right" }}>Area</span>
+              <span style={{ minWidth: 40, textAlign: "right" }}>Year</span>
+            </div>
+          </motion.div>
+
+          {/* Rows */}
+          <div>
+            {projects.map((project, i) => (
+              <ProjectRow
+                key={project.id}
+                project={project}
+                index={i}
+                onHover={(img) => setHoveredImage(img)}
+                onLeave={() => setHoveredImage(null)}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* ── Footer rule ── */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ duration: 1, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            transformOrigin: "left",
+            height: "0.5px",
+            margin: "0 clamp(24px,5vw,72px)",
+            background:
+              "linear-gradient(90deg,rgba(200,160,80,0.2),rgba(200,160,80,0.05) 80%,transparent)",
+          }}
+        />
+
+        {/* ── Back to work ── */}
+        <div
+          style={{
+            padding: "clamp(32px,5vh,56px) clamp(24px,5vw,72px)",
+          }}
+        >
+          <motion.button
+            onClick={() => router.back()}
+            whileHover={{ x: -3 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center gap-3 font-mono uppercase"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "clamp(7px,0.62vw,9px)",
+              color: "rgba(200,160,80,0.35)",
+              letterSpacing: "0.35em",
+              fontFamily: "inherit",
+            }}
+          >
+            <svg viewBox="0 0 14 10" fill="none" style={{ width: 12 }}>
+              <line x1="14" y1="5" x2="1" y2="5"
+                stroke="currentColor" strokeWidth="1" />
+              <polyline points="5,1 0,5 5,9"
+                stroke="currentColor" strokeWidth="1"
+                fill="none" strokeLinecap="round" />
+            </svg>
+            All Work
+          </motion.button>
+        </div>
+      </main>
+    </>
+  );
+}
