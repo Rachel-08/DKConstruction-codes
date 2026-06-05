@@ -4,16 +4,19 @@ import { motion, type MotionValue } from "motion/react";
 import { projects } from "@/data/projects";
 
 type SelectedWorkProps = {
+  isActive: boolean;
   workX: MotionValue<string>;
   workOpacity: MotionValue<number>;
-  workHeadingY: MotionValue<number>;
+  workHeadingY: MotionValue<string>;
   workHeadingScale: MotionValue<number>;
-  workHeadingX: MotionValue<number>;
+  workHeadingX: MotionValue<string>;
   carouselX: MotionValue<string>;
   carouselOpacity: MotionValue<number>;
+  workExitY: MotionValue<string>;
 };
 
 export default function SelectedWork({
+  isActive,
   workX,
   workOpacity,
   workHeadingY,
@@ -21,6 +24,7 @@ export default function SelectedWork({
   workHeadingX,
   carouselX,
   carouselOpacity,
+  workExitY,
 }: SelectedWorkProps) {
   return (
     <motion.section
@@ -28,8 +32,9 @@ export default function SelectedWork({
       style={{
         x: workX,
         opacity: workOpacity,
+        y: workExitY,
       }}
-      className="pointer-events-auto absolute inset-0 z-[40] overflow-hidden bg-[#f5f2eb] px-6"
+      className={`absolute inset-0 overflow-hidden bg-[#f5f2eb] px-6 ${isActive ? "z-[90] pointer-events-auto" : "z-[10] pointer-events-none"}`}
     >
       {/* HEADING */}
       <motion.div
