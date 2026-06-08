@@ -1,0 +1,383 @@
+"use client";
+
+import { useRef, useState } from "react";
+import { motion, AnimatePresence, useInView, type MotionValue } from "motion/react";
+
+// ─────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────
+
+type TeamMember = {
+  id: number;
+  name: string;
+  role: string;
+  specialisation: string;
+  experience: string;
+  bio: string;
+  initials: string;
+};
+
+type TeamSectionProps = {
+  isActive: boolean;
+  teamOpacity: MotionValue<number>;
+  teamY: MotionValue<string>;
+  teamExitY: MotionValue<string>;
+};
+
+// ─────────────────────────────────────────────
+// Data — replace with real team
+// ─────────────────────────────────────────────
+
+const TEAM: TeamMember[] = [
+  {
+    id: 1,
+    name: "Arjun Mehta",
+    role: "Principal Architect",
+    specialisation: "Residential & Structural Design",
+    experience: "14 years",
+    bio: "Arjun leads all residential and structural projects at Aurea. With a background in both engineering and architecture, he brings technical rigour to every design decision — ensuring that aesthetic ambition is always grounded in buildable reality.",
+    initials: "AM",
+  },
+  {
+    id: 2,
+    name: "Priya Shah",
+    role: "Interior Design Lead",
+    specialisation: "Interior & 3D Visualisation",
+    experience: "9 years",
+    bio: "Priya oversees all interior design and 3D visualisation work. Her approach begins with material — she believes the tactile quality of a space is felt before it is seen, and her selections reflect that conviction.",
+    initials: "PS",
+  },
+  {
+    id: 3,
+    name: "Rohan Desai",
+    role: "Urban & Planning Specialist",
+    specialisation: "Urban Planning & Approvals",
+    experience: "11 years",
+    bio: "Rohan manages all planning, approval, and urban design work. His knowledge of municipal processes and regulatory frameworks means Aurea's projects move through approval stages without friction.",
+    initials: "RD",
+  },
+  {
+    id: 4,
+    name: "Nisha Patel",
+    role: "Project Manager",
+    specialisation: "Construction & Site Management",
+    experience: "8 years",
+    bio: "Nisha is on site as much as she is in the office. She coordinates contractors, manages programmes, and ensures every project is delivered to the standard the design demands — on time and on budget.",
+    initials: "NP",
+  },
+];
+
+// ─────────────────────────────────────────────
+// Member Card
+// ─────────────────────────────────────────────
+
+function MemberCard({
+  member,
+  index,
+}: {
+  member: TeamMember;
+  index: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-8%" });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 24 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{
+        duration: 0.65,
+        delay: index * 0.09,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      onClick={() => setExpanded((v) => !v)}
+      className="group cursor-pointer"
+      style={{
+        borderBottom: "0.5px solid rgba(26,18,8,0.1)",
+        padding: "clamp(20px,3.5vh,36px) 0",
+      }}
+    >
+      <div className="flex items-start gap-5 md:gap-8">
+
+        {/* Initials avatar */}
+        <motion.div
+          animate={{
+            background: expanded
+              ? "rgba(200,160,80,0.12)"
+              : "rgba(26,18,8,0.05)",
+            borderColor: expanded
+              ? "rgba(200,160,80,0.4)"
+              : "rgba(26,18,8,0.1)",
+          }}
+          transition={{ duration: 0.35 }}
+          className="shrink-0 flex items-center justify-center font-serif italic"
+          style={{
+            width: "clamp(44px,6vw,68px)",
+            height: "clamp(44px,6vw,68px)",
+            border: "0.5px solid rgba(26,18,8,0.1)",
+            borderRadius: 2,
+            fontSize: "clamp(14px,1.6vw,20px)",
+            color: expanded ? "#c8a052" : "rgba(26,18,8,0.4)",
+            transition: "color 0.35s",
+            flexShrink: 0,
+          }}
+        >
+          {member.initials}
+        </motion.div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-1">
+              {/* Name */}
+              <motion.h3
+                animate={{ color: expanded ? "#1a1208" : "rgba(26,18,8,0.72)" }}
+                transition={{ duration: 0.3 }}
+                className="font-serif leading-tight"
+                style={{
+                  fontSize: "clamp(18px,2.2vw,30px)",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {member.name}
+              </motion.h3>
+
+              {/* Role */}
+              <span
+                className="font-mono uppercase tracking-[0.28em]"
+                style={{
+                  fontSize: "clamp(6px,0.58vw,8px)",
+                  color: "rgba(200,160,80,0.65)",
+                }}
+              >
+                {member.role}
+              </span>
+            </div>
+
+            {/* Expand toggle */}
+            <motion.div
+              animate={{ rotate: expanded ? 45 : 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                width: "clamp(24px,2.8vw,34px)",
+                height: "clamp(24px,2.8vw,34px)",
+                border: "0.5px solid rgba(26,18,8,0.12)",
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                color: expanded ? "#c8a052" : "rgba(26,18,8,0.35)",
+                transition: "color 0.3s",
+              }}
+            >
+              <svg viewBox="0 0 12 12" fill="none" style={{ width: 10 }}>
+                <line x1="6" y1="1" x2="6" y2="11"
+                  stroke="currentColor" strokeWidth="1" />
+                <line x1="1" y1="6" x2="11" y2="6"
+                  stroke="currentColor" strokeWidth="1" />
+              </svg>
+            </motion.div>
+          </div>
+
+          {/* Specialisation + experience — always visible */}
+          <div className="flex flex-wrap items-center gap-3 mt-3">
+            <span
+              className="font-mono"
+              style={{
+                fontSize: "clamp(7px,0.62vw,9px)",
+                color: "rgba(26,18,8,0.38)",
+                letterSpacing: "0.15em",
+              }}
+            >
+              {member.specialisation}
+            </span>
+            <span
+              style={{
+                width: "0.5px",
+                height: 10,
+                background: "rgba(26,18,8,0.15)",
+                display: "inline-block",
+              }}
+            />
+            <span
+              className="font-mono"
+              style={{
+                fontSize: "clamp(7px,0.62vw,9px)",
+                color: "rgba(200,160,80,0.6)",
+                letterSpacing: "0.15em",
+              }}
+            >
+              {member.experience} experience
+            </span>
+          </div>
+
+          {/* Expandable bio */}
+          <AnimatePresence initial={false}>
+            {expanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                style={{ overflow: "hidden" }}
+              >
+                <p
+                  style={{
+                    fontSize: "clamp(10px,0.88vw,13px)",
+                    color: "rgba(26,18,8,0.58)",
+                    lineHeight: 1.8,
+                    marginTop: "clamp(10px,1.8vh,18px)",
+                    maxWidth: "clamp(280px,52vw,640px)",
+                  }}
+                >
+                  {member.bio}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Hint */}
+          <motion.span
+            animate={{ opacity: expanded ? 0.3 : 0.18 }}
+            className="font-mono mt-2 inline-block"
+            style={{
+              fontSize: "clamp(5px,0.5vw,7px)",
+              color: "rgba(26,18,8,0.35)",
+              letterSpacing: "0.28em",
+            }}
+          >
+            {expanded ? "— Collapse" : "+ Read more"}
+          </motion.span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// TeamSection
+// ─────────────────────────────────────────────
+
+export default function TeamSection({
+  isActive,
+  teamOpacity,
+  teamY,
+  teamExitY,
+}: TeamSectionProps) {
+  const headingRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(headingRef, { once: true, margin: "-6%" });
+
+  return (
+    <motion.section
+      style={{
+        opacity: teamOpacity,
+        y: isActive ? teamExitY : teamY,
+        position: "absolute",
+        inset: 0,
+        zIndex: 65,
+        pointerEvents: isActive ? "auto" : "none",
+        background: "#f5f2eb",
+        overflowY: "auto",
+        overflowX: "hidden",
+      }}
+      aria-hidden={!isActive}
+    >
+      <div
+        className="mx-auto"
+        style={{
+          maxWidth: "clamp(320px,72vw,860px)",
+          padding:
+            "clamp(64px,10vh,110px) clamp(24px,4vw,56px) clamp(80px,14vh,140px)",
+        }}
+      >
+        {/* Heading */}
+        <div ref={headingRef} className="mb-[clamp(36px,6vh,64px)]">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-col gap-3"
+          >
+            <div className="flex items-center gap-4">
+              <span
+                className="font-mono uppercase tracking-[0.42em]"
+                style={{
+                  fontSize: "clamp(7px,0.62vw,9px)",
+                  color: "rgba(200,160,80,0.55)",
+                }}
+              >
+                The People
+              </span>
+              <div
+                style={{
+                  flex: 1,
+                  height: "0.5px",
+                  background:
+                    "linear-gradient(90deg,rgba(26,18,8,0.12),transparent)",
+                }}
+              />
+            </div>
+
+            <h2
+              className="font-serif leading-none tracking-tight"
+              style={{
+                fontSize: "clamp(32px,6vw,86px)",
+                color: "#1a1208",
+              }}
+            >
+              Meet the Team
+            </h2>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.65, delay: 0.2 }}
+              style={{
+                fontSize: "clamp(10px,0.88vw,13px)",
+                color: "rgba(26,18,8,0.42)",
+                lineHeight: 1.75,
+                maxWidth: "clamp(240px,42vw,520px)",
+                marginTop: 4,
+              }}
+            >
+              Four disciplines. One shared conviction — that considered
+              architecture improves the lives of the people who inhabit it.
+            </motion.p>
+          </motion.div>
+        </div>
+
+        {/* Team list */}
+        <div
+          style={{
+            borderTop: "0.5px solid rgba(26,18,8,0.1)",
+          }}
+        >
+          {TEAM.map((member, i) => (
+            <MemberCard key={member.id} member={member} index={i} />
+          ))}
+        </div>
+
+        {/* Footer note */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="font-mono mt-[clamp(32px,5vh,56px)]"
+          style={{
+            fontSize: "clamp(7px,0.6vw,9px)",
+            color: "rgba(26,18,8,0.22)",
+            letterSpacing: "0.25em",
+            lineHeight: 1.7,
+          }}
+        >
+          Click any team member to read their full profile.
+          <br />
+          Aurea Studio · Ahmedabad, Gujarat
+        </motion.p>
+      </div>
+    </motion.section>
+  );
+}
