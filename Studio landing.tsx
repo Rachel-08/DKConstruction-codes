@@ -8,7 +8,7 @@ type StudioLandingProps = {
   landingOpacity: MotionValue<number>;
   landingY: MotionValue<string>;
   landingExitX: MotionValue<string>;
-  onNavigate?: (target: "home" | "howwework" | "team" | "contact") => void;
+  onNavigate?: (target: "home" | "services" | "team" | "contact") => void;
 };
 
 export default function StudioLanding({
@@ -118,7 +118,7 @@ export default function StudioLanding({
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => onNavigate?.("howwework")}
+          onClick={() => onNavigate?.("services")}
           style={{
             background: "transparent",
             border: "0.5px solid rgba(26,18,8,0.28)",
