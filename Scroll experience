@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { useScroll, useTransform, useMotionValueEvent } from "motion/react";
+import { motion, useScroll, useTransform, useMotionValueEvent, useMotionValue } from "motion/react";
 
 import LoadingScreen   from "@/components/LoadingScreen";
 import Navbar          from "@/components/Navbar";
@@ -9,9 +9,9 @@ import WelcomeWindow   from "@/components/WelcomeWindow";
 import StudioLanding   from "@/components/StudioLanding";
 import ServicesSection from "@/components/ServiceSection";
 import SelectedWork    from "@/components/SelectedWork";
-import HowWeWork       from "@/components/HowWeWork";
+import HowWeWork       from "@/components/About";
 import ContactSection  from "@/components/Contact";
-
+// import TeamSection from "@/components/TeamSection";
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
@@ -106,8 +106,23 @@ export default function ScrollExperience() {
   const isServicesActive  = activeSegment === "services";
   const isHowWeWorkActive = activeSegment === "howwework";
   const isWorkActive      = activeSegment === "work";
+  // const isTeamActive      = activeSegment === "team";
   const isContactActive   = activeSegment === "contact";
 
+  // const [showTeam, setShowTeam] = useState<boolean>(false);
+
+  // const teamOpacity = useMotionValue(showTeam ? 1 : 0);
+  // const teamY = useMotionValue(showTeam ? "0vh" : "40vh");
+  // const teamExitY = useMotionValue("0vh");
+
+  // // Sync motion values if state changes natively
+  // if (showTeam) {
+  //   teamOpacity.set(1);
+  //   teamY.set("0vh");
+  // } else {
+  //   teamOpacity.set(0);
+  //   teamY.set("40vh");
+  // }
   /**
    * MASTER TIMELINE (unchanged from your version)
    *
@@ -165,7 +180,7 @@ export default function ScrollExperience() {
   // ── Segment 3: Services ──
   const servicesOpacity = useTransform(
     scrollYProgress,
-    [0.22, 0.26, 0.32, 0.36],
+    [0.22, 0.24, 0.30, 0.32],
     [0,    1,    1,    0   ]
   );
   const servicesY = useTransform(
@@ -175,7 +190,7 @@ export default function ScrollExperience() {
   );
   const servicesExitY = useTransform(
     scrollYProgress,
-    [0.32, 0.36],
+    [0.30, 0.34],
     ["0vh", "-60vh"]
   );
 
@@ -207,8 +222,8 @@ export default function ScrollExperience() {
     [0.46, 0.52, 0.86, 0.88],
     [0,    1,    1,    0   ]
   );
-  const workHeadingY     = useTransform(scrollYProgress, [0.48, 0.52], ["0vh",  "-22vh"]);
-  const workHeadingScale = useTransform(scrollYProgress, [0.50, 0.54], [1,       0.45 ]);
+  const workHeadingY     = useTransform(scrollYProgress, [0.48, 0.52], ["0vh",  "-30vh"]);
+  const workHeadingScale = useTransform(scrollYProgress, [0.50, 0.54], [1,       0.75 ]);
   const workHeadingX     = useTransform(scrollYProgress, [0.50, 0.54], ["0vw",  "-14vw"]);
   const carouselOpacity  = useTransform(scrollYProgress, [0.52, 0.54], [0,       1    ]);
   const carouselX        = useTransform(scrollYProgress, [0.57, 0.82], ["25vw", "-95vw"]);
@@ -235,6 +250,26 @@ export default function ScrollExperience() {
     []
   );
 
+      // ── Master Navigation Callback ──
+    // ── Master Navigation Callback ──
+  const handleNavigate = useCallback((target: "home" | "howwework" | "team" | "contact") => {
+    // If team button is triggered here, let the navbar's internal router handles it
+    if (target === "team") return;
+
+    const progressMap: Record<"home" | "howwework" | "contact", number> = {
+      home: 0.18,
+      howwework: 0.41,
+      contact: 1,
+    };
+
+    const progressTarget = progressMap[target];
+    if (progressTarget !== undefined) {
+      scrollToProgress(progressTarget);
+    }
+  }, [scrollToProgress]);
+
+
+
   // ─────────────────────────────────────────
   // RENDER
   // ─────────────────────────────────────────
@@ -244,7 +279,7 @@ export default function ScrollExperience() {
       {!loadingDone && (
         <LoadingScreen
           onComplete={handleLoadingComplete}
-          studioName="Your Studio"
+          studioName="DK Constructions"
         />
       )}
 
@@ -255,7 +290,16 @@ export default function ScrollExperience() {
       >
         <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
 
-          <Navbar showNavbar={showNavbar} />
+           <Navbar
+        showNavbar={showNavbar}
+        activeSegment={
+          activeSegment === "intro" || activeSegment === "landing" || activeSegment === "services" || activeSegment === "work"
+            ? "home"
+            : activeSegment
+        }
+        onNavigate={handleNavigate}
+      />
+
 
           {/* SEGMENT 1 — Welcome Window */}
           <WelcomeWindow
@@ -277,6 +321,7 @@ export default function ScrollExperience() {
             landingOpacity={landingOpacity}
             landingY={landingY}
             landingExitX={landingExitX}
+            // onNavigate={handleNavigate}
           />
 
           {/* SEGMENT 3 — Services */}
@@ -308,6 +353,13 @@ export default function ScrollExperience() {
             workExitY={workExitY}
           />
 
+          {/* <TeamSection
+          isActive={showTeam}
+          teamOpacity={teamOpacity}
+          teamY={teamY}
+          teamExitY={teamExitY}
+          /> */}
+
           {/* SEGMENT 6 — Contact */}
           <ContactSection
             isActive={isContactActive}
@@ -329,11 +381,11 @@ export default function ScrollExperience() {
                     ease: "easeInOut",
                   }}
                 >
-                  <svg viewBox="0 0 16 9" fill="none" style={{ width: 14, height: 8 }}>
+                  <svg viewBox="0 0 16 9" fill="none" style={{ width: 20, height: 18 }}>
                     <polyline
                       points="1,1 8,8 15,1"
-                      stroke="rgba(200,160,80,0.7)"
-                      strokeWidth="1.5"
+                      stroke="rgba(200,160,80)"
+                      strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
@@ -342,7 +394,7 @@ export default function ScrollExperience() {
               ))}
               <span
                 className="font-mono uppercase tracking-[0.32em]"
-                style={{ fontSize: 7, color: "rgba(200,160,80,0.38)" }}
+                style={{ fontSize: 15, color: "rgba(200,160,80)" }}
               >
                 Scroll
               </span>
