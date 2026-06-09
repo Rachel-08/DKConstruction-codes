@@ -37,8 +37,8 @@ export default function StudioLanding({
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="mb-6 font-mono text-xs uppercase tracking-[0.45em]"
-          style={{ color: "rgba(26,18,8,0.4)" }}
+          className="font-mono text-xl uppercase tracking-[0.45em]"
+          style={{ color: "rgba(26,18,8)" }}
         >
           Welcome to
         </motion.p>
@@ -48,18 +48,18 @@ export default function StudioLanding({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
           className="font-serif italic tracking-[-0.06em]"
-          style={{ fontSize: "clamp(48px,10vw,130px)", color: "#1a1208" }}
+          style={{ fontSize: "clamp(48px,10vw,130px)", color: "#1a1208" , wordSpacing: "-0.08em"}}
         >
-          Aurea Studio
+          DK Constructions
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.65, delay: 0.32 }}
-          className="mx-auto mt-6 max-w-xl leading-relaxed"
+          className="mx-auto mt-2 max-w-xl leading-relaxed"
           style={{
-            fontSize: "clamp(13px,1.2vw,18px)",
+            fontSize: "clamp(13px,1.5vw,20px)",
             color: "rgba(26,18,8,0.52)",
           }}
         >
@@ -83,7 +83,7 @@ export default function StudioLanding({
           style={{
             background: "#1a1208",
             border: "none",
-            borderRadius: 2,
+            borderRadius: 10,
             padding: "clamp(11px,1.6vh,15px) clamp(22px,3vw,36px)",
             cursor: "pointer",
             fontFamily: "inherit",
@@ -106,7 +106,7 @@ export default function StudioLanding({
           <span
             className="relative font-mono uppercase tracking-[0.32em]"
             style={{
-              fontSize: "clamp(7px,0.68vw,10px)",
+              fontSize: "clamp(7px,0.70vw,12px)",
               color: "rgba(232,216,184,0.9)",
             }}
           >
@@ -122,7 +122,7 @@ export default function StudioLanding({
           style={{
             background: "transparent",
             border: "0.5px solid rgba(26,18,8,0.28)",
-            borderRadius: 2,
+            borderRadius: 10,
             padding: "clamp(11px,1.6vh,15px) clamp(22px,3vw,36px)",
             cursor: "pointer",
             fontFamily: "inherit",
@@ -144,7 +144,7 @@ export default function StudioLanding({
           <span
             className="relative font-mono uppercase tracking-[0.32em]"
             style={{
-              fontSize: "clamp(7px,0.68vw,10px)",
+              fontSize: "clamp(7px,0.70vw,12px)",
               color: "rgba(26,18,8,0.55)",
             }}
           >
@@ -154,7 +154,7 @@ export default function StudioLanding({
       </motion.div>
 
       {/* Scroll hint */}
-      <motion.div
+      {/* <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.7 }}
@@ -180,7 +180,7 @@ export default function StudioLanding({
         >
           Scroll
         </span>
-      </motion.div>
+      </motion.div> */}
     </motion.section>
   );
 }
