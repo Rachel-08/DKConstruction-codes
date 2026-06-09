@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import { motion, AnimatePresence, type MotionValue } from "motion/react";
+import { relative } from "path";
+
 
 // ─────────────────────────────────────────────
 // Types
@@ -37,7 +39,7 @@ const SERVICES: Service[] = [
   {
     id: 1,
     number: "01",
-    keyword: "BUILD",
+    keyword: "Contruction",
     fullTitle: "Complete Building Construction",
     description:
       "Full-scale construction with premium materials. From foundation to finishing — every element sourced, managed, and delivered.",
@@ -108,8 +110,7 @@ const SERVICES: Service[] = [
 
 function ContactOverlay({ onClose }: { onClose: () => void }) {
   const [form, setForm] = useState<ContactForm>({ phone: "", email: "" });
-  const [status, setStatus] = useState
-    "idle" | "sending" | "sent" | "error"
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error"
   >("idle");
 
   const handleSubmit = async () => {
@@ -177,7 +178,7 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
                 color: "rgba(200,160,80,0.45)",
               }}
             >
-              Let's Connect
+              Lets Connect
             </span>
             <h3
               className="font-serif leading-tight"
@@ -186,17 +187,17 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
                 color: "#e8d8b8",
               }}
             >
-              Let's Make Fortune
+              Lets Make Fortune
             </h3>
             <p
               style={{
-                fontSize: "clamp(9px,0.78vw,11px)",
+                fontSize: "clamp(9px,0.80vw,15px)",
                 color: "rgba(200,180,150,0.42)",
-                lineHeight: 1.65,
+                lineHeight: 1.55,
                 maxWidth: 260,
               }}
             >
-              Drop your number and we'll reach out to begin your project.
+              Drop your number and we will reach out to begin your project.
             </p>
           </div>
           <button
@@ -206,8 +207,8 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
               border: "none",
               cursor: "pointer",
               color: "rgba(200,160,80,0.3)",
-              fontSize: 13,
-              padding: 4,
+              fontSize: 16,
+              padding: 2,
             }}
           >
             ✕
@@ -257,7 +258,7 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
                   letterSpacing: "0.25em",
                 }}
               >
-                WE'LL BE IN TOUCH SHORTLY
+                WE WILL BE IN TOUCH SHORTLY
               </p>
             </div>
           </motion.div>
@@ -267,7 +268,7 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
               <label
                 className="font-mono uppercase tracking-[0.28em]"
                 style={{
-                  fontSize: "clamp(6px,0.58vw,8px)",
+                  fontSize: "clamp(6px,0.60vw,12px)",
                   color: "rgba(200,160,80,0.4)",
                 }}
               >
@@ -303,7 +304,7 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
               <label
                 className="font-mono uppercase tracking-[0.28em]"
                 style={{
-                  fontSize: "clamp(6px,0.58vw,8px)",
+                  fontSize: "clamp(6px,0.60vw,12px)",
                   color: "rgba(200,160,80,0.4)",
                 }}
               >
@@ -393,6 +394,7 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
 // ServiceColumn
 // ─────────────────────────────────────────────
 
+
 function ServiceColumn({
   service,
   index,
@@ -423,29 +425,26 @@ function ServiceColumn({
             : undefined,
       }}
     >
-      {/* ── IMAGE — top anchored, bleeds into black ── */}
-      <div
-        className="relative w-full shrink-0"
-        style={{ height: "62vh" }}
-      >
+      {/* ── IMAGE WRAPPER ── */}
+      <div className="relative w-full shrink-0" style={{ height: "62vh" }}>
         {/* Photo */}
         <motion.img
           src={service.image}
           alt={service.fullTitle}
           draggable={false}
-          animate={{ scale: hovered ? 1.05 : 1 }}
+          animate={{ scale: hovered ? 1 : 1 }}
           transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
           className="absolute inset-0 w-full h-full object-cover object-top select-none"
           style={{ transformOrigin: "top center" }}
         />
 
-        {/* Bottom blend — image fades into black */}
+        {/* Bottom blend — Gradient Backdrop */}
         <div
           className="absolute left-0 right-0 bottom-0"
           style={{
-            height: "55%",
+            height: "100%",
             background:
-              "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.55) 40%, #000 100%)",
+              "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.65) 35%, rgba(0,0,0,0.9) 80%, #000 100%)",
             pointerEvents: "none",
           }}
         />
@@ -454,9 +453,7 @@ function ServiceColumn({
         <div
           className="absolute inset-0"
           style={{
-            background: hovered
-              ? "rgba(0,0,0,0.15)"
-              : "rgba(0,0,0,0.32)",
+            background: hovered ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.32)",
             transition: "background 0.45s ease",
           }}
         />
@@ -472,8 +469,7 @@ function ServiceColumn({
             left: 0,
             right: 0,
             height: "1.5px",
-            background:
-              "linear-gradient(90deg,#c8a052,#e8c070,transparent)",
+            background: "linear-gradient(90deg,#c8a052,#e8c070,transparent)",
             zIndex: 10,
           }}
         />
@@ -492,109 +488,97 @@ function ServiceColumn({
         >
           {service.number}
         </div>
-      </div>
 
-      {/* ── LABEL PANEL — transparent, below image blend ── */}
-      <div
-        className="relative flex flex-col"
-        style={{
-          background: "rgba(0,0,0,0)",
-          flex: 1,
-          padding: "clamp(10px,1.6vh,18px) clamp(10px,1.4vw,18px)",
-        }}
-      >
-        {/* Transparent label chip */}
+        {/* ── LABEL PANEL CONTAINER ── */}
         <div
+          className="absolute left-0 right-0"
           style={{
-            display: "inline-block",
-            background: "rgba(255,255,255,0.04)",
-            border: "0.5px solid rgba(200,160,80,0.14)",
-            borderRadius: 2,
-            padding: "clamp(5px,0.8vh,9px) clamp(8px,1vw,14px)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-            marginBottom: "clamp(8px,1.2vh,14px)",
+            bottom: "-60px", 
+            height: "40vh", /* Absolute height ceiling protects upper image area */
+            zIndex: 20,
+            pointerEvents: "none",
           }}
         >
-          <h3
-            className="font-serif font-bold leading-none"
+          {/* TITLE HEADER CHIP BAR */}
+          <div
             style={{
-              fontSize: "clamp(13px,1.6vw,22px)",
-              color: hovered ? "#fff8ee" : "rgba(240,224,192,0.82)",
-              letterSpacing: "0.03em",
-              transition: "color 0.35s ease",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
+              width: "100%",
+              background: "rgba(255,255,255,0.04)",
+              padding: "clamp(5px,0.8vh,9px) clamp(8px,1vw,14px)",
+              backdropFilter: "blur(6px)",
+              WebkitBackdropFilter: "blur(6px)",
             }}
           >
-            {service.keyword}
-          </h3>
-        </div>
-
-        {/* Full title */}
-        <p
-          className="font-serif leading-snug"
-          style={{
-            fontSize: "clamp(9px,0.85vw,12px)",
-            color: "rgba(220,200,165,0.55)",
-            marginBottom: "clamp(6px,1vh,10px)",
-            lineHeight: 1.45,
-          }}
-        >
-          {service.fullTitle}
-        </p>
-
-        {/* Details — fade in on hover */}
-        <AnimatePresence>
-          {hovered && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-2"
+            <h3
+              className="font-serif font-bold leading-none"
+              style={{
+                textAlign: "right",
+                fontSize: "clamp(13px,1.6vw,22px)",
+                color: hovered ? "#fff8ee" : "rgba(240,224,192,0.82)",
+                letterSpacing: "0.03em",
+                transition: "color 0.35s ease",
+                whiteSpace: "wrap",
+              }}
             >
-              <p
-                style={{
-                  fontSize: "clamp(8px,0.72vw,10px)",
-                  color: "rgba(210,190,158,0.65)",
-                  lineHeight: 1.65,
-                }}
-              >
-                {service.description}
-              </p>
-              <div className="flex flex-col gap-1 mt-1">
-                {service.detail.map((d, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 font-mono"
+              {service.fullTitle}
+            </h3>
+          </div>
+
+          {/* DETAILS BOX: Pushed lower and flows downwards safely */}
+          <div 
+            className="flex flex-col gap-2"
+            style={{
+              paddingTop: "clamp(12px, 1.8vh, 20px)", /* Pushes details a little lower from header */
+            }}
+          >
+            <p
+              style={{
+                fontSize: "clamp(8px,0.80vw,16px)",
+                color: "rgba(210,190,158,0.65)",
+                lineHeight: 1.4,
+                padding: "0 10px",
+              }}
+            >
+              {service.description}
+            </p>
+
+            {/* List tags layout */}
+            <div className="flex flex-col gap-1.5 mt-1">
+              {service.detail.map((d, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 font-mono"
+                  style={{
+                    fontSize: "clamp(6px,0.80vw,16px)",
+                    color: "rgba(200,160,80,0.48)",
+                    letterSpacing: "0.18em",
+                    lineHeight: 2.2,
+                    paddingLeft: "10px",
+                  }}
+                >
+                  <span
                     style={{
-                      fontSize: "clamp(6px,0.58vw,8px)",
-                      color: "rgba(200,160,80,0.48)",
-                      letterSpacing: "0.18em",
+                      width: 12,
+                      height: "1px",
+                      background: "rgba(200,160,80,0.3)",
+                      flexShrink: 0,
+                      transform: "translateY(0.5px)",
                     }}
-                  >
-                    <span
-                      style={{
-                        width: 12,
-                        height: "0.5px",
-                        background: "rgba(200,160,80,0.3)",
-                        flexShrink: 0,
-                        display: "inline-block",
-                      }}
-                    />
+                  />
+                  <span style={{ whiteSpace: "nowrap" }}>
                     {d.toUpperCase()}
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
       </div>
     </motion.div>
   );
 }
+
 
 // ─────────────────────────────────────────────
 // ServicesSection
@@ -667,87 +651,57 @@ className="flex"
         </div>
 
         {/* ── Bottom strip ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="relative flex items-end justify-between shrink-0"
-          style={{
-            padding:
-              "clamp(14px,2.4vh,28px) clamp(22px,3.8vw,52px) clamp(16px,2.8vh,30px)",
-            borderTop: "0.5px solid rgba(255,255,255,0.05)",
-            background:
-"linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0.85) 100%)",
-          }}
-        >
-          {/* Left — "What we do" cursive + paragraph */}
-          <div
-            className="flex flex-col gap-2"
-            style={{ maxWidth: "clamp(180px,32vw,420px)" }}
-          >
-            <span
-              style={{
-                fontFamily: "'Dancing Script', 'Pacifico', cursive",
-                fontSize: "clamp(20px,2.8vw,42px)",
-                color: "rgba(255,255,255,0.88)",
-                lineHeight: 1.1,
-                fontWeight: 600,
-              }}
-            >
-              What we do
-            </span>
-            <p
-              style={{
-                fontSize: "clamp(8px,0.72vw,11px)",
-                color: "rgba(200,180,150,0.42)",
-lineHeight: 1.7,
-                maxWidth: "clamp(160px,24vw,340px)",
-              }}
-            >
-              Six disciplines practised under one roof — from the first sketch to the final handover. Every project built with the same commitment to precision, material, and craft.
-            </p>
-          </div>
+<motion.div
+  initial={{ opacity: 0, y: 16 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.75, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+  className="relative flex items-end shrink-0 bottom-[10%] bg-gradient-to-b from-transparent to-black/85 p-[clamp(14px,2.4vh,28px)_clamp(22px,3.8vw,52px)_clamp(16px,2.8vh,30px)]"
+>
+  {/* Left — "What we do" cursive + paragraph */}
+<div className="flex flex-col gap-4 w-full max-w-[85vw] xl:max-w-[75vw]">
+  <span className="font-cursive text-[clamp(40px,8vw,7rem)] text-white/95 leading-none font-extrabold tracking-wide">
+    What we do
+  </span>
+  <p className="text-[clamp(15px,1.6vw,18px)] text-[#c8b496]/70 leading-relaxed max-w-[95%] md:max-w-[85%] font-light italic tracking-wide balance">
+    Six disciplines practised under one roof — from the first sketch to the final handover. 
+    Every project built with the same commitment to precision, material, and craft.
+  </p>
+</div>
+
+
 
           {/* Right — CTA */}
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setShowOverlay(true)}
-            style={{
-              background: "transparent",
-              border: "0.5px solid rgba(200,160,80,0.42)",
-              borderRadius: 2,
-              padding:
-                "clamp(10px,1.4vh,16px) clamp(18px,2.6vw,36px)",
-              cursor: "pointer",
-              fontFamily: "inherit",
-              position: "relative",
-              overflow: "hidden",
-flexShrink: 0,
-            }}
-          >
-            {/* Hover fill */}
-            <motion.div
-              initial={{ scaleX: 0 }}
-              whileHover={{ scaleX: 1 }}
-              style={{
-                transformOrigin: "left",
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(90deg,rgba(200,160,80,0.14),rgba(200,160,80,0.06))",
-              }}
-            />
-            <span
-              className="relative font-mono uppercase tracking-[0.32em]"
-              style={{
-                fontSize: "clamp(7px,0.68vw,10px)",
-                color: "rgba(200,160,80,0.78)",
-              }}
-            >
-              Let's Make Fortune
-            </span>
-          </motion.button>
+<motion.button
+  initial="initial"
+  whileHover="hover"
+  whileTap={{ scale: 0.97 }}
+  onClick={() => setShowOverlay(true)}
+  className="group relative bg-[#c8b496] border border-white/20 shrink-0 cursor-pointer overflow-hidden transition-transform duration-300 rounded-[24px_0px_24px_0px] p-[clamp(10px,1.4vh,16px)_clamp(18px,2.6vw,36px)]"
+>
+  {/* Sliding Background Layer */}
+  <motion.div
+    variants={{
+      initial: { x: "-100%" },
+      hover: { x: 0 }
+    }}
+    transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+    className="absolute inset-0 bg-black"
+  />
+
+  {/* Button Text */}
+  <motion.span
+    variants={{
+      initial: { color: "#000000" },
+      hover: { color: "#ffffff" }
+    }}
+    transition={{ duration: 0.3 }}
+    className="relative z-10 block text-black font-mono uppercase tracking-[0.32em] font-semibold text-[clamp(9px,0.75vw,11px)]"
+  >
+    Lets Make Fortune
+  </motion.span>
+</motion.button>
+
+
 </motion.div>
       </motion.section>
 
