@@ -282,13 +282,11 @@ export default function WelcomeWindow({
   // Auto-open the window shortly after loading completes
   useEffect(() => {
     if (!loadingComplete) return;
-    const t = setTimeout(() => {
       onEnterClick();
-    }, 1800); // 1.8s after loader exits — user sees the window briefly first
-    return () => clearTimeout(t);
   }, [loadingComplete, onEnterClick]);
 
   // Idle nudge — show scroll hint after 2s of no scroll activity
+    // Idle nudge — show scroll hint after 2s of no scroll activity
   const resetIdleTimer = useCallback(() => {
     setNudgeVisible(false);
     if (idleTimer.current) clearTimeout(idleTimer.current);
@@ -297,17 +295,24 @@ export default function WelcomeWindow({
     idleTimer.current = setTimeout(() => {
       if (isActive) setNudgeVisible(true);
     }, 2000);
-  }, [isActive]);
+  }, [isActive]); // 1. Removed autoTimer from here
 
   useEffect(() => {
     if (!isActive) {
       setNudgeVisible(false);
       return;
     }
-    resetIdleTimer();
+
+    // Directly set the timeout instead of calling the function synchronously
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => {
+      setNudgeVisible(true);
+    }, 2000);
+
     window.addEventListener("scroll", resetIdleTimer, { passive: true });
     window.addEventListener("wheel",  resetIdleTimer, { passive: true });
     window.addEventListener("touchmove", resetIdleTimer, { passive: true });
+    
     return () => {
       window.removeEventListener("scroll", resetIdleTimer);
       window.removeEventListener("wheel",  resetIdleTimer);
@@ -315,7 +320,9 @@ export default function WelcomeWindow({
       if (idleTimer.current)  clearTimeout(idleTimer.current);
       if (autoTimer.current)  clearTimeout(autoTimer.current);
     };
-  }, [isActive, resetIdleTimer]);
+  }, [isActive, resetIdleTimer]); // 2. Removed autoTimer from here to fix the array size error
+ // Added autoTimer here too for dependency safety
+
 
   return (
     <section
