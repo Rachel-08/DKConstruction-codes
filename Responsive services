@@ -1,0 +1,741 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence, type MotionValue } from "motion/react";
+
+// ─────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────
+
+type Service = {
+  id: number;
+  number: string;
+  keyword: string;
+  fullTitle: string;
+  description: string;
+  detail: string[];
+  image: string;
+};
+
+type ServicesSectionProps = {
+  isActive: boolean;
+  servicesOpacity: MotionValue<number>;
+  servicesY: MotionValue<string>;
+  servicesExitY: MotionValue<string>;
+};
+
+type ContactForm = {
+  phone: string;
+  email: string;
+};
+
+// ─────────────────────────────────────────────
+// Data
+// ─────────────────────────────────────────────
+
+const SERVICES: Service[] = [
+  {
+    id: 1,
+    number: "01",
+    keyword: "Construction",
+    fullTitle: "Complete Building Construction",
+    description:
+      "Full-scale construction with premium materials. From foundation to finishing — every element sourced, managed, and delivered.",
+    detail: ["Foundation", "Structure", "Finishing", "Materials"],
+    image:
+      "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: 2,
+    number: "02",
+    keyword: "PLAN",
+    fullTitle: "Floor Planning & Design",
+    description:
+      "Precise spatial layouts that balance flow, function, and form. Every square foot considered with purpose.",
+    detail: ["Layouts", "Zoning", "Flow", "Function"],
+    image:
+      "https://images.unsplash.com/photo-1486325212027-8081e485255e?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: 3,
+    number: "03",
+    keyword: "STRUCT",
+    fullTitle: "Structural Design",
+    description:
+      "Engineering-grade structural systems designed for longevity, safety, and load integrity across all typologies.",
+    detail: ["Engineering", "Safety", "Loads", "Systems"],
+    image:
+      "https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: 4,
+    number: "04",
+    keyword: "DESIGN",
+    fullTitle: "3D Interior & Exterior Design",
+    description:
+      "Photorealistic 3D visualisations with material selection, lighting simulation, and finish specification.",
+    detail: ["3D Renders", "Materials", "Lighting", "Exteriors"],
+    image:
+      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: 5,
+    number: "05",
+    keyword: "APPROVE",
+    fullTitle: "Municipality & Approval Services",
+    description:
+      "End-to-end handling of Municipal, N.A.C., Fire & BRIT approvals. We navigate compliance so your project moves without friction.",
+    detail: ["Municipal", "N.A.C.", "Fire NOC", "BRIT"],
+    image:
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    id: 6,
+    number: "06",
+    keyword: "RENEW",
+    fullTitle: "Renovation Work",
+    description:
+      "Considered renovation that respects existing character while introducing contemporary precision. Old bones, new life.",
+    detail: ["Restoration", "Remodel", "Retrofit", "Refresh"],
+    image:
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800&auto=format&fit=crop",
+  },
+];
+
+// ─────────────────────────────────────────────
+// Contact Overlay
+// ─────────────────────────────────────────────
+
+function ContactOverlay({ onClose }: { onClose: () => void }) {
+  const [form, setForm] = useState<ContactForm>({ phone: "", email: "" });
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
+    "idle"
+  );
+
+  const handleSubmit = async () => {
+    if (!form.phone) return;
+
+    setStatus("sending");
+
+    try {
+      const res = await fetch(
+        `https://graph.facebook.com/v19.0/YOUR_PHONE_NUMBER_ID/messages`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer YOUR_WHATSAPP_ACCESS_TOKEN`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messaging_product: "whatsapp",
+            to: form.phone.replace(/\D/g, ""),
+            type: "text",
+            text: {
+              body: `Hello! Thank you for reaching out.\n\nWe've received your enquiry and our team will contact you shortly.\n\n— The Studio`,
+            },
+          }),
+        }
+      );
+
+      setStatus(res.ok ? "sent" : "error");
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+      className="fixed inset-0 z-[300] flex items-center justify-center px-4 py-6"
+      style={{
+        background: "rgba(0,0,0,0.8)",
+        backdropFilter: "blur(10px)",
+      }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 36, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 36, scale: 0.95 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-[480px] overflow-hidden rounded-[10px] sm:rounded-[4px]"
+        style={{
+          background: "linear-gradient(160deg,#0c0a06 0%,#060402 100%)",
+          border: "0.5px solid rgba(200,160,80,0.2)",
+          boxShadow: "0 48px 120px rgba(0,0,0,0.9)",
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-start justify-between p-5 sm:p-6"
+          style={{ borderBottom: "0.5px solid rgba(200,160,80,0.1)" }}
+        >
+          <div className="flex flex-col gap-2">
+            <span
+              className="font-mono text-[7px] uppercase tracking-[0.32em] sm:text-[8px] sm:tracking-[0.38em]"
+              style={{ color: "rgba(200,160,80,0.45)" }}
+            >
+              Lets Connect
+            </span>
+
+            <h3
+              className="font-serif text-[24px] leading-tight sm:text-[30px]"
+              style={{ color: "#e8d8b8" }}
+            >
+              Lets Make Fortune
+            </h3>
+
+            <p
+              className="max-w-[260px] text-[12px] leading-relaxed sm:text-[14px]"
+              style={{ color: "rgba(200,180,150,0.42)" }}
+            >
+              Drop your number and we will reach out to begin your project.
+            </p>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="flex size-8 items-center justify-center rounded-full transition hover:bg-white/5"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "rgba(200,160,80,0.45)",
+              fontSize: 16,
+            }}
+            aria-label="Close contact form"
+          >
+            ✕
+          </button>
+        </div>
+
+        {status === "sent" ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center gap-5 p-8 text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+              className="flex size-[52px] items-center justify-center rounded-full"
+              style={{
+                border: "1px solid rgba(200,160,80,0.4)",
+              }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" className="size-[22px]">
+                <polyline
+                  points="4,12 9,17 20,7"
+                  stroke="rgba(200,160,80,0.85)"
+                  strokeWidth="1.5"
+                />
+              </svg>
+            </motion.div>
+
+            <div className="flex flex-col gap-2">
+              <p
+                className="font-serif text-[18px] sm:text-[20px]"
+                style={{ color: "#e8d8b8" }}
+              >
+                Message sent
+              </p>
+
+              <p
+                className="font-mono text-[8px] tracking-[0.25em]"
+                style={{ color: "rgba(200,160,80,0.4)" }}
+              >
+                WE WILL BE IN TOUCH SHORTLY
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+          <div className="flex flex-col gap-4 p-5 sm:p-6">
+            <div className="flex flex-col gap-2">
+              <label
+                className="font-mono text-[8px] uppercase tracking-[0.24em] sm:text-[10px] sm:tracking-[0.28em]"
+                style={{ color: "rgba(200,160,80,0.4)" }}
+              >
+                Phone Number *
+              </label>
+
+              <input
+                type="tel"
+                value={form.phone}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, phone: e.target.value }))
+                }
+                placeholder="+91 98765 43210"
+                className="w-full rounded-[4px] px-4 py-3 text-[14px] outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.025)",
+                  border: "0.5px solid rgba(200,160,80,0.14)",
+                  color: "#e8d8b8",
+                  fontFamily: "inherit",
+                }}
+                onFocus={(e) =>
+                  (e.target.style.borderColor = "rgba(200,160,80,0.45)")
+                }
+                onBlur={(e) =>
+                  (e.target.style.borderColor = "rgba(200,160,80,0.14)")
+                }
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label
+                className="font-mono text-[8px] uppercase tracking-[0.24em] sm:text-[10px] sm:tracking-[0.28em]"
+                style={{ color: "rgba(200,160,80,0.4)" }}
+              >
+                Email{" "}
+                <span
+                  style={{
+                    color: "rgba(200,160,80,0.22)",
+                    letterSpacing: "0.1em",
+                  }}
+                >
+                  (optional)
+                </span>
+              </label>
+
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, email: e.target.value }))
+                }
+                placeholder="you@example.com"
+                className="w-full rounded-[4px] px-4 py-3 text-[14px] outline-none"
+                style={{
+                  background: "rgba(255,255,255,0.025)",
+                  border: "0.5px solid rgba(200,160,80,0.14)",
+                  color: "#e8d8b8",
+                  fontFamily: "inherit",
+                }}
+                onFocus={(e) =>
+                  (e.target.style.borderColor = "rgba(200,160,80,0.45)")
+                }
+                onBlur={(e) =>
+                  (e.target.style.borderColor = "rgba(200,160,80,0.14)")
+                }
+              />
+            </div>
+
+            <motion.button
+              whileHover={form.phone ? { scale: 1.015 } : {}}
+              whileTap={form.phone ? { scale: 0.985 } : {}}
+              onClick={handleSubmit}
+              disabled={!form.phone || status === "sending"}
+              className="mt-2 rounded-[4px] px-6 py-4"
+              style={{
+                background: form.phone
+                  ? "linear-gradient(90deg,#c8a052,#e8c070,#b88840)"
+                  : "rgba(200,160,80,0.1)",
+                border: "none",
+                cursor: form.phone ? "pointer" : "not-allowed",
+                fontFamily: "inherit",
+              }}
+            >
+              <span
+                className="font-mono text-[8px] uppercase tracking-[0.28em] sm:text-[9px] sm:tracking-[0.32em]"
+                style={{
+                  color: form.phone ? "#0e0b07" : "rgba(200,160,80,0.3)",
+                }}
+              >
+                {status === "sending" ? "Sending..." : "Send Message"}
+              </span>
+            </motion.button>
+
+            {status === "error" && (
+              <p
+                className="text-center font-mono text-[8px] tracking-[0.2em]"
+                style={{ color: "rgba(220,100,80,0.7)" }}
+              >
+                FAILED — PLEASE TRY AGAIN
+              </p>
+            )}
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ServiceColumn
+// ─────────────────────────────────────────────
+
+function ServiceColumn({
+  service,
+  index,
+  total,
+}: {
+  service: Service;
+  index: number;
+  total: number;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: 0.7,
+        delay: index * 0.07,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      className="
+        relative flex cursor-default overflow-hidden bg-black
+
+        h-[210px] flex-row rounded-[18px] border border-white/10
+        min-[390px]:h-[225px]
+
+        md:h-auto md:flex-1 md:flex-col md:rounded-none md:border-0
+      "
+      style={{
+        borderRight:
+          index < total - 1
+            ? "0.5px solid rgba(255,255,255,0.06)"
+            : undefined,
+      }}
+    >
+      {/* Image area */}
+      <div
+        className="
+          relative h-full w-[42%] shrink-0 overflow-hidden
+          md:h-[62vh] md:w-full
+        "
+      >
+        <motion.img
+          src={service.image}
+          alt={service.fullTitle}
+          draggable={false}
+          animate={{ scale: hovered ? 1.04 : 1 }}
+          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+          className="
+            absolute inset-0 h-full w-full select-none object-cover object-center
+            md:object-top
+          "
+          style={{ transformOrigin: "top center" }}
+        />
+
+        {/* Mobile image dark overlay */}
+        <div className="absolute inset-0 bg-black/20 md:hidden" />
+
+        {/* Desktop bottom blend */}
+        <div
+          className="absolute inset-x-0 bottom-0 hidden md:block"
+          style={{
+            height: "100%",
+            background:
+              "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.65) 35%, rgba(0,0,0,0.9) 80%, #000 100%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        {/* Desktop side darkening */}
+        <div
+          className="absolute inset-0 hidden md:block"
+          style={{
+            background: hovered ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.32)",
+            transition: "background 0.45s ease",
+          }}
+        />
+
+        {/* Top brass rule */}
+        <motion.div
+          animate={{ scaleX: hovered ? 1 : 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="absolute inset-x-0 top-0 z-10 h-[1.5px] origin-left"
+          style={{
+            background: "linear-gradient(90deg,#c8a052,#e8c070,transparent)",
+          }}
+        />
+
+        {/* Service number */}
+        <div
+          className="
+            absolute z-10 font-mono
+            left-3 top-3 text-[8px] tracking-[0.28em]
+            md:left-[clamp(10px,1.4vw,18px)]
+            md:top-[clamp(12px,2vh,20px)]
+            md:text-[clamp(7px,0.6vw,9px)]
+            md:tracking-[0.32em]
+          "
+          style={{ color: "rgba(200,160,80,0.6)" }}
+        >
+          {service.number}
+        </div>
+      </div>
+
+      {/* Details area */}
+      <div
+        className="
+          relative flex min-w-0 flex-1 flex-col justify-center px-4 py-4
+
+          md:absolute md:inset-x-0 md:bottom-[-60px] md:z-20
+          md:h-[40vh] md:p-0
+        "
+        style={{ pointerEvents: "none" }}
+      >
+        {/* Mobile keyword */}
+        <span className="mb-2 block font-mono text-[7px] uppercase tracking-[0.26em] text-[#c8a052]/55 md:hidden">
+          {service.keyword}
+        </span>
+
+        {/* Title chip */}
+        <div
+          className="
+            w-full rounded-none bg-transparent p-0
+
+            md:bg-[rgba(255,255,255,0.04)]
+            md:px-[clamp(8px,1vw,14px)]
+            md:py-[clamp(5px,0.8vh,9px)]
+          "
+          style={{
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+          }}
+        >
+          <h3
+            className="
+              font-serif text-[20px] font-bold leading-[0.95]
+
+              md:text-right md:text-[clamp(13px,1.6vw,22px)] md:leading-none
+            "
+            style={{
+              color: hovered ? "#fff8ee" : "rgba(240,224,192,0.86)",
+              letterSpacing: "0.03em",
+              transition: "color 0.35s ease",
+            }}
+          >
+            {service.fullTitle}
+          </h3>
+        </div>
+
+        {/* Description + tags */}
+        <div className="mt-3 flex flex-col gap-3 md:mt-0 md:gap-2 md:pt-[clamp(12px,1.8vh,20px)]">
+          <p
+            className="
+              line-clamp-3 text-[11px] leading-relaxed
+
+              md:line-clamp-none md:px-[10px]
+              md:text-[clamp(8px,0.80vw,16px)]
+              md:leading-[1.4]
+            "
+            style={{ color: "rgba(210,190,158,0.68)" }}
+          >
+            {service.description}
+          </p>
+
+          <div className="grid grid-cols-2 gap-x-2 gap-y-1 md:mt-1 md:flex md:flex-col md:gap-1.5">
+            {service.detail.map((d, i) => (
+              <div
+                key={i}
+                className="
+                  flex items-center gap-1.5 font-mono
+                  text-[6.5px] uppercase tracking-[0.14em]
+
+                  md:gap-2 md:pl-[10px]
+                  md:text-[clamp(6px,0.80vw,16px)]
+                  md:leading-[2.2]
+                  md:tracking-[0.18em]
+                "
+                style={{ color: "rgba(200,160,80,0.5)" }}
+              >
+                <span
+                  className="h-px w-2.5 shrink-0 md:w-3"
+                  style={{
+                    background: "rgba(200,160,80,0.3)",
+                    transform: "translateY(0.5px)",
+                  }}
+                />
+
+                <span className="whitespace-nowrap">{d.toUpperCase()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────
+// ServicesSection
+// ─────────────────────────────────────────────
+
+export default function ServicesSection({
+  isActive,
+  servicesOpacity,
+  servicesY,
+  servicesExitY,
+}: ServicesSectionProps) {
+  const [showOverlay, setShowOverlay] = useState(false);
+
+  return (
+    <>
+      <motion.section
+        style={{
+          opacity: servicesOpacity,
+          y: isActive ? servicesExitY : servicesY,
+          position: "absolute",
+          inset: 0,
+          zIndex: 70,
+          pointerEvents: isActive ? "auto" : "none",
+          background: "#000",
+        }}
+        className="
+          flex flex-col overflow-y-auto overflow-x-hidden
+          md:overflow-hidden
+        "
+        aria-hidden={!isActive}
+      >
+        {/* Section label */}
+        <div
+          className="
+            absolute z-30 flex items-center gap-3
+            left-5 top-5
+            md:left-[clamp(18px,3vw,42px)]
+            md:top-[clamp(14px,2.2vh,24px)]
+          "
+        >
+          <span
+            className="
+              font-mono text-[8px] uppercase tracking-[0.36em]
+              md:text-[clamp(6px,0.55vw,8px)]
+              md:tracking-[0.42em]
+            "
+            style={{ color: "rgba(200,160,80,0.38)" }}
+          >
+            Services
+          </span>
+
+          <div
+            className="h-px w-6 md:w-[clamp(16px,2vw,28px)]"
+            style={{ background: "rgba(200,160,80,0.14)" }}
+          />
+        </div>
+
+        {/* Services layout */}
+        <div
+          className="
+            flex min-h-0 flex-col gap-4
+            px-4 pb-28 pt-16
+
+            md:flex-1 md:flex-row md:gap-0
+            md:px-0 md:pb-0 md:pt-0
+          "
+        >
+
+
+    {SERVICES.map((service, i) => (
+            <ServiceColumn
+              key={service.id}
+              service={service}
+              index={i}
+              total={SERVICES.length}
+            />
+          ))}
+        </div>
+
+        {/* Bottom strip / Sticky mobile CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.75,
+            delay: 0.5,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="
+            z-40 shrink-0
+
+            sticky bottom-0 left-0 right-0
+            border-t border-white/10
+            bg-black/85 px-4 py-4
+            backdrop-blur-xl
+
+            md:relative md:bottom-[10%]
+            md:flex md:items-end md:justify-between
+            md:border-t-0 md:bg-gradient-to-b
+            md:from-transparent md:to-black/85
+            md:px-[clamp(22px,3.8vw,52px)]
+            md:pb-[clamp(16px,2.8vh,30px)]
+            md:pt-[clamp(14px,2.4vh,28px)]
+            md:backdrop-blur-0
+          "
+        >
+          {/* Desktop text only */}
+          <div className="hidden w-full max-w-[85vw] flex-col gap-4 md:flex xl:max-w-[75vw]">
+            <span className="font-cursive text-[clamp(40px,8vw,7rem)] font-extrabold leading-none tracking-wide text-white/95">
+              What we do
+            </span>
+
+            <p className="max-w-[85%] text-[clamp(15px,1.6vw,18px)] font-light italic leading-relaxed tracking-wide text-[#c8b496]/70">
+              Six disciplines practised under one roof — from the first sketch
+              to the final handover. Every project built with the same
+              commitment to precision, material, and craft.
+            </p>
+          </div>
+
+          {/* CTA */}
+          <motion.button
+            initial="initial"
+            whileHover="hover"
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setShowOverlay(true)}
+            className="
+              group relative w-full shrink-0 cursor-pointer overflow-hidden
+              rounded-[18px_0px_18px_0px] border border-white/20
+              bg-[#c8b496] px-6 py-4
+              transition-transform duration-300
+
+              md:w-auto
+              md:rounded-[24px_0px_24px_0px]
+              md:px-[clamp(18px,2.6vw,36px)]
+              md:py-[clamp(10px,1.4vh,16px)]
+            "
+          >
+            <motion.div
+              variants={{
+                initial: { x: "-100%" },
+                hover: { x: 0 },
+              }}
+              transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+              className="absolute inset-0 bg-black"
+            />
+
+            <motion.span
+              variants={{
+                initial: { color: "#000000" },
+                hover: { color: "#ffffff" },
+              }}
+              transition={{ duration: 0.3 }}
+              className="
+                relative z-10 block text-center font-mono
+                text-[9px] font-semibold uppercase tracking-[0.28em]
+
+                md:text-[clamp(9px,0.75vw,11px)]
+                md:tracking-[0.32em]
+              "
+            >
+              Lets Make Fortune
+            </motion.span>
+          </motion.button>
+        </motion.div>
+      </motion.section>
+
+      {/* Contact overlay */}
+      <AnimatePresence>
+        {showOverlay && <ContactOverlay onClose={() => setShowOverlay(false)} />}
+      </AnimatePresence>
+    </>
+  );
+}
