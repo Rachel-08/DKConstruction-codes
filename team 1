@@ -1,0 +1,225 @@
+export default function TeamPage() {
+  const router = useRouter();
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const headingRef = useRef<HTMLDivElement>(null);
+  const headingInView = useInView(headingRef, { once: true });
+
+  return (
+    <>
+      <main style={{ background: "#f5f2eb", minHeight: "100vh" }}>
+
+        {/* ── Header ── */}
+        <motion.header
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="sticky top-0 z-50 flex items-center justify-between"
+          style={{
+            padding:
+              "clamp(14px,2.2vh,22px) clamp(24px,5vw,72px)",
+            borderBottom: "0.5px solid rgba(26,18,8,0.1)",
+            background: "rgba(245,242,235,0.92)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+          }}
+        >
+          <motion.button
+            onClick={() => router.back()}
+            whileHover={{ x: -3 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center gap-2 font-mono uppercase"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "clamp(7px,0.62vw,9px)",
+              color: "rgba(26,18,8,0.42)",
+              letterSpacing: "0.32em",
+            fontFamily: "inherit",
+              padding: 0,
+            }}
+          >
+            <svg viewBox="0 0 14 10" fill="none" style={{ width: 12 }}>
+              <line x1="14" y1="5" x2="1" y2="5"
+                stroke="currentColor" strokeWidth="1" />
+              <polyline points="5,1 0,5 5,9"
+                stroke="currentColor" strokeWidth="1"
+                fill="none" strokeLinecap="round" />
+            </svg>
+            Back
+          </motion.button>
+
+          <span
+            className="font-serif italic"
+            style={{
+              fontSize: "clamp(13px,1.1vw,17px)",
+              color: "rgba(26,18,8,0.5)",
+              letterSpacing: "0.04em",
+            }}
+          >
+            Aurea Studio
+          </span>
+
+          <span
+            className="font-mono uppercase"
+            style={{
+              fontSize: "clamp(7px,0.62vw,9px)",
+              color: "rgba(200,160,80,0.55)",
+              letterSpacing: "0.38em",
+            }}
+          >
+            Team
+          </span>
+        </motion.header>
+
+        {/* ── Hero ── */}
+        <section
+          ref={headingRef}
+          style={{
+            padding:
+              "clamp(48px,9vh,96px) clamp(24px,5vw,72px) clamp(32px,5vh,56px)",
+            borderBottom: "0.5px solid rgba(26,18,8,0.08)",
+          }}
+        >
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div className="flex flex-col gap-3">
+              <motion.div
+                initial={{ opacity: 0, x: -14 }}
+                animate={headingInView ? { opacity: 1, x: 0 } : {}}
+                transition={{ duration: 0.55 }}
+                className="flex items-center gap-3"
+              >
+                <span
+                  className="font-mono uppercase tracking-[0.42em]"
+                  style={{
+                    fontSize: "clamp(7px,0.62vw,9px)",
+                    color: "rgba(200,160,80,0.55)",
+                  }}
+                >
+                  The People
+                </span>
+                <div
+                  style={{
+                    width: "clamp(20px,2.5vw,36px)",
+                    height: "0.5px",
+                    background: "rgba(200,160,80,0.25)",
+                  }}
+                />
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 22 }}
+                animate={headingInView ? { opacity: 1, y: 0 } : {}}
+                transition={{
+                  duration: 0.75,
+                  delay: 0.08,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="font-serif leading-none tracking-tight"
+                style={{
+                  fontSize: "clamp(36px,7vw,96px)",
+                  color: "#1a1208",
+                }}
+              >
+                Meet the Team
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={headingInView ? { opacity: 1 } : {}}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                style={{
+                  fontSize: "clamp(10px,0.88vw,13px)",
+                  color: "rgba(26,18,8,0.42)",
+                  lineHeight: 1.78,
+                  maxWidth: "clamp(280px,42vw,520px)",
+                }}
+              >
+                A multidisciplinary construction and design team bringing together civil engineering, architecture, planning, site execution, and structural expertise.
+              </motion.p>
+            </div>
+
+            {/* Team count */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={headingInView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.55, delay: 0.3 }}
+              className="flex flex-col gap-1 shrink-0"
+            >
+              <span
+                className="font-serif"
+                style={{
+                  fontSize: "clamp(36px,5vw,64px)",
+                  color: "#1a1208",
+                  lineHeight: 1,
+                }}
+              >
+                {TEAM.length}
+              </span>
+              <span
+                className="font-mono uppercase tracking-[0.32em]"
+                style={{
+                  fontSize: "clamp(6px,0.55vw,8px)",
+                  color: "rgba(200,160,80,0.5)",
+                }}
+              >
+                Specialists
+              </span>
+            </motion.div>
+          </div>
+
+          {/* Instruction */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={headingInView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="font-mono uppercase mt-6"
+            style={{
+              fontSize: "clamp(6px,0.55vw,7px)",
+              color: "rgba(26,18,8,0.26)",
+              letterSpacing: "0.35em",
+            }}
+          >
+            Hover to preview · Click to read full profile
+          </motion.p>
+        </section>
+
+        {/* ── 3-column grid ── */}
+        <section
+          style={{
+            padding:
+              "clamp(32px,5vh,56px) clamp(24px,5vw,72px) clamp(64px,12vh,120px)",
+          }}
+        >
+          <div
+            className="grid gap-[clamp(12px,1.6vw,20px)]"
+            style={{
+              gridTemplateColumns:
+                "repeat(auto-fill, minmax(clamp(240px,28vw,320px), 1fr))",
+            }}
+          >
+            {TEAM.map((member, i) => (
+              <MemberCard
+                key={member.id}
+                member={member}
+                index={i}
+                onClick={() => setSelectedMember(member)}
+              />
+            ))}
+          </div>
+        </section>
+
+      </main>
+
+      {/* ── Member modal ── */}
+      <AnimatePresence>
+        {selectedMember && (
+          <MemberModal
+            member={selectedMember}
+            onClose={() => setSelectedMember(null)}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
