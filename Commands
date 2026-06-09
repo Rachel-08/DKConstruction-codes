@@ -1,3 +1,91 @@
 npx create-next-app@latest architecture-studio
 npm install motion lucide-react
 npm install gsap
+
+
+const OWNER = {
+  name: "Er. Deepak Ku. Mandal",
+  role: "Founder & Owner",
+  qualification: "B.Tech in Civil Engineering",
+  batch: "2022 Passout",
+  experience: "5+ years in Construction & Design",
+  phone: "8249144526",
+  email: "dmdeepak6534@gmail.com",
+  initials: "DM",
+  bio: "Er. Deepak Ku. Mandal leads the studio with a strong foundation in civil engineering, construction execution, and design coordination. His approach combines technical accuracy, practical site knowledge, and a clear understanding of client requirements — ensuring every project is planned, detailed, and delivered with responsibility.",
+  strengths: [
+    "Civil Engineering",
+    "Construction Management",
+    "Design Coordination",
+    "Site Execution",
+  ],
+};
+
+const TEAM: TeamMember[] = [
+  {
+    id: 1,
+    name: "Kiran Bhal",
+    role: "Managing Director",
+    specialisation: "Business Operations & Project Coordination",
+    experience: "5+ years",
+    bio: "Kiran oversees the studio’s daily operations, client coordination, and project workflow. With a strong focus on planning and execution, Kiran ensures every project moves smoothly from discussion to delivery.",
+    initials: "KB",
+    projects: 42,
+    skills: ["Project Coordination", "Client Handling", "Operations", "Planning"],
+  },
+  {
+    id: 2,
+    name: "Khitish Pradhan",
+    role: "Senior Architect",
+    specialisation: "Architecture, Planning & 3D Design",
+    experience: "4+ years",
+    bio: "Khitish leads architectural planning, elevation concepts, and design development. His work focuses on creating practical, modern, and visually strong spaces that balance client needs with buildable design.",
+    initials: "KP",
+    projects: 58,
+    skills: ["Architecture", "3D Design", "Planning", "Elevation Design"],
+  },
+  {
+    id: 3,
+    name: "Nayan Baidya",
+    role: "Site Engineer",
+    specialisation: "Site Execution & Construction Supervision",
+    experience: "3+ years",
+    bio: "Nayan manages on-site execution, material coordination, and construction quality checks. His role ensures that drawings and design intent are properly translated into real site work.",
+    initials: "NB",
+    projects: 31,
+    skills: ["Site Supervision", "Execution", "Quality Check", "Material Coordination"],
+  },
+  {
+    id: 4,
+    name: "Niranjan Jena",
+    role: "Site Engineer",
+    specialisation: "Construction Monitoring & Site Management",
+    experience: "3+ years",
+    bio: "Niranjan supports site management, contractor coordination, and day-to-day construction monitoring. He helps maintain progress, workmanship, and project discipline on site.",
+    initials: "NJ",
+    projects: 28,
+    skills: ["Site Management", "Contractor Coordination", "Execution", "Progress Tracking"],
+  },
+  {
+    id: 5,
+    name: "Satyam Das",
+    role: "2D Planner & Designer",
+    specialisation: "2D Planning, Layouts & Drafting",
+    experience: "3+ years",
+    bio: "Satyam creates detailed 2D plans, layout drawings, and design documentation. His work helps convert project requirements into clear and practical drawing sets for approval and execution.",
+    initials: "SD",
+    projects: 46,
+    skills: ["2D Planning", "AutoCAD", "Layout Design", "Drafting"],
+  },
+  {
+    id: 6,
+    name: "Ipsita Bhuyan",
+    role: "Structural Engineer",
+    specialisation: "Structural Design & Technical Detailing",
+    experience: "4+ years",
+    bio: "Ipsita handles structural design inputs, technical detailing, and coordination for safe and stable construction. Her work ensures that every design is supported by strong engineering logic.",
+    initials: "IB",
+    projects: 39,
+    skills: ["Structural Design", "RCC Detailing", "Technical Drawings", "Safety"],
+  },
+];
