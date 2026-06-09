@@ -1,0 +1,497 @@
+"use client";
+
+import { useEffect, useRef, useState, useCallback } from "react";
+import { motion, AnimatePresence, type MotionValue } from "motion/react";
+
+type WelcomeWindowProps = {
+  isActive: boolean;
+  leftRotate: MotionValue<number>;
+  rightRotate: MotionValue<number>;
+  windowScale: MotionValue<number>;
+  windowOpacity: MotionValue<number>;
+  windowExitX: MotionValue<string>;
+  frameOpacity: MotionValue<number>;
+  scrollTextOpacity: MotionValue<number>;
+  onEnterClick: () => void;
+  loadingComplete: boolean;
+};
+
+// ─── Hinge ───────────────────────────────────
+
+function Hinge({ top, side }: { top: string; side: "left" | "right" }) {
+  const isLeft = side === "left";
+
+  return (
+    <div
+      className="pointer-events-none absolute z-[50]"
+      style={{
+        top,
+        [isLeft ? "left" : "right"]: 0,
+        transform: "translateY(-50%)",
+        width: "clamp(8px, 1.4vw, 18px)",
+        height: "clamp(26px, 5svh, 50px)",
+      }}
+    >
+      <svg
+        viewBox="0 0 18 50"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-full w-full"
+        style={{ filter: "drop-shadow(0 2px 5px rgba(0,0,0,0.9))" }}
+      >
+        <defs>
+          <linearGradient id={`hf-${side}-${top}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#111" />
+            <stop offset="22%" stopColor="#4a4a4a" />
+            <stop offset="48%" stopColor="#7a7a7a" />
+            <stop offset="65%" stopColor="#595959" />
+            <stop offset="85%" stopColor="#2e2e2e" />
+            <stop offset="100%" stopColor="#0d0d0d" />
+          </linearGradient>
+
+          <linearGradient id={`hk-${side}-${top}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#888" />
+            <stop offset="28%" stopColor="#3a3a3a" />
+            <stop offset="62%" stopColor="#666" />
+            <stop offset="100%" stopColor="#1a1a1a" />
+          </linearGradient>
+        </defs>
+
+        <rect
+          x="1"
+          y="1"
+          width="16"
+          height="48"
+          rx="1.5"
+          fill={`url(#hf-${side}-${top})`}
+        />
+        <rect
+          x="1"
+          y="1"
+          width="16"
+          height="48"
+          rx="1.5"
+          fill="none"
+          stroke="#888"
+          strokeWidth="0.3"
+          opacity="0.35"
+        />
+        <line
+          x1="1"
+          y1="1"
+          x2="17"
+          y2="1"
+          stroke="#999"
+          strokeWidth="0.4"
+          opacity="0.5"
+        />
+
+        <rect
+          x="5"
+          y="15"
+          width="8"
+          height="20"
+          rx="2"
+          fill={`url(#hk-${side}-${top})`}
+        />
+        <ellipse cx="9" cy="15" rx="4" ry="3" fill="#777" />
+        <ellipse cx="9" cy="35" rx="4" ry="3" fill="#2a2a2a" />
+
+        <circle cx="9" cy="25" r="1.8" fill="#111" />
+        <circle cx="9" cy="25" r="0.8" fill="#555" />
+
+        <circle cx="4.5" cy="6.5" r="2" fill="#333" />
+        <line
+          x1="2.8"
+          y1="6.5"
+          x2="6.2"
+          y2="6.5"
+          stroke="#111"
+          strokeWidth="0.7"
+        />
+
+        <circle cx="13.5" cy="6.5" r="2" fill="#333" />
+        <line
+          x1="11.8"
+          y1="6.5"
+          x2="15.2"
+          y2="6.5"
+          stroke="#111"
+          strokeWidth="0.7"
+        />
+
+        <circle cx="4.5" cy="43.5" r="2" fill="#333" />
+        <line
+          x1="2.8"
+          y1="43.5"
+          x2="6.2"
+          y2="43.5"
+          stroke="#111"
+          strokeWidth="0.7"
+        />
+
+        <circle cx="13.5" cy="43.5" r="2" fill="#333" />
+        <line
+          x1="11.8"
+          y1="43.5"
+          x2="15.2"
+          y2="43.5"
+          stroke="#111"
+          strokeWidth="0.7"
+        />
+      </svg>
+    </div>
+  );
+}
+
+// ─── Handle ──────────────────────────────────
+
+function Handle({ side }: { side: "left" | "right" }) {
+  const isLeft = side === "left";
+
+  return (
+    <div
+      className="pointer-events-none absolute top-1/2 z-[50] -translate-y-1/2"
+      style={{
+        [isLeft ? "right" : "left"]: "clamp(4px, 0.9vw, 9px)",
+        width: "clamp(6px, 0.9vw, 11px)",
+        height: "clamp(32px, 7svh, 62px)",
+      }}
+    >
+      <svg
+        viewBox="0 0 11 62"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-full w-full"
+        style={{ filter: "drop-shadow(1px 2px 5px rgba(0,0,0,0.9))" }}
+      >
+        <defs>
+          <linearGradient id={`hd-${side}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#111" />
+            <stop offset="22%" stopColor="#585858" />
+            <stop offset="50%" stopColor="#909090" />
+            <stop offset="74%" stopColor="#484848" />
+            <stop offset="100%" stopColor="#111" />
+          </linearGradient>
+
+          <linearGradient id={`hd-cap-${side}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#777" />
+            <stop offset="100%" stopColor="#222" />
+          </linearGradient>
+        </defs>
+
+        <ellipse cx="5.5" cy="5" rx="3.5" ry="2.5" fill={`url(#hd-cap-${side})`} />
+        <rect x="2" y="5" width="7" height="52" rx="3.5" fill={`url(#hd-${side})`} />
+        <rect x="4" y="8" width="2" height="46" rx="1" fill="white" opacity="0.09" />
+        <ellipse cx="5.5" cy="57" rx="3.5" ry="2.5" fill="#1e1e1e" />
+        <ellipse
+          cx="5.5"
+          cy="57"
+          rx="3.5"
+          ry="2.5"
+          fill="none"
+          stroke="#444"
+          strokeWidth="0.4"
+        />
+      </svg>
+    </div>
+  );
+}
+
+// ─── WindowPane ──────────────────────────────
+
+function WindowPane({
+  side,
+  rotateY,
+  opacity,
+}: {
+  side: "left" | "right";
+  rotateY: MotionValue<number>;
+  opacity: MotionValue<number>;
+}) {
+  const isLeft = side === "left";
+
+  return (
+    <motion.div
+      style={{
+        rotateY,
+        transformOrigin: isLeft ? "left center" : "right center",
+        opacity,
+      }}
+      className={`pointer-events-none absolute top-0 z-[30] h-full w-1/2 ${
+        isLeft ? "left-0" : "right-0"
+      }`}
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          background: isLeft
+            ? "linear-gradient(90deg,#080503 0%,#180c05 9%,#241006 20%,#110803 35%,#1c0d05 50%,#130804 68%,#200e06 82%,#100703 94%,#080503 100%)"
+            : "linear-gradient(270deg,#080503 0%,#180c05 9%,#241006 20%,#110803 35%,#1c0d05 50%,#130804 68%,#200e06 82%,#100703 94%,#080503 100%)",
+        }}
+      />
+
+      <div
+        className="absolute"
+        style={{
+          inset: "clamp(7px, 1.6vw, 18px)",
+          background: isLeft
+            ? "linear-gradient(135deg,rgba(155,195,218,0.46) 0%,rgba(115,170,198,0.26) 42%,rgba(180,218,236,0.16) 72%,rgba(95,155,188,0.36) 100%)"
+            : "linear-gradient(225deg,rgba(155,195,218,0.46) 0%,rgba(115,170,198,0.26) 42%,rgba(180,218,236,0.16) 72%,rgba(95,155,188,0.36) 100%)",
+          backdropFilter: "blur(2px) saturate(1.1)",
+          boxShadow:
+            "inset 0 0 0 0.5px rgba(170,210,232,0.2), inset 0 0 22px rgba(0,0,0,0.18)",
+        }}
+      >
+        <div
+          className="absolute"
+          style={{
+            top: 0,
+            left: isLeft ? "10%" : "auto",
+            right: isLeft ? "auto" : "10%",
+            width: "24%",
+            height: "100%",
+            background: `linear-gradient(${
+              isLeft ? "148deg" : "212deg"
+            },rgba(255,255,255,0.1) 0%,rgba(255,255,255,0.02) 55%,transparent 100%)`,
+          }}
+        />
+      </div>
+
+      <div
+        className="absolute left-0 right-0"
+        style={{
+          top: "50%",
+          height: "clamp(4px, 1svh, 11px)",
+          transform: "translateY(-50%)",
+          background:
+            "linear-gradient(180deg,#2e2418 0%,#14100a 20%,#080604 42%,#181209 62%,#241a10 80%,#0a0806 100%)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,0.055),0 -1px 0 rgba(255,255,255,0.035),0 3px 9px rgba(0,0,0,0.65),inset 0 1px 0 rgba(90,65,35,0.28)",
+        }}
+      />
+
+      <div
+        className="absolute bottom-0 top-0"
+        style={{
+          left: "50%",
+          width: "clamp(4px, 0.8vw, 9px)",
+          transform: "translateX(-50%)",
+          background:
+            "linear-gradient(90deg,#080604 0%,#241a10 20%,#0a0806 42%,#181209 62%,#2e2418 80%,#080604 100%)",
+          boxShadow:
+            "1px 0 0 rgba(255,255,255,0.05),-1px 0 0 rgba(255,255,255,0.03),3px 0 9px rgba(0,0,0,0.55),inset 1px 0 0 rgba(90,65,35,0.22)",
+        }}
+      />
+
+      <Hinge top="16%" side={side} />
+      <Hinge top="50%" side={side} />
+      <Hinge top="84%" side={side} />
+      <Handle side={side} />
+    </motion.div>
+  );
+}
+
+// ─── ScrollNudge indicator ───────────────────
+
+function ScrollNudge({ visible }: { visible: boolean }) {
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          key="nudge"
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 6 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="
+            pointer-events-none absolute left-1/2 z-[90]
+            flex -translate-x-1/2 flex-col items-center gap-1.5
+            bottom-[calc(1.4rem+env(safe-area-inset-bottom))]
+            sm:bottom-8 sm:gap-2
+            md:bottom-10
+          "
+        >
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              animate={{ opacity: [0.15, 0.7, 0.15], y: [0, 5, 0] }}
+              transition={{
+                duration: 1.4,
+                repeat: Infinity,
+                delay: i * 0.18,
+                ease: "easeInOut",
+              }}
+            >
+              <svg viewBox="0 0 16 9" fill="none" className="h-[7px] w-3.5 sm:h-2">
+                <polyline
+                  points="1,1 8,8 15,1"
+                  stroke="rgba(0,0,0,0.45)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </motion.div>
+          ))}
+
+          <span className="font-mono text-[7px] uppercase tracking-[0.28em] text-black/35 sm:text-[8px] sm:tracking-[0.32em]">
+            Scroll
+          </span>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ─── WelcomeWindow ───────────────────────────
+
+export default function WelcomeWindow({
+  isActive,
+  leftRotate,
+  rightRotate,
+  windowScale,
+  windowOpacity,
+  windowExitX,
+  frameOpacity,
+  scrollTextOpacity,
+  onEnterClick,
+  loadingComplete,
+}: WelcomeWindowProps) {
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [nudgeVisible, setNudgeVisible] = useState(false);
+
+  // Auto-open the window shortly after loading completes.
+  // Remove this useEffect if you want the user to manually click/tap before entering.
+  useEffect(() => {
+    if (!loadingComplete) return;
+    onEnterClick();
+  }, [loadingComplete, onEnterClick]);
+
+  const resetIdleTimer = useCallback(() => {
+    setNudgeVisible(false);
+
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+
+    idleTimer.current = setTimeout(() => {
+      if (isActive) setNudgeVisible(true);
+    }, 2000);
+  }, [isActive]);
+
+  useEffect(() => {
+    if (!isActive) {
+      setNudgeVisible(false);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      return;
+    }
+
+    resetIdleTimer();
+
+    window.addEventListener("scroll", resetIdleTimer, { passive: true });
+    window.addEventListener("wheel", resetIdleTimer, { passive: true });
+    window.addEventListener("touchmove", resetIdleTimer, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", resetIdleTimer);
+      window.removeEventListener("wheel", resetIdleTimer);
+      window.removeEventListener("touchmove", resetIdleTimer);
+
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, [isActive, resetIdleTimer]);
+
+  return (
+    <section
+      className={`absolute inset-0 z-[80] ${
+        isActive ? "pointer-events-auto" : "pointer-events-none"
+      }`}
+    >
+      <motion.div
+        role="button"
+        tabIndex={isActive ? 0 : -1}
+        aria-label="Enter website"
+        onClick={onEnterClick}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onEnterClick();
+          }
+        }}
+        style={{
+          scale: windowScale,
+          opacity: windowOpacity,
+          x: windowExitX,
+        }}
+        className="absolute inset-0 flex cursor-pointer items-center justify-center outline-none"
+      >
+        <div
+          className="
+            relative overflow-hidden bg-[#080503] shadow-[0_28px_90px_rgba(0,0,0,0.48)]
+            [perspective:1100px]
+
+            h-[58svh] w-[88vw] rounded-[12px]
+
+            min-[390px]:h-[60svh] min-[390px]:w-[86vw]
+
+            sm:h-[62svh] sm:w-[82vw] sm:rounded-[16px]
+            md:h-[65vh] md:w-[78vw] md:rounded-[18px]
+            lg:h-[66vh] lg:w-[74vw] lg:max-w-5xl lg:[perspective:1400px]
+            xl:h-[68vh] xl:w-[70vw]
+            2xl:h-[70vh] 2xl:max-w-6xl
+          "
+        >
+          <motion.img
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
+            alt="Architecture view"
+            draggable={false}
+            className="absolute inset-0 h-full w-full select-none object-cover object-center"
+          />
+
+          <div className="absolute inset-0 bg-black/10" />
+
+          <motion.div
+            style={{ opacity: frameOpacity }}
+            className="
+              pointer-events-none absolute inset-0 z-[20]
+              rounded-[12px] border-[7px] border-[#0d0805]
+              sm:rounded-[16px] sm:border-[10px]
+              md:rounded-[18px] md:border-[14px]
+            "
+          />
+
+          <motion.div
+            style={{ opacity: frameOpacity }}
+            className="
+              pointer-events-none absolute left-1/2 top-0 z-[25] h-full
+              w-[6px] -translate-x-1/2 bg-[#0d0805]
+              sm:w-[8px]
+              md:w-[12px]
+            "
+          />
+
+          <WindowPane side="left" rotateY={leftRotate} opacity={frameOpacity} />
+          <WindowPane side="right" rotateY={rightRotate} opacity={frameOpacity} />
+        </div>
+      </motion.div>
+
+      <motion.p
+        style={{ opacity: scrollTextOpacity, x: windowExitX }}
+        className="
+          pointer-events-none absolute left-1/2 z-[90] -translate-x-1/2
+          whitespace-nowrap text-center font-medium uppercase text-black/60
+
+          bottom-[calc(1.6rem+env(safe-area-inset-bottom))]
+          text-[8px] tracking-[0.22em]
+
+          sm:bottom-8 sm:text-[10px] sm:tracking-[0.3em]
+          md:bottom-10 md:text-xs md:tracking-[0.35em]
+        "
+      >
+        <span className="sm:hidden">Tap anywhere on the window</span>
+        <span className="hidden sm:inline">Click anywhere on the window to enter</span>
+      </motion.p>
+
+      <ScrollNudge visible={nudgeVisible} />
+    </section>
+  );
+}
