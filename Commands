@@ -1,304 +1,66 @@
-npx create-next-app@latest architecture-studio
-npm install motion lucide-react
-npm install gsap
+```txt
+Refactor my scroll experience architecture to prevent chained auto-scroll triggers and improve performance.
 
+Current Problem:
+- I have an intro section that automatically scrolls to the landing section by triggering an onClickEnter-like functionality.
+- I also implemented another feature where if the user slightly scrolls, the page automatically transitions to the next section.
+- The issue is that the first programmatic auto-scroll is being detected as a real user scroll, which unintentionally triggers the second auto-scroll.
+- This breaks the landing → services transition flow.
+- Users also reported that animations feel laggy and heavy.
 
-const OWNER = {
-  name: "Er. Deepak Ku. Mandal",
-  role: "Founder & Owner",
-  qualification: "B.Tech in Civil Engineering",
-  batch: "2022 Passout",
-  experience: "5+ years in Construction & Design",
-  phone: "8249144526",
-  email: "dmdeepak6534@gmail.com",
-  initials: "DM",
-  bio: "Er. Deepak Ku. Mandal leads the studio with a strong foundation in civil engineering, construction execution, and design coordination. His approach combines technical accuracy, practical site knowledge, and a clear understanding of client requirements — ensuring every project is planned, detailed, and delivered with responsibility.",
-  strengths: [
-    "Civil Engineering",
-    "Construction Management",
-    "Design Coordination",
-    "Site Execution",
-  ],
-};
+What I Want:
+- Separate real user scroll interactions from programmatic/automatic scrolling.
+- Prevent auto-scroll chain reactions.
+- Add proper animation locking/state management.
+- Improve overall smoothness and responsiveness.
+- Keep the cinematic premium experience but reduce aggressive scroll hijacking.
 
-const TEAM: TeamMember[] = [
-  {
-    id: 1,
-    name: "Kiran Bhal",
-    role: "Managing Director",
-    specialisation: "Business Operations & Project Coordination",
-    experience: "5+ years",
-    bio: "Kiran oversees the studio’s daily operations, client coordination, and project workflow. With a strong focus on planning and execution, Kiran ensures every project moves smoothly from discussion to delivery.",
-    initials: "KB",
-    projects: 42,
-    skills: ["Project Coordination", "Client Handling", "Operations", "Planning"],
-  },
-  {
-    id: 2,
-    name: "Khitish Pradhan",
-    role: "Senior Architect",
-    specialisation: "Architecture, Planning & 3D Design",
-    experience: "4+ years",
-    bio: "Khitish leads architectural planning, elevation concepts, and design development. His work focuses on creating practical, modern, and visually strong spaces that balance client needs with buildable design.",
-    initials: "KP",
-    projects: 58,
-    skills: ["Architecture", "3D Design", "Planning", "Elevation Design"],
-  },
-  {
-    id: 3,
-    name: "Nayan Baidya",
-    role: "Site Engineer",
-    specialisation: "Site Execution & Construction Supervision",
-    experience: "3+ years",
-    bio: "Nayan manages on-site execution, material coordination, and construction quality checks. His role ensures that drawings and design intent are properly translated into real site work.",
-    initials: "NB",
-    projects: 31,
-    skills: ["Site Supervision", "Execution", "Quality Check", "Material Coordination"],
-  },
-  {
-    id: 4,
-    name: "Niranjan Jena",
-    role: "Site Engineer",
-    specialisation: "Construction Monitoring & Site Management",
-    experience: "3+ years",
-    bio: "Niranjan supports site management, contractor coordination, and day-to-day construction monitoring. He helps maintain progress, workmanship, and project discipline on site.",
-    initials: "NJ",
-    projects: 28,
-    skills: ["Site Management", "Contractor Coordination", "Execution", "Progress Tracking"],
-  },
-  {
-    id: 5,
-    name: "Satyam Das",
-    role: "2D Planner & Designer",
-    specialisation: "2D Planning, Layouts & Drafting",
-    experience: "3+ years",
-    bio: "Satyam creates detailed 2D plans, layout drawings, and design documentation. His work helps convert project requirements into clear and practical drawing sets for approval and execution.",
-    initials: "SD",
-    projects: 46,
-    skills: ["2D Planning", "AutoCAD", "Layout Design", "Drafting"],
-  },
-  {
-    id: 6,
-    name: "Ipsita Bhuyan",
-    role: "Structural Engineer",
-    specialisation: "Structural Design & Technical Detailing",
-    experience: "4+ years",
-    bio: "Ipsita handles structural design inputs, technical detailing, and coordination for safe and stable construction. Her work ensures that every design is supported by strong engineering logic.",
-    initials: "IB",
-    projects: 39,
-    skills: ["Structural Design", "RCC Detailing", "Technical Drawings", "Safety"],
-  },
-];
+Implementation Requirements:
+1. Create a global `isAutoScrolling` or `isAnimating` ref/state.
+2. Whenever programmatic scrolling happens:
+   - lock user-triggered transitions
+   - unlock only after animation completes
+3. Wheel/scroll/touch handlers must ignore events during auto-scroll.
+4. Use section-based navigation architecture instead of multiple nested scroll triggers.
+5. Maintain active section indexes.
+6. Prevent overlapping transitions.
+7. Use Framer Motion / motion/react optimized patterns.
+8. Reduce lag by:
+   - minimizing continuous scroll calculations
+   - avoiding expensive blur/layout animations
+   - using transform + opacity animations only
+   - throttling wheel handlers
+   - reducing unnecessary rerenders
+9. Preserve:
+   - intro cinematic experience
+   - smooth section transitions
+   - premium modern UI feel
+10. Avoid:
+   - chained auto-scrolls
+   - repeated window.scrollTo loops
+   - fighting against user scroll input
 
+Preferred Outcome:
+- Intro auto-scroll happens only once.
+- After that, transitions feel intentional and controlled.
+- Scrolling between Landing → Services → Projects works smoothly.
+- User interactions never accidentally trigger another auto-scroll.
+- Motion feels premium but lightweight.
 
+Tech Stack:
+- Next.js
+- React
+- motion/react (Framer Motion style APIs)
+- useScroll
+- useTransform
+- useMotionValue
+- useMotionValueEvent
 
-function OwnerSection() {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-8%" });
-
-  return (
-    <section
-      ref={ref}
-      style={{
-        padding:
-          "clamp(36px,7vh,80px) clamp(24px,5vw,72px) clamp(48px,8vh,90px)",
-        borderBottom: "0.5px solid rgba(26,18,8,0.08)",
-      }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 28 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-        className="grid md:grid-cols-[0.9fr_1.4fr] gap-0 overflow-hidden"
-        style={{
-          background: "#f0ece0",
-          border: "0.5px solid rgba(26,18,8,0.1)",
-          borderRadius: 4,
-          boxShadow: "0 24px 70px rgba(26,18,8,0.08)",
-        }}
-      >
-        {/* Left owner image / placeholder */}
-        <div
-          className="relative flex items-center justify-center"
-          style={{
-            minHeight: "clamp(280px,42vw,520px)",
-            background:
-              "linear-gradient(135deg, rgba(26,18,8,0.08), rgba(200,160,80,0.12))",
-            borderRight: "0.5px solid rgba(26,18,8,0.08)",
-          }}
-        >
-          {/* Replace this div with image later if you have owner photo */}
-          <div
-            className="flex items-center justify-center font-serif italic"
-            style={{
-              width: "clamp(120px,15vw,210px)",
-              height: "clamp(120px,15vw,210px)",
-              background: "rgba(245,242,235,0.65)",
-              border: "0.5px solid rgba(200,160,80,0.35)",
-              borderRadius: 4,
-              fontSize: "clamp(42px,6vw,82px)",
-              color: "#c8a052",
-              boxShadow: "0 20px 60px rgba(26,18,8,0.08)",
-            }}
-          >
-            {OWNER.initials}
-          </div>
-
-          <span
-            className="absolute bottom-5 left-5 font-mono uppercase"
-            style={{
-              fontSize: "clamp(6px,0.55vw,8px)",
-              letterSpacing: "0.35em",
-              color: "rgba(26,18,8,0.32)",
-            }}
-          >
-            Founder Profile
-          </span>
-        </div>
-
-        {/* Right owner details */}
-        <div
-          className="flex flex-col"
-          style={{
-            padding: "clamp(28px,5vw,68px)",
-          }}
-        >
-          <span
-            className="font-mono uppercase tracking-[0.42em]"
-            style={{
-              fontSize: "clamp(7px,0.62vw,9px)",
-              color: "rgba(200,160,80,0.65)",
-            }}
-          >
-            Owner Details
-          </span>
-
-          <h2
-            className="font-serif leading-none tracking-tight mt-4"
-            style={{
-              fontSize: "clamp(34px,5.8vw,82px)",
-              color: "#1a1208",
-              letterSpacing: "-0.04em",
-            }}
-          >
-            {OWNER.name}
-          </h2>
-
-          <p
-            className="font-mono uppercase tracking-[0.28em] mt-4"
-            style={{
-              fontSize: "clamp(7px,0.65vw,10px)",
-              color: "rgba(200,160,80,0.7)",
-            }}
-          >
-            {OWNER.role}
-          </p>
-
-          <div
-            style={{
-              height: "0.5px",
-              width: "clamp(42px,6vw,80px)",
-              background: "linear-gradient(90deg,#c8a052,#e8c070,transparent)",
-              margin: "clamp(22px,4vh,36px) 0",
-            }}
-          />
-
-          <p
-            style={{
-              fontSize: "clamp(11px,0.95vw,15px)",
-              color: "rgba(26,18,8,0.58)",
-              lineHeight: 1.85,
-              maxWidth: 680,
-            }}
-          >
-            {OWNER.bio}
-          </p>
-
-          {/* Qualification details */}
-          <div
-            className="grid sm:grid-cols-2 gap-3 mt-8"
-            style={{
-              maxWidth: 760,
-            }}
-          >
-            {[
-              { label: "Qualification", value: OWNER.qualification },
-              { label: "Batch", value: OWNER.batch },
-              { label: "Experience", value: OWNER.experience },
-              { label: "Contact", value: OWNER.phone },
-              { label: "Email", value: OWNER.email },
-            ].map(({ label, value }) => (
-              <div
-                key={label}
-                style={{
-                  background: "rgba(26,18,8,0.035)",
-                  border: "0.5px solid rgba(26,18,8,0.08)",
-                  borderRadius: 3,
-                  padding: "12px 14px",
-                }}
-              >
-                <span
-                  className="font-mono uppercase tracking-[0.28em]"
-                  style={{
-                    fontSize: "clamp(5px,0.5vw,7px)",
-                    color: "rgba(200,160,80,0.58)",
-                  }}
-                >
-                  {label}
-                </span>
-
-                <p
-                  style={{
-                    marginTop: 5,
-                    fontSize: "clamp(10px,0.85vw,13px)",
-                    color: "rgba(26,18,8,0.64)",
-                    lineHeight: 1.5,
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {value}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Strength chips */}
-          <div className="flex flex-wrap gap-2 mt-6">
-            {OWNER.strengths.map((item) => (
-              <span
-                key={item}
-                className="font-mono uppercase"
-                style={{
-                  fontSize: "clamp(6px,0.55vw,7px)",
-                  color: "rgba(26,18,8,0.42)",
-                  background: "rgba(200,160,80,0.08)",
-                  border: "0.5px solid rgba(200,160,80,0.18)",
-                  borderRadius: 2,
-                  padding: "4px 10px",
-                  letterSpacing: "0.18em",
-                }}
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-      </motion.div>
-    </section>
-  );
-}
-
-
-
-A multidisciplinary construction and design team bringing together civil engineering, architecture, planning, site execution, and structural expertise.
-
-
-<img
-  src="/team/deepak-mandal.jpg"
-  alt="Er. Deepak Ku. Mandal"
-  style={{
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-  }}
-/>
+Provide:
+- architecture improvements
+- clean scalable logic
+- React implementation example
+- event handling strategy
+- performance optimizations
+- best UX practices for cinematic scrolling websites
+```
