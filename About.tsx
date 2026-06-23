@@ -18,9 +18,7 @@ import {
   FaHome,
 } from "react-icons/fa";
 
-// ─────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────
+// TYPES
 
 type Step = {
   id: number;
@@ -40,9 +38,7 @@ type HowWeWorkProps = {
   howWeWorkExitY: MotionValue<string>;
 };
 
-// ─────────────────────────────────────────────
-// Data
-// ─────────────────────────────────────────────
+// DATA
 
 const STEPS: Step[] = [
   {
@@ -51,7 +47,7 @@ const STEPS: Step[] = [
     phase: "Discovery",
     title: "Initial Design Consultation",
     description:
-      "We begin with a structured briefing session — understanding your vision, spatial requirements, budget parameters, and timeline. Our designer walks your site and establishes the design direction.",
+      "We begin with a structured briefing session, understanding your vision, spatial requirements, budget parameters, and timeline.",
     icon: FaRegComments,
   },
 
@@ -59,9 +55,9 @@ const STEPS: Step[] = [
     id: 2,
     number: "02",
     phase: "Proposal",
-    title: "Design Proposal & Agreement",
+    title: "Design Proposal And Agreement",
     description:
-      "We present drawings, material schedules, and a detailed cost estimate. Upon approval, a formal agreement is signed and your project slot is secured.",
+      "We present drawings, material schedules, and a detailed cost estimate before confirming the agreement.",
     payment: "5%",
     paymentLabel: "Retainer to confirm project",
     icon: FaFileSignature,
@@ -71,9 +67,9 @@ const STEPS: Step[] = [
     id: 3,
     number: "03",
     phase: "Execution",
-    title: "Construction & Project Execution",
+    title: "Construction And Project Execution",
     description:
-      "Groundwork begins. Procurement, contractor scheduling, and quality control are managed throughout execution with regular progress updates.",
+      "Procurement, contractor scheduling, and quality control are managed throughout the execution process.",
     payment: "60%",
     paymentLabel: "Progressive milestone payment",
     icon: FaHardHat,
@@ -83,9 +79,9 @@ const STEPS: Step[] = [
     id: 4,
     number: "04",
     phase: "Completion",
-    title: "Final Installations & Handover",
+    title: "Final Installations And Handover",
     description:
-      "All finishes, fixtures, and furnishings are inspected before the final balance is settled and handover is completed.",
+      "All finishes, fixtures, and furnishings are inspected before final handover.",
     payment: "100%",
     paymentLabel: "Final balance on handover",
     icon: FaClipboardCheck,
@@ -95,16 +91,14 @@ const STEPS: Step[] = [
     id: 5,
     number: "05",
     phase: "Occupation",
-    title: "Move In & Enjoy",
+    title: "Move In And Enjoy",
     description:
-      "Your space is complete with warranty documents, supplier contacts, care guides, and aftercare support.",
+      "Your space is completed with aftercare support and warranty documentation.",
     icon: FaHome,
   },
 ];
 
-// ─────────────────────────────────────────────
-// Step Card
-// ─────────────────────────────────────────────
+// STEP CARD
 
 function StepCard({
   step,
@@ -147,15 +141,11 @@ function StepCard({
       transition={{
         duration: 0.55,
         delay: index * 0.08,
-        ease: [0.22, 1, 0.36, 1],
       }}
       className="relative pl-[72px]"
     >
-      {/* Process Line */}
-
       {!isLast && (
         <div
-          aria-hidden="true"
           className="absolute left-[24px] top-[72px]"
           style={{
             width: "1px",
@@ -166,10 +156,7 @@ function StepCard({
         />
       )}
 
-      {/* Icon */}
-
       <motion.div
-        aria-hidden="true"
         animate={{
           borderColor: expanded
             ? "rgba(0,0,0,0.75)"
@@ -192,8 +179,6 @@ function StepCard({
         <Icon className="h-[42%] w-[42%]" />
       </motion.div>
 
-      {/* Content */}
-
       <button
         type="button"
         aria-expanded={expanded}
@@ -204,8 +189,6 @@ function StepCard({
         }}
       >
         <header className="flex flex-col gap-3">
-          {/* Top */}
-
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span
               className="font-mono uppercase tracking-[0.28em]"
@@ -213,7 +196,7 @@ function StepCard({
                 fontSize: "clamp(7px,0.65vw,9px)",
               }}
             >
-              Phase {step.number} — {step.phase}
+              Phase {step.number} - {step.phase}
             </span>
 
             {step.payment && (
@@ -270,8 +253,6 @@ function StepCard({
             )}
           </div>
 
-          {/* Title */}
-
           <h3
             className="font-serif leading-snug"
             style={{
@@ -281,10 +262,7 @@ function StepCard({
             {step.title}
           </h3>
 
-          {/* Divider */}
-
           <motion.div
-            aria-hidden="true"
             animate={{
               scaleX: expanded ? 1 : 0.2,
               opacity: expanded ? 0.6 : 0.25,
@@ -300,8 +278,6 @@ function StepCard({
                 "linear-gradient(90deg,#000,rgba(0,0,0,0.3),transparent)",
             }}
           />
-
-          {/* Expandable Content */}
 
           <AnimatePresence initial={false}>
             {expanded && (
@@ -340,8 +316,6 @@ function StepCard({
             )}
           </AnimatePresence>
 
-          {/* Toggle Label */}
-
           <span
             className="font-mono"
             style={{
@@ -350,16 +324,13 @@ function StepCard({
               opacity: 0.7,
             }}
           >
-            {expanded ? "— COLLAPSE" : "+ EXPAND"}
+            {expanded ? "- COLLAPSE" : "+ EXPAND"}
           </span>
         </header>
       </button>
 
-      {/* Bottom Divider */}
-
       {!isLast && (
         <div
-          aria-hidden="true"
           style={{
             height: "0.5px",
             background:
@@ -371,9 +342,7 @@ function StepCard({
   );
 }
 
-// ─────────────────────────────────────────────
-// Main Component
-// ─────────────────────────────────────────────
+// MAIN COMPONENT
 
 export default function HowWeWork({
   isActive,
@@ -394,9 +363,7 @@ export default function HowWeWork({
       style={{
         opacity: howWeWorkOpacity,
 
-        y: isActive
-          ? howWeWorkExitY
-          : howWeWorkY,
+        y: isActive ? howWeWorkExitY : howWeWorkY,
 
         position: "fixed",
         inset: 0,
@@ -408,30 +375,22 @@ export default function HowWeWork({
 
         background: "#f5f2eb",
 
-        // INNER SCROLL
         overflowY: "auto",
         overflowX: "hidden",
 
-        // MOBILE FIXES
         WebkitOverflowScrolling: "touch",
         overscrollBehavior: "contain",
         touchAction: "pan-y",
 
-        // PERFORMANCE
         willChange: "transform, opacity",
         transform: "translateZ(0)",
         backfaceVisibility: "hidden",
 
-        // ACTIVE STATE
-        pointerEvents: isActive
-          ? "auto"
-          : "none",
+        pointerEvents: isActive ? "auto" : "none",
       }}
       className="how-we-work-scroll"
       aria-hidden={!isActive}
     >
-      {/* Scrollbar */}
-
       <style jsx>{`
         .how-we-work-scroll::-webkit-scrollbar {
           width: 6px;
@@ -456,42 +415,6 @@ export default function HowWeWork({
         }
       `}</style>
 
-      {/* Background Grid */}
-
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          opacity: 0.025,
-        }}
-      >
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={`h-${i}`}
-            className="absolute left-0 right-0"
-            style={{
-              top: `${(i / 19) * 100}%`,
-              height: "0.5px",
-              background: "rgba(100,160,220)",
-            }}
-          />
-        ))}
-
-        {Array.from({ length: 24 }).map((_, i) => (
-          <div
-            key={`v-${i}`}
-            className="absolute top-0 bottom-0"
-            style={{
-              left: `${(i / 23) * 100}%`,
-              width: "0.5px",
-              background: "rgba(100,160,220)",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Content */}
-
       <div
         className="
           relative
@@ -504,13 +427,10 @@ export default function HowWeWork({
         "
         style={{
           maxWidth: "1280px",
-
           padding:
             "clamp(56px,9vh,100px) clamp(24px,5vw,72px) clamp(40px,5vh,60px)",
         }}
       >
-        {/* Left Side */}
-
         <aside
           ref={headingRef}
           className="
@@ -537,8 +457,6 @@ export default function HowWeWork({
             }}
             className="flex flex-col gap-4"
           >
-            {/* Label */}
-
             <div className="flex items-center gap-4">
               <span
                 className="font-mono uppercase tracking-[0.42em]"
@@ -550,7 +468,6 @@ export default function HowWeWork({
               </span>
 
               <div
-                aria-hidden="true"
                 style={{
                   flex: 1,
                   height: "1px",
@@ -559,8 +476,6 @@ export default function HowWeWork({
                 }}
               />
             </div>
-
-            {/* Heading */}
 
             <h2
               id="how-we-work-heading"
@@ -573,8 +488,6 @@ export default function HowWeWork({
               <br />
               Works
             </h2>
-
-            {/* Description */}
 
             <motion.p
               initial={{
@@ -597,13 +510,11 @@ export default function HowWeWork({
                 maxWidth: "420px",
               }}
             >
-              A transparent, phased process designed to keep you informed and
-              in control at every stage — from first meeting to final handover.
+              A transparent process designed to keep you informed and in
+              control from first meeting to final handover.
             </motion.p>
           </motion.div>
         </aside>
-
-        {/* Right Side */}
 
         <main>
           <div className="flex flex-col">
@@ -617,8 +528,6 @@ export default function HowWeWork({
             ))}
           </div>
 
-          {/* Footer */}
-
           <footer
             className="mt-[clamp(18px,3vh,32px)] flex items-start gap-4"
             style={{
@@ -627,7 +536,6 @@ export default function HowWeWork({
             }}
           >
             <div
-              aria-hidden="true"
               style={{
                 width: "24px",
                 height: "1px",
@@ -643,9 +551,8 @@ export default function HowWeWork({
                 lineHeight: 1.75,
               }}
             >
-              Payment milestones are structured to align with verified project
-              progress. All schedules and timelines are confirmed before
-              commencement.
+              Payment milestones are aligned with verified project progress and
+              confirmed timelines.
             </p>
           </footer>
         </main>
@@ -653,4 +560,3 @@ export default function HowWeWork({
     </motion.section>
   );
 }
-  
