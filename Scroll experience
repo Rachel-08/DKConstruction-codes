@@ -1,17 +1,24 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { motion, useScroll, useTransform, useMotionValueEvent, useMotionValue } from "motion/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValueEvent,
+} from "motion/react";
 
-import LoadingScreen   from "@/components/LoadingScreen";
-import Navbar          from "@/components/Navbar";
-import WelcomeWindow   from "@/components/WelcomeWindow";
-import StudioLanding   from "@/components/StudioLanding";
+import { useRouter } from "next/navigation";
+
+import LoadingScreen from "@/components/LoadingScreen";
+import Navbar from "@/components/Navbar";
+import WelcomeWindow from "@/components/WelcomeWindow";
+import StudioLanding from "@/components/StudioLanding";
 import ServicesSection from "@/components/ServiceSection";
-import SelectedWork    from "@/components/SelectedWork";
-import HowWeWork       from "@/components/About";
-import ContactSection  from "@/components/Contact";
-// import TeamSection from "@/components/TeamSection";
+import SelectedWork from "@/components/SelectedWork";
+import HowWeWork from "@/components/About";
+import ContactSection from "@/components/Contact";
+
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
@@ -24,27 +31,433 @@ type ActiveSegment =
   | "work"
   | "contact";
 
+type NavigateTarget =
+  | "home"
+  | "services"
+  | "howwework"
+  | "team"
+  | "contact";
+
+type ViewportMode = "mobile" | "tablet" | "desktop" | "wide";
+
+type Timeline = {
+  scrollVh: number;
+
+  active: {
+    introEnd: number;
+    landingEnd: number;
+    servicesEnd: number;
+    howWeWorkEnd: number;
+    workEnd: number;
+  };
+
+  navbar: {
+    hideBefore: number;
+    showStart: number;
+    showEnd: number;
+  };
+
+  intro: {
+    rotate: [number, number];
+    frame: [number, number];
+    zoom: [number, number];
+    scrollText: [number, number];
+    exitX: [number, number];
+    enterTarget: number;
+    enterTargetMobile: number;
+    enterTargetDesktop: number;
+  };
+
+  landing: {
+    opacity: [number, number, number, number];
+    y: [number, number];
+    exitX: [number, number];
+    target: number;
+  };
+
+  services: {
+    opacity: [number, number, number, number];
+    y: [number, number];
+    exitY: [number, number];
+    target: number;
+  };
+
+  howWeWork: {
+    opacity: [number, number, number, number];
+    y: [number, number];
+    exitY: [number, number];
+    target: number;
+  };
+
+  work: {
+    x: [number, number];
+    opacity: [number, number, number, number];
+    headingY: [number, number];
+    headingScale: [number, number];
+    headingX: [number, number];
+    carouselOpacity: [number, number];
+    carouselX: [number, number];
+    exitY: [number, number];
+    target: number;
+  };
+
+  contact: {
+    opacity: [number, number, number];
+    y: [number, number, number];
+    target: number;
+  };
+};
+
 // ─────────────────────────────────────────────
-// Scroll nudge — shown on every section after
-// 2 s of idle. User still controls scroll.
+// Responsive viewport mode
 // ─────────────────────────────────────────────
 
-// Per-section nudge logic lives inside each
-// section component or is handled generically
-// here via a shared hook below.
+function getViewportMode(width: number): ViewportMode {
+  if (width < 768) return "mobile";
+  if (width < 1024) return "tablet";
+  if (width < 1536) return "desktop";
+  return "wide";
+}
+
+function useViewportMode(): ViewportMode {
+  const [mode, setMode] = useState<ViewportMode>("desktop");
+
+  useEffect(() => {
+    const update = () => {
+      setMode(getViewportMode(window.innerWidth));
+    };
+
+    update();
+    window.addEventListener("resize", update);
+
+    return () => {
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  return mode;
+}
+
+// ─────────────────────────────────────────────
+// Responsive timeline
+// ─────────────────────────────────────────────
+
+function getTimeline(mode: ViewportMode): Timeline {
+  /**
+   * Mobile gets:
+   * - longer total scroll height
+   * - more Services duration
+   * - slower Selected Work carousel
+   * - smoother intro/landing spacing
+   */
+  if (mode === "mobile") {
+    return {
+      scrollVh: 2400,
+
+      active: {
+        introEnd: 0.16,
+        landingEnd: 0.27,
+        servicesEnd: 0.47,
+        howWeWorkEnd: 0.61,
+        workEnd: 0.86,
+      },
+
+      navbar: {
+        hideBefore: 0.18,
+        showStart: 0.18,
+        showEnd: 0.28,
+      },
+
+      intro: {
+        rotate: [0.0, 0.1],
+        frame: [0.04, 0.1],
+        zoom: [0.05, 0.15],
+        scrollText: [0.0, 0.05],
+        exitX: [0.21, 0.27],
+        enterTarget: 0.17,
+        enterTargetMobile: 0.20,
+        enterTargetDesktop: 0.17,
+      },
+
+      landing: {
+        opacity: [0.14, 0.18, 0.23, 0.27],
+        y: [0.14, 0.18],
+        exitX: [0.23, 0.27],
+        target: 0.19,
+      },
+
+      services: {
+        opacity: [0.25, 0.29, 0.43, 0.47],
+        y: [0.25, 0.3],
+        exitY: [0.43, 0.49],
+        target: 0.32,
+      },
+
+      howWeWork: {
+        opacity: [0.47, 0.51, 0.57, 0.61],
+        y: [0.47, 0.51],
+        exitY: [0.57, 0.62],
+        target: 0.53,
+      },
+
+      work: {
+        x: [0.59, 0.64],
+        opacity: [0.59, 0.64, 0.86, 0.89],
+        headingY: [0.61, 0.65],
+        headingScale: [0.63, 0.67],
+        headingX: [0.63, 0.67],
+        carouselOpacity: [0.65, 0.68],
+        carouselX: [0.69, 0.85],
+        exitY: [0.85, 0.89],
+        target: 0.66,
+      },
+
+      contact: {
+        opacity: [0.86, 0.9, 1.0],
+        y: [0.88, 0.9, 1.0],
+        target: 1.0,
+      },
+    };
+  }
+
+  if (mode === "tablet") {
+    return {
+      scrollVh: 2100,
+
+      active: {
+        introEnd: 0.15,
+        landingEnd: 0.27,
+        servicesEnd: 0.43,
+        howWeWorkEnd: 0.57,
+        workEnd: 0.86,
+      },
+
+      navbar: {
+        hideBefore: 0.18,
+        showStart: 0.18,
+        showEnd: 0.27,
+      },
+
+      intro: {
+        rotate: [0.0, 0.1],
+        frame: [0.04, 0.1],
+        zoom: [0.05, 0.14],
+        scrollText: [0.0, 0.05],
+        exitX: [0.21, 0.26],
+        enterTarget: 0.21,
+        enterTargetMobile: 0.21,
+        enterTargetDesktop: 0.21,
+      },
+
+      landing: {
+        opacity: [0.14, 0.17, 0.22, 0.27],
+        y: [0.14, 0.17],
+        exitX: [0.22, 0.27],
+        target: 0.18,
+      },
+
+      services: {
+        opacity: [0.25, 0.28, 0.39, 0.43],
+        y: [0.25, 0.29],
+        exitY: [0.39, 0.45],
+        target: 0.31,
+      },
+
+      howWeWork: {
+        opacity: [0.43, 0.47, 0.53, 0.57],
+        y: [0.43, 0.47],
+        exitY: [0.53, 0.58],
+        target: 0.49,
+      },
+
+      work: {
+        x: [0.55, 0.6],
+        opacity: [0.55, 0.6, 0.84, 0.87],
+        headingY: [0.57, 0.61],
+        headingScale: [0.59, 0.63],
+        headingX: [0.59, 0.63],
+        carouselOpacity: [0.61, 0.64],
+        carouselX: [0.65, 0.83],
+        exitY: [0.83, 0.87],
+        target: 0.63,
+      },
+
+      contact: {
+        opacity: [0.86, 0.9, 1.0],
+        y: [0.88, 0.9, 1.0],
+        target: 1.0,
+      },
+    };
+  }
+
+  if (mode === "wide") {
+    return {
+      scrollVh: 2000,
+
+      active: {
+        introEnd: 0.15,
+        landingEnd: 0.26,
+        servicesEnd: 0.36,
+        howWeWorkEnd: 0.48,
+        workEnd: 0.86,
+      },
+
+      navbar: {
+        hideBefore: 0.19,
+        showStart: 0.19,
+        showEnd: 0.24,
+      },
+
+      intro: {
+        rotate: [0.0, 0.1],
+        frame: [0.04, 0.1],
+        zoom: [0.05, 0.14],
+        scrollText: [0.0, 0.05],
+        exitX: [0.2, 0.24],
+        enterTarget: 0.2,
+        enterTargetMobile: 0.2,
+        enterTargetDesktop: 0.2,
+      },
+
+      landing: {
+        opacity: [0.14, 0.17, 0.2, 0.24],
+        y: [0.14, 0.17],
+        exitX: [0.2, 0.24],
+        target: 0.18,
+      },
+
+      services: {
+        opacity: [0.22, 0.24, 0.3, 0.32],
+        y: [0.22, 0.26],
+        exitY: [0.3, 0.34],
+        target: 0.27,
+      },
+
+      howWeWork: {
+        opacity: [0.34, 0.38, 0.44, 0.48],
+        y: [0.34, 0.38],
+        exitY: [0.44, 0.48],
+        target: 0.41,
+      },
+
+      work: {
+        x: [0.46, 0.52],
+        opacity: [0.46, 0.52, 0.86, 0.88],
+        headingY: [0.48, 0.52],
+        headingScale: [0.5, 0.54],
+        headingX: [0.5, 0.54],
+        carouselOpacity: [0.52, 0.54],
+        carouselX: [0.57, 0.82],
+        exitY: [0.82, 0.86],
+        target: 0.55,
+      },
+
+      contact: {
+        opacity: [0.86, 0.9, 1.0],
+        y: [0.88, 0.9, 1.0],
+        target: 1.0,
+      },
+    };
+  }
+
+  return {
+    scrollVh: 1850,
+
+    active: {
+      introEnd: 0.15,
+      landingEnd: 0.26,
+      servicesEnd: 0.38,
+      howWeWorkEnd: 0.5,
+      workEnd: 0.86,
+    },
+
+    navbar: {
+      hideBefore: 0.19,
+      showStart: 0.19,
+      showEnd: 0.25,
+    },
+
+    intro: {
+      rotate: [0.0, 0.1],
+      frame: [0.04, 0.1],
+      zoom: [0.05, 0.14],
+      scrollText: [0.0, 0.05],
+      exitX: [0.2, 0.25],
+      enterTarget: 0.2,
+      enterTargetMobile: 0.2,
+      enterTargetDesktop: 0.2,
+    },
+
+    landing: {
+      opacity: [0.14, 0.17, 0.21, 0.23],
+      y: [0.14, 0.17],
+      exitX: [0.21, 0.23],
+      target: 0.18,
+    },
+
+    services: {
+      opacity: [0.21, 0.23, 0.32, 0.36],
+      y: [0.21, 0.25],
+      exitY: [0.34, 0.4],
+      target: 0.29,
+    },
+
+    howWeWork: {
+      opacity: [0.38, 0.42, 0.46, 0.5],
+      y: [0.38, 0.42],
+      exitY: [0.46, 0.5],
+      target: 0.43,
+    },
+
+    work: {
+      x: [0.48, 0.54],
+      opacity: [0.48, 0.54, 0.84, 0.87],
+      headingY: [0.5, 0.54],
+      headingScale: [0.52, 0.56],
+      headingX: [0.52, 0.56],
+      carouselOpacity: [0.54, 0.56],
+      carouselX: [0.59, 0.82],
+      exitY: [0.82, 0.86],
+      target: 0.57,
+    },
+
+    contact: {
+      opacity: [0.86, 0.9, 1.0],
+        y: [0.88, 0.9, 1.0],
+        target: 1.0,
+    },
+  };
+}
 
 // ─────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────
 
 export default function ScrollExperience() {
-  const containerRef  = useRef<HTMLElement | null>(null);
-  const idleTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLElement | null>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoScrollTriggeredRef = useRef<Set<string>>(new Set());
+  const isProgrammaticScrollingRef = useRef(false); // Flag to indicate programmatic scroll
+  const isSnappingRef = useRef(false);
+  // Global animation lock: when true, all user input and auto-snap logic should be ignored
+  const isAnimatingRef = useRef(false);
+  const hasSettledOnLandingRef = useRef(false);
+  const prevActiveRef = useRef<ActiveSegment>("intro");
 
-  const [loadingDone, setLoadingDone]     = useState<boolean>(false);
-  const [showNavbar,  setShowNavbar]      = useState<boolean>(false);
-  const [showNudge,   setShowNudge]       = useState<boolean>(false);
-  const [activeSegment, setActiveSegment] = useState<ActiveSegment>("intro");
+
+  const router = useRouter();
+
+  const [loadingDone, setLoadingDone] = useState<boolean>(false);
+  const [showNavbar, setShowNavbar] = useState<boolean>(false);
+  const [showNudge, setShowNudge] = useState<boolean>(false);
+  const [activeSegment, setActiveSegment] =
+    useState<ActiveSegment>("intro");
+
+  const viewportMode = useViewportMode();
+
+  const timeline = useMemo(() => {
+    return getTimeline(viewportMode);
+  }, [viewportMode]);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -54,20 +467,98 @@ export default function ScrollExperience() {
   // ----------------------------------------
   // Loading complete callback
   // ----------------------------------------
+
   const handleLoadingComplete = useCallback(() => {
     setLoadingDone(true);
+    console.debug("Loading complete: ready to animate intro", { ts: Date.now() });
   }, []);
 
   // ----------------------------------------
-  // Idle nudge — reset on every scroll event
-  // Show nudge arrow after 2 s of no scrolling
+  // Scroll helper
   // ----------------------------------------
+
+  const scrollToProgress = useCallback((progress: number): void => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    const scrollableDistance = container.scrollHeight - window.innerHeight;
+    const containerTop = container.getBoundingClientRect().top + window.scrollY;
+
+    window.scrollTo({
+      top: containerTop + scrollableDistance * progress,
+      behavior: "smooth",
+    });
+  }, []);
+
+  // Central helper that performs a programmatic snap while locking user interactions
+  const performSnapTo = useCallback(
+    (progress: number, key: string | null = null, duration = 900) => {
+      if (isAnimatingRef.current) {
+        console.debug("performSnapTo: blocked - already animating", {
+          progress,
+          key,
+          ts: Date.now(),
+        });
+        return;
+      }
+
+      if (key) autoScrollTriggeredRef.current.add(key);
+
+      console.debug("performSnapTo: start", { key, progress, duration, ts: Date.now() });
+
+      isAnimatingRef.current = true;
+      isProgrammaticScrollingRef.current = true;
+      isSnappingRef.current = true;
+
+      scrollToProgress(progress);
+
+      // Ensure we always clear the lock after the duration (fallback)
+      const clear = () => {
+        isAnimatingRef.current = false;
+        isProgrammaticScrollingRef.current = false;
+        isSnappingRef.current = false;
+        console.debug("performSnapTo: end", { key, ts: Date.now() });
+      };
+
+      const t = window.setTimeout(clear, duration);
+
+      // Return a cancellation function
+      return () => {
+        clear();
+        clearTimeout(t);
+      };
+    },
+    [scrollToProgress]
+  );
+
+  const handleEnterClick = useCallback((): void => {
+    if (autoScrollTriggeredRef.current.has("intro-enter")) return;
+    const enterTarget =
+      viewportMode === "mobile"
+        ? timeline.intro.enterTargetMobile
+        : timeline.intro.enterTargetDesktop;
+    performSnapTo(enterTarget, "intro-enter", 1500);
+  }, [
+    performSnapTo,
+    timeline.intro.enterTargetMobile,
+    timeline.intro.enterTargetDesktop,
+    viewportMode,
+  ]);
+
+  // ----------------------------------------
+  // Idle nudge
+  // ----------------------------------------
+
   const resetNudge = useCallback(() => {
     setShowNudge(false);
+
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+
     idleTimerRef.current = setTimeout(() => {
-      // Only nudge if not on the last section
-      if (activeSegment !== "contact") setShowNudge(true);
+      if (activeSegment !== "contact") {
+        setShowNudge(true);
+        console.debug("showNudge -> true", { activeSegment, ts: Date.now() });
+      }
     }, 2000);
   }, [activeSegment]);
 
@@ -75,207 +566,484 @@ export default function ScrollExperience() {
     resetNudge();
   });
 
+  useEffect(() => {
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, []);
+
   // ----------------------------------------
   // Active segment tracker
   // ----------------------------------------
+
   useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
-    if      (latest < 0.15) setActiveSegment("intro");
-    else if (latest < 0.26) setActiveSegment("landing");
-    else if (latest < 0.36) setActiveSegment("services");
-    else if (latest < 0.48) setActiveSegment("howwework");
-    else if (latest < 0.83) setActiveSegment("work");
-    else                    setActiveSegment("contact");
+    let newSeg: ActiveSegment = "contact";
+
+    if (latest < timeline.active.introEnd) newSeg = "intro";
+    else if (latest < timeline.active.landingEnd) newSeg = "landing";
+    else if (latest < timeline.active.servicesEnd) newSeg = "services";
+    else if (latest < timeline.active.howWeWorkEnd) newSeg = "howwework";
+    else if (latest < timeline.active.workEnd) newSeg = "work";
+
+    if (prevActiveRef.current !== newSeg) {
+      prevActiveRef.current = newSeg;
+      setActiveSegment(newSeg);
+      console.debug("activeSegment ->", newSeg, { progress: scrollYProgress.get(), ts: Date.now() });
+    }
   });
 
   // ----------------------------------------
   // Navbar visibility tracker
   // ----------------------------------------
-  useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
-    const previous        = scrollYProgress.getPrevious() ?? 0;
-    const isScrollingDown = latest > previous;
-    const isScrollingUp   = latest < previous;
 
-    if (latest < 0.19)                   { setShowNavbar(false); return; }
-    if (latest >= 0.19 && latest < 0.24) { setShowNavbar(true);  return; }
-    if (isScrollingDown) setShowNavbar(false);
-    if (isScrollingUp)   setShowNavbar(true);
+  useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
+    const previous = scrollYProgress.getPrevious() ?? 0;
+    const isScrollingDown = latest > previous;
+    const isScrollingUp = latest < previous;
+
+    if (latest < timeline.navbar.hideBefore) {
+      setShowNavbar(false);
+      console.debug("Navbar -> hide (before threshold)", { latest, ts: Date.now() });
+      return;
+    }
+
+    if (
+      latest >= timeline.navbar.showStart &&
+      latest < timeline.navbar.showEnd
+    ) {
+      setShowNavbar(true);
+      console.debug("Navbar -> show (in show window)", { latest, ts: Date.now() });
+      return;
+    }
+
+    if (isScrollingDown) {
+      setShowNavbar(false);
+      console.debug("Navbar -> hide (scrolling down)", { latest, ts: Date.now() });
+    }
+    if (isScrollingUp) {
+      setShowNavbar(true);
+      console.debug("Navbar -> show (scrolling up)", { latest, ts: Date.now() });
+    }
   });
 
-  const isIntroActive     = activeSegment === "intro";
-  const isLandingActive   = activeSegment === "landing";
-  const isServicesActive  = activeSegment === "services";
+  // ----------------------------------------
+  // Auto-snap scroll (excludes SelectedWork & Contact)
+  // ----------------------------------------
+
+ 
+  useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
+    const previous = scrollYProgress.getPrevious() ?? 0;
+    // Ignore events during any programmatic scroll / animation
+    if (isAnimatingRef.current) {
+      console.debug("auto-snap: ignored change due to animation lock", { latest, ts: Date.now() });
+      return;
+    }
+
+    const isScrollingDown = latest > previous;
+
+    // Block re-triggering while a snap animation is in flight
+    if (isSnappingRef.current) return;
+
+    // --- FIX: Handle Initial Load Auto-Scroll Safely ---
+    if (!hasSettledOnLandingRef.current) {
+      // If we haven't reached the landing target yet, ignore the scroll events
+      if (latest < timeline.landing.target) {
+        return;
+      }
+      // Once we hit or pass the landing target, lock it in permanently
+      hasSettledOnLandingRef.current = true;
+      console.debug("Initial landing settled", { latest, target: timeline.landing.target, ts: Date.now() });
+      return;
+    }
+
+    // Scrolling up should snap to the previous section once the current section falls below its full-opacity entry
+    if (!isScrollingDown) {
+      const landingBackThreshold = timeline.services.opacity[1];
+      const servicesBackThreshold = timeline.howWeWork.opacity[1];
+      const howWeWorkBackThreshold = timeline.work.opacity[1];
+      const workBackThreshold = timeline.contact.opacity[1];
+
+      if (
+        previous >= landingBackThreshold &&
+        latest <= landingBackThreshold &&
+        latest > timeline.landing.target &&
+        !autoScrollTriggeredRef.current.has("landing-back")
+      ) {
+        console.debug("auto-snap: services -> landing (upward)", {
+          latest,
+          target: timeline.landing.target,
+          threshold: landingBackThreshold,
+          ts: Date.now(),
+        });
+        performSnapTo(timeline.landing.target, "landing-back", 1200);
+        return;
+      }
+
+      if (
+        previous >= servicesBackThreshold &&
+        latest <= servicesBackThreshold &&
+        latest > timeline.services.target &&
+        !autoScrollTriggeredRef.current.has("services-back")
+      ) {
+        console.debug("auto-snap: howwework -> services (upward)", {
+          latest,
+          target: timeline.services.target,
+          threshold: servicesBackThreshold,
+          ts: Date.now(),
+        });
+        performSnapTo(timeline.services.target, "services-back", 1200);
+        return;
+      }
+
+      if (
+        previous >= howWeWorkBackThreshold &&
+        latest <= howWeWorkBackThreshold &&
+        latest > timeline.howWeWork.target &&
+        !autoScrollTriggeredRef.current.has("howwework-back")
+      ) {
+        console.debug("auto-snap: work -> howwework (upward)", {
+          latest,
+          target: timeline.howWeWork.target,
+          threshold: howWeWorkBackThreshold,
+          ts: Date.now(),
+        });
+        performSnapTo(timeline.howWeWork.target, "howwework-back", 1200);
+        return;
+      }
+
+      if (
+        previous >= workBackThreshold &&
+        latest <= workBackThreshold &&
+        latest > timeline.work.target &&
+        !autoScrollTriggeredRef.current.has("work-back")
+      ) {
+        console.debug("auto-snap: contact -> work (upward)", {
+          latest,
+          target: timeline.work.target,
+          threshold: workBackThreshold,
+          ts: Date.now(),
+        });
+        performSnapTo(timeline.work.target, "work-back", 1200);
+        return;
+      }
+
+      autoScrollTriggeredRef.current.clear();
+      console.debug("auto-snap triggers cleared (scrolling up)", { ts: Date.now() });
+      return;
+    }
+
+    // Prevent “multi-step” auto-snap from firing immediately.
+    if (latest < timeline.active.landingEnd) {
+      autoScrollTriggeredRef.current.delete("services");
+      autoScrollTriggeredRef.current.delete("howwework");
+      autoScrollTriggeredRef.current.delete("work");
+      console.debug("auto-snap: deleted intermediate triggers to avoid multi-step", { latest, ts: Date.now() });
+    }
+
+    // --- Landing → Services ---
+    if (
+      !autoScrollTriggeredRef.current.has("landing") &&
+      latest >= timeline.landing.opacity[1] &&
+      latest < timeline.active.landingEnd
+    ) {
+      console.debug("auto-snap: landing -> services", { latest, target: timeline.services.target, ts: Date.now() });
+      performSnapTo(timeline.services.target, "landing", 1500);
+      return;
+    }
+
+    // --- Services → HowWeWork ---
+    if (
+      !autoScrollTriggeredRef.current.has("services") &&
+      latest >= timeline.services.opacity[2] &&
+      latest < timeline.active.servicesEnd
+    ) {
+      console.debug("auto-snap: services -> howwework", { latest, target: timeline.howWeWork.target, ts: Date.now() });
+      performSnapTo(timeline.howWeWork.target, "services", 1500);
+      return;
+    }
+
+    // --- HowWeWork → Work (SelectedWork) ---
+    if (
+      !autoScrollTriggeredRef.current.has("howwework") &&
+      latest >= timeline.howWeWork.opacity[2] &&
+      latest < timeline.active.howWeWorkEnd
+    ) {
+      console.debug("auto-snap: howwework -> work", { latest, target: timeline.work.target, ts: Date.now() });
+      performSnapTo(timeline.work.target, "howwework", 1500);
+      return;
+    }
+
+    const workToContactThreshold = timeline.work.exitY[0];
+
+    // --- Work → Contact ---
+    if (
+      !autoScrollTriggeredRef.current.has("work") &&
+      latest >= workToContactThreshold &&
+      latest < timeline.active.workEnd
+    ) {
+      console.debug("auto-snap: work -> contact", {
+        latest,
+        target: timeline.contact.target,
+        threshold: workToContactThreshold,
+        ts: Date.now(),
+      });
+      performSnapTo(timeline.contact.target, "work", 1500);
+      return;
+    }
+  });
+
+
+  // ----------------------------------------
+  // Navigation callback
+  // ----------------------------------------
+
+  const handleNavigate = useCallback(
+    (target: NavigateTarget) => {
+      if (target === "team") {
+        router.push("/team");
+        return;
+      }
+
+      const progressMap: Record<Exclude<NavigateTarget, "team">, number> = {
+        home: timeline.landing.target,
+        services: timeline.services.target,
+        howwework: timeline.howWeWork.target,
+        contact: timeline.contact.target,
+      };
+
+    console.debug("handleNavigate ->", target, { ts: Date.now() });
+    performSnapTo(progressMap[target], `nav-${target}`, 1200);
+    },
+    [
+      performSnapTo,
+      timeline.landing.target,
+      timeline.services.target,
+      timeline.howWeWork.target,
+      timeline.contact.target,
+      router,
+    ]
+  );
+
+  // ----------------------------------------
+  // Wheel / touch handlers — throttle and ignore during programmatic scroll
+  // ----------------------------------------
+  useEffect(() => {
+    let lastWheel = 0;
+    const throttle = 150; // ms
+
+    const onWheel = (e: WheelEvent) => {
+      if (isAnimatingRef.current) {
+        console.debug("wheel ignored during animation", { deltaY: e.deltaY, ts: Date.now() });
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      const now = performance.now();
+      if (now - lastWheel < throttle) return;
+      lastWheel = now;
+
+      // minimal logging for user-initiated wheel
+      console.debug("wheel pass-through", { deltaY: e.deltaY, ts: Date.now() });
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (isAnimatingRef.current) {
+        console.debug("touchstart ignored during animation", { ts: Date.now() });
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    window.addEventListener("wheel", onWheel, { passive: false, capture: true });
+    window.addEventListener("touchstart", onTouchStart, { passive: false, capture: true });
+
+    return () => {
+      window.removeEventListener("wheel", onWheel, true);
+      window.removeEventListener("touchstart", onTouchStart, true);
+    };
+  }, []);
+
+  const isIntroActive = activeSegment === "intro";
+  const isLandingActive = activeSegment === "landing";
+  const isServicesActive = activeSegment === "services";
   const isHowWeWorkActive = activeSegment === "howwework";
-  const isWorkActive      = activeSegment === "work";
-  // const isTeamActive      = activeSegment === "team";
-  const isContactActive   = activeSegment === "contact";
+  const isWorkActive = activeSegment === "work";
+  const isContactActive = activeSegment === "contact";
 
-  // const [showTeam, setShowTeam] = useState<boolean>(false);
+  // ─────────────────────────────────────────
+  // Motion transforms
+  // ─────────────────────────────────────────
 
-  // const teamOpacity = useMotionValue(showTeam ? 1 : 0);
-  // const teamY = useMotionValue(showTeam ? "0vh" : "40vh");
-  // const teamExitY = useMotionValue("0vh");
+  // Segment 1: Welcome Window
+  const leftRotate = useTransform(
+    scrollYProgress,
+    timeline.intro.rotate,
+    [0, -78]
+  );
 
-  // // Sync motion values if state changes natively
-  // if (showTeam) {
-  //   teamOpacity.set(1);
-  //   teamY.set("0vh");
-  // } else {
-  //   teamOpacity.set(0);
-  //   teamY.set("40vh");
-  // }
-  /**
-   * MASTER TIMELINE (unchanged from your version)
-   *
-   * 0.00 – 0.10   Window panels rotate open
-   * 0.04 – 0.10   Frame fades out
-   * 0.05 – 0.14   Window zooms + fades
-   * 0.00 – 0.05   Scroll hint fades
-   * 0.14 – 0.17   Landing slides up
-   * 0.17 – 0.20   Landing rests
-   * 0.20 – 0.24   Landing + window exit left
-   * 0.22 – 0.26   Services rise in
-   * 0.26 – 0.32   Services rest
-   * 0.32 – 0.36   Services exit up
-   * 0.34 – 0.38   HowWeWork rises in
-   * 0.38 – 0.44   HowWeWork rests
-   * 0.44 – 0.48   HowWeWork exits up
-   * 0.46 – 0.52   SelectedWork slides in
-   * 0.52 – 0.82   Carousel scrolls
-   * 0.82 – 0.86   Work exits up
-   * 0.86 – 1.00   Contact fades up
-   */
+  const rightRotate = useTransform(
+    scrollYProgress,
+    timeline.intro.rotate,
+    [0, 78]
+  );
 
-  // ── Segment 1: Welcome Window ──
-  const leftRotate  = useTransform(scrollYProgress, [0.00, 0.10], [0, -78]);
-  const rightRotate = useTransform(scrollYProgress, [0.00, 0.10], [0,  78]);
+  const windowScale = useTransform(
+    scrollYProgress,
+    timeline.intro.zoom,
+    [1, viewportMode === "mobile" ? 2.35 : 2.1]
+  );
 
-  const windowScale       = useTransform(scrollYProgress, [0.05, 0.14], [1,   2.1]);
-  const windowOpacity     = useTransform(scrollYProgress, [0.05, 0.14], [1,   0  ]);
-  const frameOpacity      = useTransform(scrollYProgress, [0.04, 0.10], [1,   0  ]);
-  const scrollTextOpacity = useTransform(scrollYProgress, [0.00, 0.05], [1,   0  ]);
+  const windowOpacity = useTransform(
+    scrollYProgress,
+    timeline.intro.zoom,
+    [1, 0]
+  );
+
+  const frameOpacity = useTransform(
+    scrollYProgress,
+    timeline.intro.frame,
+    [1, 0]
+  );
+
+  const scrollTextOpacity = useTransform(
+    scrollYProgress,
+    timeline.intro.scrollText,
+    [1, 0]
+  );
 
   const windowExitX = useTransform(
     scrollYProgress,
-    [0.20, 0.24],
-    ["0vw", "-180vw"]
+    timeline.intro.exitX,
+    ["0vw", viewportMode === "mobile" ? "-220vw" : "-180vw"]
   );
 
-  // ── Segment 2: Studio Landing ──
+  // Segment 2: Studio Landing
   const landingOpacity = useTransform(
     scrollYProgress,
-    [0.14, 0.17, 0.20, 0.24],
-    [0,    1,    1,    0   ]
+    timeline.landing.opacity,
+    [0, 1, 1, 0]
   );
+
   const landingY = useTransform(
     scrollYProgress,
-    [0.14, 0.17],
+    timeline.landing.y,
     ["120vh", "0vh"]
   );
+
   const landingExitX = useTransform(
     scrollYProgress,
-    [0.20, 0.24],
-    ["0vw", "-140vw"]
+    timeline.landing.exitX,
+    ["0vw", viewportMode === "mobile" ? "-170vw" : "-140vw"]
   );
 
-  // ── Segment 3: Services ──
+  // Segment 3: Services
   const servicesOpacity = useTransform(
     scrollYProgress,
-    [0.22, 0.24, 0.30, 0.32],
-    [0,    1,    1,    0   ]
-  );
-  const servicesY = useTransform(
-    scrollYProgress,
-    [0.22, 0.26],
-    ["40vh", "0vh"]
-  );
-  const servicesExitY = useTransform(
-    scrollYProgress,
-    [0.30, 0.34],
-    ["0vh", "-60vh"]
+    timeline.services.opacity,
+    [0, 1, 1, 0]
   );
 
-  // ── Segment 4: How We Work ──
+  const servicesY = useTransform(
+    scrollYProgress,
+    timeline.services.y,
+    [viewportMode === "mobile" ? "60vh" : "40vh", "0vh"]
+  );
+
+
+  const servicesExitY = useTransform(
+    scrollYProgress,
+    timeline.services.exitY,
+    ["0vh", viewportMode === "mobile" ? "-85vh" : "-60vh"]
+  );
+
+  // Segment 4: How We Work
   const howWeWorkOpacity = useTransform(
     scrollYProgress,
-    [0.34, 0.38, 0.44, 0.48],
-    [0,    1,    1,    0   ]
+    timeline.howWeWork.opacity,
+    [0, 1, 1, 0]
   );
+
   const howWeWorkY = useTransform(
     scrollYProgress,
-    [0.34, 0.38],
+    timeline.howWeWork.y,
     ["55vh", "0vh"]
   );
+
   const howWeWorkExitY = useTransform(
     scrollYProgress,
-    [0.44, 0.48],
+    timeline.howWeWork.exitY,
     ["0vh", "-55vh"]
   );
 
-  // ── Segment 5: Selected Work ──
+  // Segment 5: Selected Work
   const workX = useTransform(
     scrollYProgress,
-    [0.46, 0.52],
-    ["100vw", "0vw"]
+    timeline.work.x,
+    [viewportMode === "mobile" ? "120vw" : "100vw", "0vw"]
   );
+
   const workOpacity = useTransform(
     scrollYProgress,
-    [0.46, 0.52, 0.86, 0.88],
-    [0,    1,    1,    0   ]
-  );
-  const workHeadingY     = useTransform(scrollYProgress, [0.48, 0.52], ["0vh",  "-30vh"]);
-  const workHeadingScale = useTransform(scrollYProgress, [0.50, 0.54], [1,       0.75 ]);
-  const workHeadingX     = useTransform(scrollYProgress, [0.50, 0.54], ["0vw",  "-14vw"]);
-  const carouselOpacity  = useTransform(scrollYProgress, [0.52, 0.54], [0,       1    ]);
-  const carouselX        = useTransform(scrollYProgress, [0.57, 0.82], ["25vw", "-95vw"]);
-  const workExitY        = useTransform(scrollYProgress, [0.82, 0.86], ["0vh",  "-100vh"]);
-
-  // ── Segment 6: Contact ──
-  const contactOpacity = useTransform(scrollYProgress, [0.86, 1.00], [0,      1    ]);
-  const contactY       = useTransform(scrollYProgress, [0.86, 1.00], ["50vh", "0vh"]);
-
-  // ── Helpers ──
-  const scrollToProgress = (progress: number): void => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
-    const scrollableDistance = container.offsetHeight - window.innerHeight;
-    window.scrollTo({
-      top: container.offsetTop + scrollableDistance * progress,
-      behavior: "smooth",
-    });
-  };
-
-  const handleEnterClick = useCallback(
-    (): void => scrollToProgress(0.20),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    timeline.work.opacity,
+    [0, 1, 1, 0]
   );
 
-      // ── Master Navigation Callback ──
-    // ── Master Navigation Callback ──
-  const handleNavigate = useCallback((target: "home" | "howwework" | "team" | "contact") => {
-    // If team button is triggered here, let the navbar's internal router handles it
-    if (target === "team") return;
+  const workHeadingY = useTransform(
+    scrollYProgress,
+    timeline.work.headingY,
+    ["0vh", viewportMode === "mobile" ? "-24vh" : "-30vh"]
+  );
 
-    const progressMap: Record<"home" | "howwework" | "contact", number> = {
-      home: 0.18,
-      howwework: 0.41,
-      contact: 1,
-    };
+  const workHeadingScale = useTransform(
+    scrollYProgress,
+    timeline.work.headingScale,
+    [1, viewportMode === "mobile" ? 0.85 : 0.75]
+  );
 
-    const progressTarget = progressMap[target];
-    if (progressTarget !== undefined) {
-      scrollToProgress(progressTarget);
-    }
-  }, [scrollToProgress]);
+  const workHeadingX = useTransform(
+    scrollYProgress,
+    timeline.work.headingX,
+    ["0vw", viewportMode === "mobile" ? "-4vw" : "-14vw"]
+  );
 
+  const carouselOpacity = useTransform(
+    scrollYProgress,
+    timeline.work.carouselOpacity,
+    [0, 1]
+  );
 
+  const carouselX = useTransform(
+    scrollYProgress,
+    timeline.work.carouselX,
+    ["25vw", viewportMode === "mobile" ? "-150vw" : "-95vw"]
+  );
+
+  const workExitY = useTransform(
+    scrollYProgress,
+    timeline.work.exitY,
+    ["0vh", "-100vh"]
+  );
+
+  // Segment 6: Contact
+  const contactOpacity = useTransform(
+    scrollYProgress,
+    timeline.contact.opacity,
+    [0, 1, 1]
+  );
+
+  const contactY = useTransform(
+    scrollYProgress,
+    timeline.contact.y,
+    ["65vh", "50vh", "0vh"]
+  );
 
   // ─────────────────────────────────────────
   // RENDER
   // ─────────────────────────────────────────
+
   return (
     <>
-      {/* Loading screen — unmounts itself via onComplete */}
       {!loadingDone && (
         <LoadingScreen
           onComplete={handleLoadingComplete}
@@ -286,22 +1054,26 @@ export default function ScrollExperience() {
       <section
         id="top"
         ref={containerRef}
-        className="relative h-[1700vh] bg-[#f5f2eb] md:h-[1800vh] xl:h-[1900vh] 2xl:h-[2000vh]"
+        className="relative bg-[#f5f2eb]"
+        style={{
+          height: `${timeline.scrollVh}vh`,
+        }}
       >
-        <div className="sticky top-0 h-screen min-h-[100svh] overflow-hidden bg-[#f5f2eb]">
+        <div className="sticky top-0 h-svh overflow-hidden bg-[#f5f2eb]">
+          <Navbar
+            showNavbar={showNavbar}
+            activeSegment={
+              activeSegment === "intro" ||
+              activeSegment === "landing" ||
+              activeSegment === "services" ||
+              activeSegment === "work"
+                ? "home"
+                : activeSegment
+            }
+            onNavigate={handleNavigate}
+          />
 
-           <Navbar
-        showNavbar={showNavbar}
-        activeSegment={
-          activeSegment === "intro" || activeSegment === "landing" || activeSegment === "services" || activeSegment === "work"
-            ? "home"
-            : activeSegment
-        }
-        onNavigate={handleNavigate}
-      />
-
-
-          {/* SEGMENT 1 — Welcome Window */}
+          {/* Segment 1 — Welcome Window */}
           <WelcomeWindow
             isActive={isIntroActive}
             leftRotate={leftRotate}
@@ -315,16 +1087,26 @@ export default function ScrollExperience() {
             loadingComplete={loadingDone}
           />
 
-          {/* SEGMENT 2 — Studio Landing */}
+          {/* Segment 2 — Studio Landing */}
           <StudioLanding
             isActive={isLandingActive}
             landingOpacity={landingOpacity}
             landingY={landingY}
             landingExitX={landingExitX}
-            // onNavigate={handleNavigate}
+            onNavigate={(target) => {
+              if (target === "services") {
+                handleNavigate("services");
+              } else if (target === "contact") {
+                handleNavigate("contact");
+              } else if (target === "home") {
+                handleNavigate("home");
+              } else if (target === "team") {
+                router.push("/team");
+              }
+            }}
           />
 
-          {/* SEGMENT 3 — Services */}
+          {/* Segment 3 — Services */}
           <ServicesSection
             isActive={isServicesActive}
             servicesOpacity={servicesOpacity}
@@ -332,7 +1114,7 @@ export default function ScrollExperience() {
             servicesExitY={servicesExitY}
           />
 
-          {/* SEGMENT 4 — How We Work */}
+          {/* Segment 4 — How We Work */}
           <HowWeWork
             isActive={isHowWeWorkActive}
             howWeWorkOpacity={howWeWorkOpacity}
@@ -340,7 +1122,7 @@ export default function ScrollExperience() {
             howWeWorkExitY={howWeWorkExitY}
           />
 
-          {/* SEGMENT 5 — Selected Work */}
+          {/* Segment 5 — Selected Work */}
           <SelectedWork
             isActive={isWorkActive}
             workX={workX}
@@ -353,23 +1135,24 @@ export default function ScrollExperience() {
             workExitY={workExitY}
           />
 
-          {/* <TeamSection
-          isActive={showTeam}
-          teamOpacity={teamOpacity}
-          teamY={teamY}
-          teamExitY={teamExitY}
-          /> */}
-
-          {/* SEGMENT 6 — Contact */}
-          <ContactSection
+          {/* Segment 6 — Contact */}
+        <ContactSection
             isActive={isContactActive}
             contactOpacity={contactOpacity}
             contactY={contactY}
           />
 
-          {/* Global idle scroll nudge — shown on all sections except contact */}
+          {/* Global idle scroll nudge */}
           {showNudge && activeSegment !== "contact" && (
-            <div className="pointer-events-none absolute bottom-8 left-1/2 z-[200] -translate-x-1/2 flex flex-col items-center gap-1.5">
+            <div
+              className="
+                pointer-events-none absolute left-1/2 z-200
+                flex -translate-x-1/2 flex-col items-center gap-1.5
+
+                bottom-[calc(1.4rem+env(safe-area-inset-bottom))]
+                md:bottom-8
+              "
+            >
               {[0, 1, 2].map((i) => (
                 <motion.div
                   key={i}
@@ -381,7 +1164,11 @@ export default function ScrollExperience() {
                     ease: "easeInOut",
                   }}
                 >
-                  <svg viewBox="0 0 16 9" fill="none" style={{ width: 20, height: 18 }}>
+                  <svg
+                    viewBox="0 0 16 9"
+                    fill="none"
+                    className="h-3 w-4 md:h-4.5 md:w-5"
+                  >
                     <polyline
                       points="1,1 8,8 15,1"
                       stroke="rgba(200,160,80)"
@@ -392,15 +1179,18 @@ export default function ScrollExperience() {
                   </svg>
                 </motion.div>
               ))}
+
               <span
-                className="font-mono uppercase tracking-[0.32em]"
-                style={{ fontSize: 15, color: "rgba(200,160,80)" }}
+                className="
+                  font-mono uppercase text-[9px] tracking-[0.28em]
+                  md:text-[15px] md:tracking-[0.32em]
+                "
+                style={{ color: "rgba(200,160,80)" }}
               >
                 Scroll
               </span>
             </div>
           )}
-
         </div>
       </section>
     </>
