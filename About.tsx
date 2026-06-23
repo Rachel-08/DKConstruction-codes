@@ -1,19 +1,22 @@
+
 "use client";
 
 import { useRef, useState } from "react";
 import {
-  motion,
-  AnimatePresence,
-  useInView,
-  type MotionValue,
+  motion,
+  AnimatePresence,
+  useInView,
+  type MotionValue,
 } from "motion/react";
+
 import type { IconType } from "react-icons";
+
 import {
-  FaRegComments,
-  FaFileSignature,
-  FaHardHat,
-  FaClipboardCheck,
-  FaHome,
+  FaRegComments,
+  FaFileSignature,
+  FaHardHat,
+  FaClipboardCheck,
+  FaHome,
 } from "react-icons/fa";
 
 // ─────────────────────────────────────────────
@@ -21,21 +24,21 @@ import {
 // ─────────────────────────────────────────────
 
 type Step = {
-  id: number;
-  number: string;
-  phase: string;
-  title: string;
-  description: string;
-  payment?: string;
-  paymentLabel?: string;
-  icon: IconType;
+  id: number;
+  number: string;
+  phase: string;
+  title: string;
+  description: string;
+  payment?: string;
+  paymentLabel?: string;
+  icon: IconType;
 };
 
 type HowWeWorkProps = {
-  isActive: boolean;
-  howWeWorkOpacity: MotionValue<number>;
-  howWeWorkY: MotionValue<string>;
-  howWeWorkExitY: MotionValue<string>;
+  isActive: boolean;
+  howWeWorkOpacity: MotionValue<number>;
+  howWeWorkY: MotionValue<string>;
+  howWeWorkExitY: MotionValue<string>;
 };
 
 // ─────────────────────────────────────────────
@@ -43,57 +46,61 @@ type HowWeWorkProps = {
 // ─────────────────────────────────────────────
 
 const STEPS: Step[] = [
-  {
-    id: 1,
-    number: "01",
-    phase: "Discovery",
-    title: "Initial Design Consultation",
-    description:
-      "We begin with a structured briefing session — understanding your vision, spatial requirements, budget parameters, and timeline. Our designer walks your site, documents existing conditions, and establishes the design direction.",
-    icon: FaRegComments,
-  },
-  {
-    id: 2,
-    number: "02",
-    phase: "Proposal",
-    title: "Design Proposal & Agreement",
-    description:
-      "We present a comprehensive design proposal — drawings, material schedules, and a detailed cost estimate. Upon your approval, a formal agreement is signed and an initial retainer secures your project slot in our schedule.",
-    payment: "5%",
-    paymentLabel: "Retainer to confirm project",
-    icon: FaFileSignature,
-  },
-  {
-    id: 3,
-    number: "03",
-    phase: "Execution",
-    title: "Construction & Project Execution",
-    description:
-      "Groundwork begins. Our site team manages procurement, contractor scheduling, and quality control at every stage. Regular progress reports keep you informed. Materials are delivered, structural and finishing works proceed in phased sequence.",
-    payment: "60%",
-    paymentLabel: "Progressive milestone payment",
-    icon: FaHardHat,
-  },
-  {
-    id: 4,
-    number: "04",
-    phase: "Completion",
-    title: "Final Installations & Handover",
-    description:
-      "All finishing elements — joinery, fixtures, furnishings, and applied finishes — are installed and inspected against specification. A formal snagging walkthrough is conducted with you before the balance is settled and keys are handed over.",
-    payment: "100%",
-    paymentLabel: "Final balance on handover",
-    icon: FaClipboardCheck,
-  },
-  {
-    id: 5,
-    number: "05",
-    phase: "Occupation",
-    title: "Move In & Enjoy",
-    description:
-      "Your space is complete. We provide a full handover pack — warranty documents, material care guides, supplier contacts, and as-built drawings. Our aftercare commitment means we remain available for the first twelve months post-completion.",
-    icon: FaHome,
-  },
+  {
+    id: 1,
+    number: "01",
+    phase: "Discovery",
+    title: "Initial Design Consultation",
+    description:
+      "We begin with a structured briefing session — understanding your vision, spatial requirements, budget parameters, and timeline.",
+    icon: FaRegComments,
+  },
+
+  {
+    id: 2,
+    number: "02",
+    phase: "Proposal",
+    title: "Design Proposal & Agreement",
+    description:
+      "We present drawings, material schedules, and a detailed estimate. Upon approval, the agreement is signed.",
+    payment: "5%",
+    paymentLabel: "Retainer to confirm project",
+    icon: FaFileSignature,
+  },
+
+  {
+    id: 3,
+    number: "03",
+    phase: "Execution",
+    title: "Construction & Project Execution",
+    description:
+      "Groundwork begins. Procurement, contractor scheduling, and quality control are managed throughout execution.",
+    payment: "60%",
+    paymentLabel: "Progressive milestone payment",
+    icon: FaHardHat,
+  },
+
+  {
+    id: 4,
+    number: "04",
+    phase: "Completion",
+    title: "Final Installations & Handover",
+    description:
+      "All finishes and fixtures are inspected before the final balance is settled and handover is completed.",
+    payment: "100%",
+    paymentLabel: "Final balance on handover",
+    icon: FaClipboardCheck,
+  },
+
+  {
+    id: 5,
+    number: "05",
+    phase: "Occupation",
+    title: "Move In & Enjoy",
+    description:
+      "Your space is complete with warranty documents, supplier contacts, and aftercare support.",
+    icon: FaHome,
+  },
 ];
 
 // ─────────────────────────────────────────────
@@ -101,458 +108,463 @@ const STEPS: Step[] = [
 // ─────────────────────────────────────────────
 
 function StepCard({
-  step,
-  index,
-  isLast,
+  step,
+  index,
+  isLast,
 }: {
-  step: Step;
-  index: number;
-  isLast: boolean;
+  step: Step;
+  index: number;
+  isLast: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-8%" });
+  const [expanded, setExpanded] = useState(false);
 
-  const Icon = step.icon;
+  const ref = useRef<HTMLElement>(null);
 
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: 36 }}
-      animate={inView ? { opacity: 1, x: 0 } : { opacity: 1, x: 0 }}
-      transition={{
-        duration: 0.75,
-        delay: index * 0.1,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-      className="relative pl-[clamp(64px,6vw,96px)]"
-    >
-      {/* Process flow line */}
-      {!isLast && (
-        <div
-          className="absolute left-[clamp(24px,2.8vw,36px)] top-[clamp(62px,7vh,78px)] z-0"
-          style={{
-            width: "1px",
-            height: "calc(100% - 28px)",
-            background:
-              "linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.08))",
-          }}
-        />
-      )}
+  const inView = useInView(ref, {
+    once: true,
+    margin: "-5%",
+  });
 
-      {/* Flow icon */}
-      <motion.div
-        animate={{
-          borderColor: expanded ? "rgba(0,0,0,0.75)" : "rgba(0,0,0,0.28)",
-          background: expanded ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.35)",
-        }}
-        transition={{ duration: 0.35 }}
-        className="absolute left-0 top-[clamp(18px,2.5vh,28px)] z-10 flex items-center justify-center"
-        style={{
-          width: "clamp(48px,4.8vw,64px)",
-          height: "clamp(48px,4.8vw,64px)",
-          border: "1px solid rgba(0,0,0,0.28)",
-          borderRadius: 999,
-          color: "#000",
-        }}
-      >
-        <Icon className="h-[42%] w-[42%]" />
-      </motion.div>
+  const Icon = step.icon;
 
-      <motion.button
-        type="button"
-        onClick={() => setExpanded((value) => !value)}
-        whileHover={{ x: 4 }}
-        transition={{ duration: 0.3 }}
-        className="relative z-10 block w-full cursor-pointer text-left"
-        style={{
-          padding: "clamp(16px,2.4vh,26px) 0",
-          color: "#000",
-          pointerEvents: "auto",
-        }}
-      >
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <span
-              className="font-mono uppercase tracking-[0.32em]"
-              style={{
-                fontSize: "clamp(6px,0.58vw,8px)",
-                color: "#000",
-              }}
-            >
-              Phase {step.number} — {step.phase}
-            </span>
+  return (
+    <motion.article
+      ref={ref}
+      initial={{ opacity: 0, x: 24 }}
+      animate={
+        inView
+          ? { opacity: 1, x: 0 }
+          : { opacity: 0, x: 24 }
+      }
+      transition={{
+        duration: 0.55,
+        delay: index * 0.08,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      className="relative pl-[72px]"
+    >
+      {/* Vertical line */}
 
-            {step.payment && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={
-                  inView ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1 }
-                }
-                transition={{ delay: index * 0.1 + 0.3, duration: 0.4 }}
-                style={{
-                  background: "rgba(0,0,0,0.04)",
-                  border: "0.5px solid rgba(0,0,0,0.3)",
-                  borderRadius: 2,
-                  padding: "3px 10px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <span
-                  className="font-mono"
-                  style={{
-                    fontSize: "clamp(8px,0.75vw,11px)",
-                    color: "#000",
-                    letterSpacing: "0.15em",
-                    fontWeight: 600,
-                  }}
-                >
-                  {step.payment}
-                </span>
+      {!isLast && (
+        <div
+          aria-hidden="true"
+          className="absolute left-[24px] top-[72px]"
+          style={{
+            width: "1px",
+            height: "calc(100% - 24px)",
+            background:
+              "linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.08))",
+          }}
+        />
+      )}
 
-                <span
-                  className="font-mono"
-                  style={{
-                    fontSize: "clamp(6px,0.55vw,7px)",
-                    color: "#000",
-                    letterSpacing: "0.18em",
-                  }}
-                >
-                  {step.paymentLabel?.toUpperCase()}
-                </span>
-              </motion.div>
-            )}
-          </div>
+      {/* Icon */}
 
-          <motion.h3
-            animate={{ color: "#000" }}
-            transition={{ duration: 0.35 }}
-            className="font-serif leading-snug"
-            style={{ fontSize: "clamp(17px,1.85vw,28px)" }}
-          >
-            {step.title}
-          </motion.h3>
+      <motion.div
+        aria-hidden="true"
+        animate={{
+          borderColor: expanded
+            ? "rgba(0,0,0,0.75)"
+            : "rgba(0,0,0,0.28)",
 
-          <motion.div
-            animate={{
-              scaleX: expanded ? 1 : 0.22,
-              opacity: expanded ? 0.6 : 0.25,
-            }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              transformOrigin: "left",
-              height: "0.5px",
-              width: "clamp(48px,8vw,110px)",
-              background:
-                "linear-gradient(90deg,#000,rgba(0,0,0,0.3),transparent)",
-            }}
-          />
+          background: expanded
+            ? "rgba(0,0,0,0.06)"
+            : "rgba(255,255,255,0.35)",
+        }}
+        transition={{ duration: 0.25 }}
+        className="absolute left-0 top-[18px] z-10 flex items-center justify-center rounded-full"
+        style={{
+          width: 48,
+          height: 48,
+          border: "1px solid rgba(0,0,0,0.28)",
+        }}
+      >
+        <Icon className="h-[42%] w-[42%]" />
+      </motion.div>
 
-          <AnimatePresence initial={false}>
-            {expanded && (
-              <motion.div
-                key="description"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                style={{ overflow: "hidden" }}
-              >
-                <p
-                  className="leading-relaxed"
-                  style={{
-                    fontSize: "clamp(10px,0.9vw,13px)",
-                    color: "#000",
-                    lineHeight: 1.75,
-                    paddingTop: 8,
-                    paddingBottom: 4,
-                  }}
-                >
-                  {step.description}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+      {/* Content */}
 
-          <span
-            className="font-mono"
-            style={{
-              fontSize: "clamp(7px,0.6vw,9px)",
-              color: "#000",
-              letterSpacing: "0.3em",
-              marginTop: 2,
-              opacity: 0.75,
-            }}
-          >
-            {expanded ? "— COLLAPSE" : "+ EXPAND"}
-          </span>
-        </div>
-      </motion.button>
+      <button
+        type="button"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((prev) => !prev)}
+        className="relative z-10 block w-full text-left"
+        style={{
+          padding: "18px 0",
+        }}
+      >
+        <header className="flex flex-col gap-3">
+          {/* Top Row */}
 
-      {!isLast && (
-        <div
-          style={{
-            height: "0.5px",
-            background:
-              "linear-gradient(90deg,rgba(0,0,0,0.16),rgba(0,0,0,0.05),transparent)",
-          }}
-        />
-      )}
-    </motion.div>
-  );
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span
+              className="font-mono uppercase tracking-[0.28em]"
+              style={{
+                fontSize: "clamp(7px,0.65vw,9px)",
+              }}
+            >
+              Phase {step.number} — {step.phase}
+            </span>
+
+            {step.payment && (
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  scale: 0.9,
+                }}
+                animate={
+                  inView
+                    ? {
+                        opacity: 1,
+                        scale: 1,
+                      }
+                    : {
+                        opacity: 0,
+                        scale: 0.9,
+                      }
+                }
+                transition={{
+                  duration: 0.25,
+                  delay: 0.15,
+                }}
+                style={{
+                  background: "rgba(0,0,0,0.04)",
+                  border: "0.5px solid rgba(0,0,0,0.25)",
+                  borderRadius: 2,
+                  padding: "4px 10px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <span
+                  className="font-mono"
+                  style={{
+                    fontSize: "clamp(9px,0.75vw,11px)",
+                    fontWeight: 600,
+                  }}
+                >
+                  {step.payment}
+                </span>
+
+                <span
+                  className="font-mono"
+                  style={{
+                    fontSize: "clamp(6px,0.55vw,7px)",
+                    letterSpacing: "0.14em",
+                  }}
+                >
+                  {step.paymentLabel?.toUpperCase()}
+                </span>
+              </motion.div>
+            )}
+          </div>
+
+          {/* Title */}
+
+          <h3
+            className="font-serif leading-snug"
+            style={{
+              fontSize: "clamp(20px,2vw,30px)",
+            }}
+          >
+            {step.title}
+          </h3>
+
+          {/* Divider */}
+
+          <motion.div
+            aria-hidden="true"
+            animate={{
+              scaleX: expanded ? 1 : 0.2,
+              opacity: expanded ? 0.6 : 0.25,
+            }}
+            transition={{
+              duration: 0.3,
+            }}
+            style={{
+              transformOrigin: "left",
+              height: "1px",
+              width: "100px",
+              background:
+                "linear-gradient(90deg,#000,rgba(0,0,0,0.3),transparent)",
+            }}
+          />
+
+          {/* Expand Content */}
+
+          <AnimatePresence initial={false}>
+            {expanded && (
+              <motion.div
+                key="description"
+                initial={{
+                  opacity: 0,
+                  scaleY: 0.92,
+                }}
+                animate={{
+                  opacity: 1,
+                  scaleY: 1,
+                }}
+                exit={{
+                  opacity: 0,
+                  scaleY: 0.92,
+                }}
+                transition={{
+                  duration: 0.22,
+                }}
+                style={{
+                  overflow: "hidden",
+                  transformOrigin: "top",
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: "clamp(12px,0.95vw,14px)",
+                    lineHeight: 1.8,
+                    paddingTop: 6,
+                  }}
+                >
+                  {step.description}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Expand Label */}
+
+          <span
+            className="font-mono"
+            style={{
+              fontSize: "clamp(8px,0.65vw,9px)",
+              letterSpacing: "0.24em",
+              opacity: 0.7,
+            }}
+          >
+            {expanded ? "— COLLAPSE" : "+ EXPAND"}
+          </span>
+        </header>
+      </button>
+
+      {!isLast && (
+        <div
+          aria-hidden="true"
+          style={{
+            height: "0.5px",
+            background:
+              "linear-gradient(90deg,rgba(0,0,0,0.16),rgba(0,0,0,0.05),transparent)",
+          }}
+        />
+      )}
+    </motion.article>
+  );
 }
 
 // ─────────────────────────────────────────────
-// HowWeWork
+// Main Component
 // ─────────────────────────────────────────────
 
 export default function HowWeWork({
-  isActive,
-  howWeWorkOpacity,
-  howWeWorkY,
-  howWeWorkExitY,
+  isActive,
+  howWeWorkOpacity,
+  howWeWorkY,
 }: HowWeWorkProps) {
-  const headingRef = useRef<HTMLDivElement>(null);
-  const headingInView = useInView(headingRef, { once: true, margin: "-6%" });
+  const headingRef = useRef<HTMLElement>(null);
 
-  return (
-    <motion.section
-      style={{
-        opacity: howWeWorkOpacity,
-        y: isActive ? howWeWorkExitY : howWeWorkY,
-        position: "absolute",
-        inset: 0,
-        zIndex: 65,
-        pointerEvents: isActive ? "auto" : "none",
-        background: "#f5f2eb",
-        height: "100dvh",
-        maxHeight: "100dvh",
-        overflowY: "auto",
-        overflowX: "hidden",
-        touchAction: "pan-y",
-        WebkitOverflowScrolling: "touch",
-      }}
-      className="how-we-work-scroll"
-      aria-hidden={!isActive}
-    >
-      <style jsx>{`
-        .how-we-work-scroll::-webkit-scrollbar {
-          width: 6px;
-        }
+  const headingInView = useInView(headingRef, {
+    once: true,
+    margin: "-6%",
+  });
 
-        .how-we-work-scroll::-webkit-scrollbar-track {
-          background: rgba(0, 0, 0, 0.04);
-        }
+  if (!isActive) return null;
 
-        .how-we-work-scroll::-webkit-scrollbar-thumb {
-          background: rgba(0, 0, 0, 0.35);
-          border-radius: 999px;
-        }
+  return (
+    <motion.section
+      aria-labelledby="how-we-work-heading"
+      style={{
+        opacity: howWeWorkOpacity,
+        y: howWeWorkY,
 
-        .how-we-work-scroll {
-          scrollbar-width: thin;
-          scrollbar-color: rgba(0, 0, 0, 0.35) rgba(0, 0, 0, 0.04);
-        }
-      `}</style>
+        position: "relative",
+        width: "100%",
+        minHeight: "100vh",
 
-      {/* NEW ADDITION: Large Image sticking out off the left side of the screen */}
-            {/* <motion.div
-              initial={{ opacity: 0, x: -40 }} // Slides in from the left edge
-              animate={headingInView ? { opacity: 1, x: 0 } : {}}
-              transition={{
-                duration: 0.8,
-                delay: 0.3,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="relative"
-              style={{
-                position: "absolute",
-                left:"0%",
-                bottom:"2%",
-                overflow: "visible", // Ensures image isn't clipped internally
-              }}
-            >
-              <img
-                src="/transparency.png"
-                alt="Process Illustration"
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  objectFit: "cover",
-                  display: "block",
-                  // Clean drop-shadow to give depth as it floats off the screen edge
-                  filter: "drop-shadow(0 20px 40px rgba(0,0,0,0.06))",
-                }}
-              />
-            </motion.div> */}
+        background: "#f5f2eb",
 
-      {/* Subtle blueprint grid bg */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ opacity: 0.025 }}
-      >
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div
-            key={`h-${i}`}
-            className="absolute left-0 right-0"
-            style={{
-              top: `${(i / 19) * 100}%`,
-              height: "0.5px",
-              background: "rgba(100,160,220)",
-            }}
-          />
-        ))}
+        overflowX: "hidden",
+      }}
+      className="relative"
+    >
+      {/* Background Grid */}
 
-        {Array.from({ length: 24 }).map((_, i) => (
-          <div
-            key={`v-${i}`}
-            className="absolute top-0 bottom-0"
-            style={{
-              left: `${(i / 23) * 100}%`,
-              width: "0.5px",
-              background: "rgba(100,160,220)",
-            }}
-          />
-        ))}
-      </div>
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{ opacity: 0.025 }}
+      >
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={`h-${i}`}
+            className="absolute left-0 right-0"
+            style={{
+              top: `${(i / 19) * 100}%`,
+              height: "0.5px",
+              background: "rgba(100,160,220)",
+            }}
+          />
+        ))}
 
-      <div
-        className="relative z-10 mx-auto grid grid-cols-1 lg:grid-cols-[0.42fr_0.58fr] gap-[clamp(40px,6vw,100px)]"
-        style={{
-          maxWidth: "clamp(320px,86vw,1280px)",
-          padding:
-            "clamp(56px,9vh,100px) clamp(24px,5vw,72px) clamp(32px,5vh,56px)",
-        }}
-      >
-        {/* Left heading */}
-        <div
-          ref={headingRef}
-          className="self-start lg:sticky lg:top-[clamp(72px,11vh,120px)]"
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={headingInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col gap-4"
-          >
-            <div className="flex items-center gap-4">
-              <span
-                className="font-mono uppercase tracking-[0.42em]"
-                style={{
-                  fontSize: "clamp(7px,0.62vw,9px)",
-                  color: "#000",
-                }}
-              >
-                Process
-              </span>
+        {Array.from({ length: 24 }).map((_, i) => (
+          <div
+            key={`v-${i}`}
+            className="absolute top-0 bottom-0"
+            style={{
+              left: `${(i / 23) * 100}%`,
+              width: "0.5px",
+              background: "rgba(100,160,220)",
+            }}
+          />
+        ))}
+      </div>
 
-              <div
-                style={{
-                  flex: 1,
-                  height: "0.5px",
-                  background:
-                    "linear-gradient(90deg, #000000 0%, transparent 100%)",
-                }}
-              />
-            </div>
+      {/* Content */}
 
-            <h2
-              className="font-serif leading-none tracking-tight"
-              style={{
-                fontSize: "clamp(42px,7vw,104px)",
-                color: "#000",
-              }}
-            >
-              How It
-              <br />
-              Works
-            </h2>
+      <div
+        className="
+          relative
+          z-10
+          mx-auto
+          grid
+          grid-cols-1
+          lg:grid-cols-[0.42fr_0.58fr]
+          gap-[clamp(40px,6vw,100px)]
+        "
+        style={{
+          maxWidth: "1280px",
+          padding:
+            "clamp(56px,9vh,100px) clamp(24px,5vw,72px) clamp(40px,5vh,60px)",
+        }}
+      >
+        {/* Left */}
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={headingInView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.75, delay: 0.2 }}
-              style={{
-                fontSize: "clamp(11px,0.9vw,14px)",
-                color: "#000",
-                lineHeight: 1.8,
-                maxWidth: "clamp(260px,28vw,420px)",
-                marginTop: 8,
-              }}
-            >
-              A transparent, phased process designed to keep you informed and in
-              control at every stage — from first meeting to final handover.
-            </motion.p>
+        <aside
+          ref={headingRef}
+          className="self-start lg:sticky lg:top-[120px]"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={
+              headingInView
+                ? { opacity: 1, y: 0 }
+                : {}
+            }
+            transition={{
+              duration: 0.6,
+            }}
+            className="flex flex-col gap-4"
+          >
+            <div className="flex items-center gap-4">
+              <span
+                className="font-mono uppercase tracking-[0.42em]"
+                style={{
+                  fontSize: "clamp(7px,0.62vw,9px)",
+                }}
+              >
+                Process
+              </span>
 
+              <div
+                aria-hidden="true"
+                style={{
+                  flex: 1,
+                  height: "1px",
+                  background:
+                    "linear-gradient(90deg,#000 0%,transparent 100%)",
+                }}
+              />
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={headingInView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.6, delay: 0.35 }}
-              style={{
-                width: "clamp(32px,3.5vw,56px)",
-                height: "clamp(32px,3.5vw,56px)",
-                // borderLeft: "1px solid rgba(0,0,0)",
-                // borderBottom: "1px solid rgba(0,0,0)",
-                marginTop: "clamp(20px,3.5vh,30px)",
-              }}
-            />
-          </motion.div>
-        </div>
+            <h2
+              id="how-we-work-heading"
+              className="font-serif leading-none tracking-tight"
+              style={{
+                fontSize: "clamp(46px,7vw,104px)",
+              }}
+            >
+              How It
+              <br />
+              Works
+            </h2>
 
-        {/* Right process */}
-        <div className="relative pb-[clamp(24px,4vh,44px)]">
-          <div className="flex flex-col">
-            {STEPS.map((step, i) => (
-              <StepCard
-                key={step.id}
-                step={step}
-                index={i}
-                isLast={i === STEPS.length - 1}
-              />
-            ))}
-          </div>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={
+                headingInView
+                  ? { opacity: 1 }
+                  : {}
+              }
+              transition={{
+                duration: 0.6,
+                delay: 0.15,
+              }}
+              style={{
+                fontSize: "clamp(12px,0.95vw,14px)",
+                lineHeight: 1.8,
+                maxWidth: "420px",
+              }}
+            >
+              A transparent, phased process designed to keep you informed and
+              in control at every stage — from first meeting to final handover.
+            </motion.p>
+          </motion.div>
+        </aside>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={headingInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.6 }}
-            className="mt-[clamp(18px,3vh,32px)] flex items-start gap-4"
-            style={{
-              borderTop: "0.5px solid rgba(0,0,0)",
-              paddingTop: "clamp(14px,2.5vh,24px)",
-            }}
-          >
-            <div
-              style={{
-                width: "clamp(18px,2.2vw,28px)",
-                height: "0.5px",
-                background: "rgba(0,0,0)",
-                flexShrink: 0,
-                marginTop: 8,
-              }}
-            />
+        {/* Right */}
 
-            <p
-              style={{
-                fontSize: "clamp(9px,0.8vw,11px)",
-                color: "rgba(0,0,0)",
-                lineHeight: 1.75,
-              }}
-            >
-              Payment milestones are structured to align with verified project
-              progress. All timelines and schedules are confirmed in writing
-              prior to commencement.
-            </p>
-          </motion.div>
-        </div>
-      </div>
-    </motion.section>
-  );
+        <main>
+          <div className="flex flex-col">
+            {STEPS.map((step, i) => (
+              <StepCard
+                key={step.id}
+                step={step}
+                index={i}
+                isLast={i === STEPS.length - 1}
+              />
+            ))}
+          </div>
+
+          {/* Footer */}
+
+          <footer
+            className="mt-[clamp(18px,3vh,32px)] flex items-start gap-4"
+            style={{
+              borderTop: "0.5px solid rgba(0,0,0)",
+              paddingTop: "clamp(14px,2.5vh,24px)",
+            }}
+          >
+            <div
+              aria-hidden="true"
+              style={{
+                width: "24px",
+                height: "1px",
+                background: "#000",
+                marginTop: 8,
+                flexShrink: 0,
+              }}
+            />
+
+            <p
+              style={{
+                fontSize: "clamp(10px,0.8vw,11px)",
+                lineHeight: 1.75,
+              }}
+            >
+              Payment milestones are structured to align with verified project
+              progress. All schedules and timelines are confirmed before
+              commencement.
+            </p>
+          </footer>
+        </main>
+      </div>
+    </motion.section>
+  );
 }
-
-
-In mobile view this section is not working properly..
-Appearing laggy then disappearing 
