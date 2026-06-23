@@ -1,39 +1,116 @@
-Ultra-realistic cinematic architectural video strictly based on the provided reference image. Maintain exact composition, layout, proportions, materials, and lighting.
+```txt id="drs23o"
+Optimize my Next.js cinematic portfolio/construction website for performance while preserving the premium scroll experience and animations.
 
-[0–3s]
-Static front-facing shot. No camera movement. Curtains gently sway with subtle natural motion. Warm sunlight fills the room.
+Current Stack:
+- Next.js
+- React
+- motion/react (Framer Motion APIs)
+- useScroll
+- useTransform
+- useMotionValue
+- useMotionValueEvent
 
-[3–7s]
-Window panels slowly open outward (hinged motion). Increase sunlight slightly. Add volumetric light rays and subtle dust particles.
+Website Characteristics:
+- Animation-heavy landing experience
+- Scroll-driven transitions
+- Cinematic section reveals
+- Multiple animated components
+- Large visual sections
+- Premium modern UI
 
-[7–12s]
-Slow dolly forward toward the window. Depth of field shifts from bed to window. Perfect stabilization.
+Current Problems:
+- Users reported laggy animations
+- Scroll interactions feel heavy on some devices
+- Too many motion calculations during scrolling
+- Potentially large JS bundles
+- Possible rerenders from motion listeners
+- Performance drops on mobile devices
 
-[12–16s]
-Camera passes through window seamlessly. Exposure adapts naturally from interior to exterior.
+Optimization Goals:
+- Improve Lighthouse/PageSpeed score
+- Make animations smoother on mobile and low-end devices
+- Reduce jank during scrolling
+- Keep the cinematic/premium feel
+- Improve initial load time
+- Reduce unnecessary rendering and calculations
 
-[16–20s]
-Exterior reveal with soft greenery and trees moving gently in breeze.
+Requirements:
 
-[20–27s]
-Camera continues outside, slight orbit movement revealing exterior wall and window from angle.
+1. Image Optimization
+- Use Next.js Image component properly
+- Add responsive image sizing
+- Lazy load below-the-fold images
+- Optimize image formats (WebP/AVIF)
+- Prevent layout shifts
+- Suggest best folder/image structure
 
-[27–32s]
-Slow pull-back widening composition. Interior still visible through window.
+2. Lazy Loading
+- Lazy load heavy sections/components
+- Use dynamic imports for animation-heavy sections
+- Avoid loading all motion components initially
+- Load sections only when needed
 
-[32–39s]
-Camera moves backward and slightly upward. Reveal more trees and surroundings.
+3. Motion Optimization
+- Reduce excessive useScroll/useTransform calculations
+- Prevent continuous rerenders during scroll
+- Optimize motion value subscriptions
+- Use transform + opacity animations only
+- Avoid expensive blur/filter/layout animations
+- Add proper will-change usage
+- Reduce animation complexity on mobile devices
+- Disable/reduce animations for low-performance devices
 
-[39–45s]
-Camera rises into foliage. Leaves softly move in foreground. Warm sunlight filters through.
+4. Scroll Performance
+- Optimize wheel/scroll event listeners
+- Throttle/debounce heavy calculations
+- Prevent scroll-trigger chain reactions
+- Improve smoothness of section transitions
+- Reduce scroll hijacking issues
 
-[45–48s]
-Camera slows and holds a calm final frame with window partially visible through trees.
+5. Rendering Optimization
+- Memoize expensive components
+- Prevent unnecessary rerenders
+- Optimize React component structure
+- Reduce hydration cost
+- Separate static and animated components
 
-Style: ultra-realistic, cinematic, architectural visualization
-Lighting: warm natural sunlight, global illumination, soft shadows, volumetric light
-Camera: smooth dolly, orbit, and crane movement, perfectly stabilized
-Mood: calm, peaceful, luxury aesthetic
-Quality: 4K photorealistic
+6. Bundle Optimization
+- Reduce client-side JS bundle size
+- Split heavy animation libraries properly
+- Remove unused dependencies
+- Optimize imports from motion/react
+- Improve code splitting strategy
 
-Negative prompt: distortion, warped geometry, flickering, jitter, unrealistic motion, overexposure, blur artifacts
+7. Mobile Optimization
+- Make animations lightweight on phones
+- Reduce GPU-heavy effects
+- Improve FPS during transitions
+- Ensure smooth touch scrolling
+- Add adaptive animation intensity
+
+8. Next.js Best Practices
+- Use server components wherever possible
+- Keep client components minimal
+- Optimize layout structure
+- Improve loading states
+- Optimize fonts and assets
+
+9. UX Goals
+- Keep premium cinematic feel
+- Make interactions feel responsive
+- Avoid overwhelming users with motion
+- Maintain smooth section transitions
+- Keep the experience modern but lightweight
+
+10. Deliverables
+Provide:
+- architecture improvements
+- optimized code examples
+- motion optimization patterns
+- lazy loading strategy
+- bundle optimization strategy
+- mobile performance improvements
+- best practices for animation-heavy Next.js websites
+- recommended project structure
+- Lighthouse optimization suggestions
+```
