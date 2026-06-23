@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, forwardRef } from "react";
 import { motion, AnimatePresence, type MotionValue } from "motion/react";
 
 // ─────────────────────────────────────────────
@@ -367,185 +367,194 @@ function ContactOverlay({ onClose }: { onClose: () => void }) {
 // ─────────────────────────────────────────────
 // ServiceColumn
 // ─────────────────────────────────────────────
-export function ServiceColumn({
-  service,
-  index,
-  total,
-}: {
+type ServiceColumnProps = {
   service: Service;
   index: number;
   total: number;
-}) {
-  const [hovered, setHovered] = useState(false);
+  isActive: boolean;
+};
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.7,
-        delay: index * 0.07,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-      onHoverStart={() => typeof window !== "undefined" && window.innerWidth >= 768 && setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      className="
-        relative flex flex-col cursor-default bg-black
-        w-full rounded-[18px] border border-white/10 p-5 gap-3
-        
-        /* Removed overflow-hidden for small screens, kept strictly for md and above */
-        md:overflow-hidden md:p-0 md:gap-0 md:h-auto md:flex-1 md:rounded-none md:border-0
-      "
-      style={{
-        borderRight:
-          index < total - 1 && typeof window !== "undefined" && window.innerWidth >= 768
-            ? "0.5px solid rgba(255,255,255,0.06)"
-            : undefined,
-      }}
-    >
-      {/* ── Image Canvas Area ── */}
-      <div
-        className="
-          relative w-full overflow-hidden shrink-0 rounded-[12px]
-          h-[140px] min-[390px]:h-[155px]
-          
-          md:rounded-none md:h-[62vh]
-        "
-      >
-        <motion.img
-          src={service.image}
-          alt={service.fullTitle}
-          draggable={false}
-          animate={{ scale: hovered ? 1.04 : 1 }}
-          transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute inset-0 h-full w-full select-none object-cover object-center md:object-top"
-          style={{ transformOrigin: "top center" }}
-        />
+export const ServiceColumn = forwardRef<HTMLDivElement, ServiceColumnProps>(
+  ({ service, index, total, isActive }, ref) => {
+    const [hovered, setHovered] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+    const [isDesktop, setIsDesktop] = useState(false);
 
-        {/* Mobile image dimming layer */}
-        <div className="absolute inset-0 bg-black/35 md:hidden" />
+    useEffect(() => {
+      // schedule mount flag asynchronously to avoid synchronous setState in effect
+      const raf = requestAnimationFrame(() => setIsMounted(true));
 
-        {/* Desktop styling linear gradient blends */}
-        <div
-          className="absolute inset-x-0 bottom-0 hidden md:block"
-          style={{
-            height: "100%",
-            background: "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.65) 35%, rgba(0,0,0,0.9) 80%, #000 100%)",
-            pointerEvents: "none",
-          }}
-        />
-        <div
-          className="absolute inset-0 hidden md:block"
-          style={{
-            background: hovered ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.32)",
-            transition: "background 0.45s ease",
-          }}
-        />
+      if (typeof window === "undefined") {
+        return () => cancelAnimationFrame(raf);
+      }
 
-        {/* Top gold accent line */}
-        <motion.div
-          animate={{ scaleX: hovered ? 1 : 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute inset-x-0 top-0 z-10 h-[1.5px] origin-left hidden md:block"
-          style={{
-            background: "linear-gradient(90deg,#c8a052,#e8c070,transparent)",
-          }}
-        />
+      const update = () => setIsDesktop(window.innerWidth >= 768);
+      update();
+      window.addEventListener("resize", update);
+      return () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener("resize", update);
+      };
+    }, []);
 
-        {/* Index Serial counter */}
-        <div
-          className="
-            absolute z-10 font-mono left-3 top-3 text-[9px] tracking-[0.28em]
-            md:left-[clamp(10px,1.4vw,18px)] md:top-[clamp(12px,2vh,20px)]
-            md:text-[clamp(7px,0.6vw,9px)] md:tracking-[0.32em]
-          "
-          style={{ color: "rgba(200,160,80,0.85)" }}
-        >
-          {service.number}
-        </div>
-      </div>
-
-      {/* ── Details Content Area ── */}
-      <div
-        className="
-          relative flex min-w-0 flex-col justify-start w-full pr-1 select-text
-          
-          /* Absolute multi-stage breakpoint settings for desktop display scales */
-          md:absolute md:inset-x-0 md:z-20 md:h-[40vh] md:p-0
-          md:bottom-[-12px]   /* Tablets / Medium screens */
-          lg:bottom-[20px]    /* Normal Desktop Laptops */
-          xl:bottom-[48px]    /* Large Display Monitors */
-        "
-        style={{ 
-          pointerEvents: typeof window !== "undefined" && window.innerWidth < 768 ? "auto" : "none" 
+    return (
+      <motion.div
+        ref={ref}
+        initial={isMounted ? { opacity: 0, y: 28 } : false}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.7,
+          delay: index * 0.07,
+          ease: [0.22, 1, 0.36, 1],
+        }}
+        onHoverStart={() => isDesktop && setHovered(true)}
+        onHoverEnd={() => setHovered(false)}
+        className={
+          `
+          snap-start md:snap-none min-h-[80vh] md:min-h-0 relative flex flex-col cursor-default bg-black
+          w-full rounded-[18px] border border-white/10 p-5 gap-3
+          transition duration-300 ease-out
+          ${isActive ? "shadow-[0_22px_80px_rgba(0,0,0,0.3)] border-white/20" : "opacity-90"}
+          md:overflow-hidden md:p-0 md:gap-0 md:h-auto md:flex-1 md:rounded-none md:border-0
+        `
+        }
+        style={{
+          borderRight: index < total - 1 && isDesktop ? "0.5px solid rgba(255,255,255,0.06)" : undefined,
         }}
       >
-        {/* Mobile Keyword Label Stamp */}
-        <span className="mb-1 block font-mono text-[8px] uppercase tracking-[0.26em] text-[#c8a052] md:hidden">
-          {service.keyword}
-        </span>
-
-        {/* Title Container Block layout */}
+        {/* ── Image Canvas Area ── */}
         <div
-          className="w-full bg-transparent p-0 md:bg-[rgba(255,255,255,0.04)] md:px-[clamp(8px,1vw,14px)] md:py-[clamp(5px,0.8vh,9px)]"
-          style={{
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
-          }}
+          className="
+            relative w-full overflow-hidden shrink-0 rounded-[12px]
+            h-[140px] min-[390px]:h-[155px]
+            md:rounded-none md:h-[62vh]
+          "
         >
-          <h3
-            className="
-              font-serif text-[22px] font-bold leading-tight text-white
-              md:text-right md:text-[clamp(13px,1.6vw,22px)] md:leading-none
-            "
+          <motion.img
+            src={service.image}
+            alt={service.fullTitle}
+            draggable={false}
+            animate={{ scale: hovered ? 1.04 : 1 }}
+            transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 h-full w-full select-none object-cover object-center md:object-top"
+            style={{ transformOrigin: "top center" }}
+          />
+
+          <div className="absolute inset-0 bg-black/35 md:hidden" />
+
+          <div
+            className="absolute inset-x-0 bottom-0 hidden md:block"
             style={{
-              color: hovered ? "#fff8ee" : "rgba(240,224,192,0.86)",
-              letterSpacing: "0.03em",
-              transition: "color 0.35s ease",
+              height: "100%",
+              background:
+                "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.65) 35%, rgba(0,0,0,0.9) 80%, #000 100%)",
+              pointerEvents: "none",
             }}
-          >
-            {service.fullTitle}
-          </h3>
-        </div>
+          />
+          <div
+            className="absolute inset-0 hidden md:block"
+            style={{
+              background: hovered ? "rgba(0,0,0,0.15)" : "rgba(0,0,0,0.32)",
+              transition: "background 0.45s ease",
+            }}
+          />
 
-        {/* Description body copy and detail list tags */}
-        <div className="mt-2 flex flex-col gap-4 md:mt-0 md:gap-2 md:pt-3">
-          <p
+          <motion.div
+            animate={{ scaleX: hovered ? 1 : 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-x-0 top-0 z-10 h-[1.5px] origin-left hidden md:block"
+            style={{
+              background: "linear-gradient(90deg,#c8a052,#e8c070,transparent)",
+            }}
+          />
+
+          <div
             className="
-              text-[12px] leading-relaxed text-stone-400
-              md:line-clamp-none md:px-[10px] md:text-[clamp(8px,0.80vw,16px)] md:leading-[1.4]
+              absolute z-10 font-mono left-3 top-3 text-[9px] tracking-[0.28em]
+              md:left-[clamp(10px,1.4vw,18px)] md:top-[clamp(12px,2vh,20px)]
+              md:text-[clamp(7px,0.6vw,9px)] md:tracking-[0.32em]
             "
-            style={{ color: "rgba(210,190,158,0.68)" }}
+            style={{ color: "rgba(200,160,80,0.85)" }}
           >
-            {service.description}
-          </p>
-
-          <div className="grid grid-cols-1 gap-y-2 mt-1 md:flex md:flex-col md:gap-1.5">
-            {service.detail.map((d, i) => (
-              <div
-                key={i}
-                className="
-                  flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.14em]
-                  md:gap-2 md:pl-[10px] md:text-[clamp(6px,0.80vw,16px)] md:leading-[2.2] md:tracking-[0.18em]
-                "
-                style={{ color: "rgba(200,160,80,0.65)" }}
-              >
-                <span
-                  className="h-px w-2 shrink-0 md:w-3"
-                  style={{
-                    background: "rgba(200,160,80,0.4)",
-                    transform: "translateY(0.5px)",
-                  }}
-                />
-                <span className="whitespace-nowrap">{d.toUpperCase()}</span>
-              </div>
-            ))}
+            {service.number}
           </div>
         </div>
-      </div>
-    </motion.div>
-  );
-}
+
+        <div
+          className="
+            relative flex min-w-0 flex-col justify-start w-full pr-1 select-text
+            md:absolute md:inset-x-0 md:z-20 md:h-[40vh] md:p-0
+            md:bottom-[-12px] lg:bottom-[20px] xl:bottom-[48px]
+          "
+          style={{
+            pointerEvents: !isDesktop ? "auto" : "none",
+          }}
+        >
+          <span className="mb-1 block font-mono text-[8px] uppercase tracking-[0.26em] text-[#c8a052] md:hidden">
+            {service.keyword}
+          </span>
+
+          <div
+            className="w-full bg-transparent p-0 md:bg-[rgba(255,255,255,0.04)] md:px-[clamp(8px,1vw,14px)] md:py-[clamp(5px,0.8vh,9px)]"
+            style={{
+              backdropFilter: "blur(6px)",
+              WebkitBackdropFilter: "blur(6px)",
+            }}
+          >
+            <h3
+              className="
+                font-serif text-[22px] font-bold leading-tight text-white
+                md:text-right md:text-[clamp(13px,1.6vw,22px)] md:leading-none
+              "
+              style={{
+                color: hovered ? "#fff8ee" : "rgba(240,224,192,0.86)",
+                letterSpacing: "0.03em",
+                transition: "color 0.35s ease",
+              }}
+            >
+              {service.fullTitle}
+            </h3>
+          </div>
+
+          <div className="mt-2 flex flex-col gap-4 md:mt-0 md:gap-2 md:pt-3">
+            <p
+              className="
+                text-[12px] leading-relaxed text-stone-400
+                md:line-clamp-none md:px-[10px] md:text-[clamp(8px,0.80vw,16px)] md:leading-[1.4]
+              "
+              style={{ color: "rgba(210,190,158,0.68)" }}
+            >
+              {service.description}
+            </p>
+
+            <div className="grid grid-cols-1 gap-y-2 mt-1 md:hidden">
+              {service.detail.map((d, i) => (
+                <div
+                  key={i}
+                  className="
+                    flex items-center gap-2 font-mono text-[8px] uppercase tracking-[0.14em]
+                    md:gap-2 md:pl-[10px] md:text-[clamp(6px,0.80vw,16px)] md:leading-[2.2] md:tracking-[0.18em]
+                  "
+                  style={{ color: "rgba(200,160,80,0.65)" }}
+                >
+                  <span
+                    className="h-px w-2 shrink-0 md:w-3"
+                    style={{
+                      background: "rgba(200,160,80,0.4)",
+                      transform: "translateY(0.5px)",
+                    }}
+                  />
+                  <span className="whitespace-nowrap">{d.toUpperCase()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+);
+ServiceColumn.displayName = "ServiceColumn";
 // ─────────────────────────────────────────────
 // ServicesSection
 // ─────────────────────────────────────────────
@@ -557,20 +566,82 @@ export default function ServicesSection({
   servicesExitY,
 }: ServicesSectionProps) {
   const [showOverlay, setShowOverlay] = useState(false);
+  const [activeServiceIndex, setActiveServiceIndex] = useState(0);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const serviceRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      if (typeof window !== "undefined") setIsMobile(window.innerWidth < 768);
+    });
+
+    if (typeof window === "undefined") return () => cancelAnimationFrame(raf);
+
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", onResize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+ 
+
+  useEffect(() => {
+    if (!wrapperRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+        if (!visible.length) return;
+
+        const activeTarget = visible[0].target;
+        const index = serviceRefs.current.findIndex((ref) => ref === activeTarget);
+
+            if (index !== -1) {
+              setActiveServiceIndex(index);
+            }
+      },
+      {
+        root: wrapperRef.current,
+        rootMargin: "0px",
+        threshold: [0.45, 0.65, 0.85],
+      }
+    );
+
+    serviceRefs.current.forEach((ref) => ref && observer.observe(ref));
+
+    return () => observer.disconnect();
+  }, [isActive]);
 
   return (
     <>
       <motion.section
+        ref={wrapperRef}
         style={{
           opacity: servicesOpacity,
           y: isActive ? servicesExitY : servicesY,
           position: "absolute",
           inset: 0,
-          zIndex: 70,
+          zIndex: isActive ? 1 : 0,
           pointerEvents: isActive ? "auto" : "none",
           background: "#000",
+          ...(isMobile
+            ? {
+                height: "100dvh",
+                maxHeight: "100dvh",
+                overflowY: "auto",
+                overflowX: "hidden",
+                touchAction: "pan-y",
+                WebkitOverflowScrolling: "touch",
+                overscrollBehavior: "auto",
+              }
+            : {}),
         }}
-        className="flex flex-col overflow-y-auto overflow-x-hidden md:overflow-hidden"
+        className={`flex flex-col ${isMobile ? 'snap-y snap-mandatory' : ''}`}
         aria-hidden={!isActive}
       >
         {/* Section Heading Tag Label */}
@@ -590,10 +661,21 @@ export default function ServicesSection({
         </div>
 
         {/* ── Vertical Responsive Services Layout Stack ── */}
+        <div className="md:hidden px-4 pt-4">
+          <div
+            className="mb-4 inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/40 px-3 py-2 text-[9px] uppercase tracking-[0.28em] text-[#c8a052]"
+            aria-live="polite"
+          >
+            <span>{SERVICES[activeServiceIndex].number}</span>
+            <span>{SERVICES[activeServiceIndex].keyword}</span>
+            <span className="font-medium text-[#f9f3e8]">Active</span>
+          </div>
+        </div>
+
         <div
           className="
-            flex min-h-0 flex-col gap-6 px-4 pt-16 pb-32
-            md:flex-1 md:flex-row md:gap-0 md:px-0 md:pb-0 md:pt-0
+            flex min-h-0 flex-col gap-6 px-4 pt-2 pb-32
+            snap-y snap-mandatory md:flex-1 md:flex-row md:gap-0 md:px-0 md:pb-0 md:pt-0 md:snap-none md:overflow-visible
           "
         >
           {SERVICES.map((service, i) => (
@@ -602,6 +684,10 @@ export default function ServicesSection({
               service={service}
               index={i}
               total={SERVICES.length}
+              isActive={activeServiceIndex === i}
+              ref={(el) => {
+                serviceRefs.current[i] = el;
+              }}
             />
           ))}
         </div>
