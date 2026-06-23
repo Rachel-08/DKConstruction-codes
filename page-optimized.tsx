@@ -1,0 +1,1031 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValueEvent,
+} from "motion/react";
+import { useRouter } from "next/navigation";
+
+// ─────────────────────────────────────────────
+// Lazy load heavy components to reduce initial JS bundle
+// ──────��──────────────────────────────────────
+import dynamic from "next/dynamic";
+
+// Load components dynamically based on viewport
+const LoadingScreen = dynamic(() => import("@/components/LoadingScreen"), {
+  loading: () => <div className="w-full h-screen bg-black" />,
+});
+
+const Navbar = dynamic(() => import("@/components/Navbar"), {
+  loading: () => null,
+});
+
+const WelcomeWindow = dynamic(() => import("@/components/WelcomeWindow"), {
+  ssr: false, // No need to render on server for intro animation
+});
+
+const StudioLanding = dynamic(() => import("@/components/StudioLanding"), {
+  ssr: false,
+});
+
+const ServicesSection = dynamic(() => import("@/components/ServiceSection"), {
+  ssr: false,
+});
+
+const SelectedWork = dynamic(() => import("@/components/SelectedWork"), {
+  ssr: false,
+});
+
+const HowWeWork = dynamic(() => import("@/components/About"), {
+  ssr: false,
+});
+
+const ContactSection = dynamic(() => import("@/components/Contact"), {
+  ssr: false,
+});
+
+// ─────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────
+
+type ActiveSegment =
+  | "intro"
+  | "landing"
+  | "services"
+  | "howwework"
+  | "work"
+  | "contact";
+
+type NavigateTarget =
+  | "home"
+  | "services"
+  | "howwework"
+  | "team"
+  | "contact";
+
+type ViewportMode = "mobile" | "tablet" | "desktop" | "wide";
+
+type Timeline = {
+  scrollVh: number;
+  active: {
+    introEnd: number;
+    landingEnd: number;
+    servicesEnd: number;
+    howWeWorkEnd: number;
+    workEnd: number;
+  };
+  navbar: {
+    hideBefore: number;
+    showStart: number;
+    showEnd: number;
+  };
+  intro: {
+    rotate: [number, number];
+    frame: [number, number];
+    zoom: [number, number];
+    scrollText: [number, number];
+    exitX: [number, number];
+    enterTarget: number;
+    enterTargetMobile: number;
+    enterTargetDesktop: number;
+  };
+  landing: {
+    opacity: [number, number, number, number];
+    y: [number, number];
+    exitX: [number, number];
+    target: number;
+  };
+  services: {
+    opacity: [number, number, number, number];
+    y: [number, number];
+    exitY: [number, number];
+    target: number;
+  };
+  howWeWork: {
+    opacity: [number, number, number, number];
+    y: [number, number];
+    exitY: [number, number];
+    target: number;
+  };
+  work: {
+    x: [number, number];
+    opacity: [number, number, number, number];
+    headingY: [number, number];
+    headingScale: [number, number];
+    headingX: [number, number];
+    carouselOpacity: [number, number];
+    carouselX: [number, number];
+    exitY: [number, number];
+    target: number;
+  };
+  contact: {
+    opacity: [number, number, number];
+    y: [number, number, number];
+    target: number;
+  };
+};
+
+// ─────────────────────────────────────────────
+// Performance: Disable debug logging in production
+// ─────────────────────────────────────────────
+const DEBUG = process.env.NODE_ENV === "development";
+const log = (...args: any[]) => {
+  if (DEBUG) console.debug(...args);
+};
+
+// ─────────────────────────────────────────────
+// Responsive viewport mode
+// ─────────────────────────────────────────────
+
+function getViewportMode(width: number): ViewportMode {
+  if (width < 768) return "mobile";
+  if (width < 1024) return "tablet";
+  if (width < 1536) return "desktop";
+  return "wide";
+}
+
+function useViewportMode(): ViewportMode {
+  const [mode, setMode] = useState<ViewportMode>("desktop");
+
+  useEffect(() => {
+    const update = () => {
+      setMode(getViewportMode(window.innerWidth));
+    };
+
+    update();
+    
+    // Use passive listener for better scroll performance
+    window.addEventListener("resize", update, { passive: true });
+
+    return () => {
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  return mode;
+}
+
+// ─────────────────────────────────────────────
+// Responsive timeline (memoized to prevent recalculation)
+// ─────────────────────────────────────────────
+
+const TIMELINE_CACHE = new Map<ViewportMode, Timeline>();
+
+function getTimeline(mode: ViewportMode): Timeline {
+  // Return cached timeline if available
+  if (TIMELINE_CACHE.has(mode)) {
+    return TIMELINE_CACHE.get(mode)!;
+  }
+
+  let timeline: Timeline;
+
+  if (mode === "mobile") {
+    timeline = {
+      scrollVh: 2400,
+      active: {
+        introEnd: 0.16,
+        landingEnd: 0.27,
+        servicesEnd: 0.47,
+        howWeWorkEnd: 0.61,
+        workEnd: 0.86,
+      },
+      navbar: { hideBefore: 0.18, showStart: 0.18, showEnd: 0.28 },
+      intro: {
+        rotate: [0.0, 0.1],
+        frame: [0.04, 0.1],
+        zoom: [0.05, 0.15],
+        scrollText: [0.0, 0.05],
+        exitX: [0.21, 0.27],
+        enterTarget: 0.17,
+        enterTargetMobile: 0.2,
+        enterTargetDesktop: 0.17,
+      },
+      landing: {
+        opacity: [0.14, 0.18, 0.23, 0.27],
+        y: [0.14, 0.18],
+        exitX: [0.23, 0.27],
+        target: 0.19,
+      },
+      services: {
+        opacity: [0.25, 0.29, 0.43, 0.47],
+        y: [0.25, 0.3],
+        exitY: [0.43, 0.49],
+        target: 0.32,
+      },
+      howWeWork: {
+        opacity: [0.47, 0.51, 0.57, 0.61],
+        y: [0.47, 0.51],
+        exitY: [0.57, 0.62],
+        target: 0.53,
+      },
+      work: {
+        x: [0.59, 0.64],
+        opacity: [0.59, 0.64, 0.86, 0.89],
+        headingY: [0.61, 0.65],
+        headingScale: [0.63, 0.67],
+        headingX: [0.63, 0.67],
+        carouselOpacity: [0.65, 0.68],
+        carouselX: [0.69, 0.85],
+        exitY: [0.85, 0.89],
+        target: 0.66,
+      },
+      contact: {
+        opacity: [0.86, 0.9, 1.0],
+        y: [0.88, 0.9, 1.0],
+        target: 1.0,
+      },
+    };
+  } else if (mode === "tablet") {
+    timeline = {
+      scrollVh: 2100,
+      active: {
+        introEnd: 0.15,
+        landingEnd: 0.27,
+        servicesEnd: 0.43,
+        howWeWorkEnd: 0.57,
+        workEnd: 0.86,
+      },
+      navbar: { hideBefore: 0.18, showStart: 0.18, showEnd: 0.27 },
+      intro: {
+        rotate: [0.0, 0.1],
+        frame: [0.04, 0.1],
+        zoom: [0.05, 0.14],
+        scrollText: [0.0, 0.05],
+        exitX: [0.21, 0.26],
+        enterTarget: 0.21,
+        enterTargetMobile: 0.21,
+        enterTargetDesktop: 0.21,
+      },
+      landing: {
+        opacity: [0.14, 0.17, 0.22, 0.27],
+        y: [0.14, 0.17],
+        exitX: [0.22, 0.27],
+        target: 0.18,
+      },
+      services: {
+        opacity: [0.25, 0.28, 0.39, 0.43],
+        y: [0.25, 0.29],
+        exitY: [0.39, 0.45],
+        target: 0.31,
+      },
+      howWeWork: {
+        opacity: [0.43, 0.47, 0.53, 0.57],
+        y: [0.43, 0.47],
+        exitY: [0.53, 0.58],
+        target: 0.49,
+      },
+      work: {
+        x: [0.55, 0.6],
+        opacity: [0.55, 0.6, 0.84, 0.87],
+        headingY: [0.57, 0.61],
+        headingScale: [0.59, 0.63],
+        headingX: [0.59, 0.63],
+        carouselOpacity: [0.61, 0.64],
+        carouselX: [0.65, 0.83],
+        exitY: [0.83, 0.87],
+        target: 0.63,
+      },
+      contact: {
+        opacity: [0.86, 0.9, 1.0],
+        y: [0.88, 0.9, 1.0],
+        target: 1.0,
+      },
+    };
+  } else if (mode === "wide") {
+    timeline = {
+      scrollVh: 2000,
+      active: {
+        introEnd: 0.15,
+        landingEnd: 0.26,
+        servicesEnd: 0.36,
+        howWeWorkEnd: 0.48,
+        workEnd: 0.86,
+      },
+      navbar: { hideBefore: 0.19, showStart: 0.19, showEnd: 0.24 },
+      intro: {
+        rotate: [0.0, 0.1],
+        frame: [0.04, 0.1],
+        zoom: [0.05, 0.14],
+        scrollText: [0.0, 0.05],
+        exitX: [0.2, 0.24],
+        enterTarget: 0.2,
+        enterTargetMobile: 0.2,
+        enterTargetDesktop: 0.2,
+      },
+      landing: {
+        opacity: [0.14, 0.17, 0.2, 0.24],
+        y: [0.14, 0.17],
+        exitX: [0.2, 0.24],
+        target: 0.18,
+      },
+      services: {
+        opacity: [0.22, 0.24, 0.3, 0.32],
+        y: [0.22, 0.26],
+        exitY: [0.3, 0.34],
+        target: 0.27,
+      },
+      howWeWork: {
+        opacity: [0.34, 0.38, 0.44, 0.48],
+        y: [0.34, 0.38],
+        exitY: [0.44, 0.48],
+        target: 0.41,
+      },
+      work: {
+        x: [0.46, 0.52],
+        opacity: [0.46, 0.52, 0.86, 0.88],
+        headingY: [0.48, 0.52],
+        headingScale: [0.5, 0.54],
+        headingX: [0.5, 0.54],
+        carouselOpacity: [0.52, 0.54],
+        carouselX: [0.57, 0.82],
+        exitY: [0.82, 0.86],
+        target: 0.55,
+      },
+      contact: {
+        opacity: [0.86, 0.9, 1.0],
+        y: [0.88, 0.9, 1.0],
+        target: 1.0,
+      },
+    };
+  } else {
+    timeline = {
+      scrollVh: 1850,
+      active: {
+        introEnd: 0.15,
+        landingEnd: 0.26,
+        servicesEnd: 0.38,
+        howWeWorkEnd: 0.5,
+        workEnd: 0.86,
+      },
+      navbar: { hideBefore: 0.19, showStart: 0.19, showEnd: 0.25 },
+      intro: {
+        rotate: [0.0, 0.1],
+        frame: [0.04, 0.1],
+        zoom: [0.05, 0.14],
+        scrollText: [0.0, 0.05],
+        exitX: [0.2, 0.25],
+        enterTarget: 0.2,
+        enterTargetMobile: 0.2,
+        enterTargetDesktop: 0.2,
+      },
+      landing: {
+        opacity: [0.14, 0.17, 0.21, 0.23],
+        y: [0.14, 0.17],
+        exitX: [0.21, 0.23],
+        target: 0.18,
+      },
+      services: {
+        opacity: [0.21, 0.23, 0.32, 0.36],
+        y: [0.21, 0.25],
+        exitY: [0.34, 0.4],
+        target: 0.29,
+      },
+      howWeWork: {
+        opacity: [0.38, 0.42, 0.46, 0.5],
+        y: [0.38, 0.42],
+        exitY: [0.46, 0.5],
+        target: 0.43,
+      },
+      work: {
+        x: [0.48, 0.54],
+        opacity: [0.48, 0.54, 0.84, 0.87],
+        headingY: [0.5, 0.54],
+        headingScale: [0.52, 0.56],
+        headingX: [0.52, 0.56],
+        carouselOpacity: [0.54, 0.56],
+        carouselX: [0.59, 0.82],
+        exitY: [0.82, 0.86],
+        target: 0.57,
+      },
+      contact: {
+        opacity: [0.86, 0.9, 1.0],
+        y: [0.88, 0.9, 1.0],
+        target: 1.0,
+      },
+    };
+  }
+
+  TIMELINE_CACHE.set(mode, timeline);
+  return timeline;
+}
+
+// ─────────────────────────────────────────────
+// Performance: Check for prefers-reduced-motion
+// ─────────────────────────────────────────────
+
+function usePrefersReducedMotion(): boolean {
+  const [prefersReduced, setPrefersReduced] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReduced(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => {
+      setPrefersReduced(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
+  return prefersReduced;
+}
+
+// ─────────────────────────────────────────────
+// Main Component
+// ─────────────────────────────────────────────
+
+export default function ScrollExperience() {
+  const containerRef = useRef<HTMLElement | null>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoScrollTriggeredRef = useRef<Set<string>>(new Set());
+  const isProgrammaticScrollingRef = useRef(false);
+  const isSnappingRef = useRef(false);
+  const isAnimatingRef = useRef(false);
+  const hasSettledOnLandingRef = useRef(false);
+  const prevActiveRef = useRef<ActiveSegment>("intro");
+  const scrollEventThrottleRef = useRef(0);
+
+  const router = useRouter();
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  const [loadingDone, setLoadingDone] = useState<boolean>(false);
+  const [showNavbar, setShowNavbar] = useState<boolean>(false);
+  const [showNudge, setShowNudge] = useState<boolean>(false);
+  const [activeSegment, setActiveSegment] = useState<ActiveSegment>("intro");
+
+  const viewportMode = useViewportMode();
+
+  const timeline = useMemo(() => {
+    return getTimeline(viewportMode);
+  }, [viewportMode]);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  // ─────────────────────────────────────────────
+  // Consolidated scroll event handler
+  // ─────────────────────────────────────────────
+
+  useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
+    const previous = scrollYProgress.getPrevious() ?? 0;
+    const now = performance.now();
+
+    // Throttle scroll events to 60fps (16.67ms)
+    if (now - scrollEventThrottleRef.current < 16.67) {
+      return;
+    }
+    scrollEventThrottleRef.current = now;
+
+    // --- Active segment tracking ---
+    if (isAnimatingRef.current === false) {
+      let newSeg: ActiveSegment = "contact";
+
+      if (latest < timeline.active.introEnd) newSeg = "intro";
+      else if (latest < timeline.active.landingEnd) newSeg = "landing";
+      else if (latest < timeline.active.servicesEnd) newSeg = "services";
+      else if (latest < timeline.active.howWeWorkEnd) newSeg = "howwework";
+      else if (latest < timeline.active.workEnd) newSeg = "work";
+
+      if (prevActiveRef.current !== newSeg) {
+        prevActiveRef.current = newSeg;
+        setActiveSegment(newSeg);
+        log("activeSegment ->", newSeg);
+      }
+    }
+
+    // --- Navbar visibility tracking ---
+    const isScrollingDown = latest > previous;
+    const isScrollingUp = latest < previous;
+
+    if (latest < timeline.navbar.hideBefore) {
+      setShowNavbar(false);
+    } else if (
+      latest >= timeline.navbar.showStart &&
+      latest < timeline.navbar.showEnd
+    ) {
+      setShowNavbar(true);
+    } else if (isScrollingDown) {
+      setShowNavbar(false);
+    } else if (isScrollingUp) {
+      setShowNavbar(true);
+    }
+
+    // --- Auto-snap scroll logic ---
+    if (isAnimatingRef.current) {
+      log("auto-snap: ignored due to animation lock");
+      return;
+    }
+
+    if (isSnappingRef.current) return;
+
+    // Handle initial landing settlement
+    if (!hasSettledOnLandingRef.current) {
+      if (latest < timeline.landing.target) return;
+      hasSettledOnLandingRef.current = true;
+      log("Initial landing settled");
+      return;
+    }
+
+    // --- Upward scroll snap logic ---
+    if (!isScrollingDown) {
+      const thresholds = {
+        landing: timeline.services.opacity[1],
+        services: timeline.howWeWork.opacity[1],
+        howWeWork: timeline.work.opacity[1],
+        work: timeline.contact.opacity[1],
+      };
+
+      if (
+        previous >= thresholds.landing &&
+        latest <= thresholds.landing &&
+        latest > timeline.landing.target &&
+        !autoScrollTriggeredRef.current.has("landing-back")
+      ) {
+        performSnapTo(timeline.landing.target, "landing-back", 1200);
+        return;
+      }
+
+      if (
+        previous >= thresholds.services &&
+        latest <= thresholds.services &&
+        latest > timeline.services.target &&
+        !autoScrollTriggeredRef.current.has("services-back")
+      ) {
+        performSnapTo(timeline.services.target, "services-back", 1200);
+        return;
+      }
+
+      if (
+        previous >= thresholds.howWeWork &&
+        latest <= thresholds.howWeWork &&
+        latest > timeline.howWeWork.target &&
+        !autoScrollTriggeredRef.current.has("howwework-back")
+      ) {
+        performSnapTo(timeline.howWeWork.target, "howwework-back", 1200);
+        return;
+      }
+
+      if (
+        previous >= thresholds.work &&
+        latest <= thresholds.work &&
+        latest > timeline.work.target &&
+        !autoScrollTriggeredRef.current.has("work-back")
+      ) {
+        performSnapTo(timeline.work.target, "work-back", 1200);
+        return;
+      }
+
+      autoScrollTriggeredRef.current.clear();
+      return;
+    }
+
+    // Prevent multi-step auto-snap
+    if (latest < timeline.active.landingEnd) {
+      autoScrollTriggeredRef.current.delete("services");
+      autoScrollTriggeredRef.current.delete("howwework");
+      autoScrollTriggeredRef.current.delete("work");
+    }
+
+    // --- Downward scroll snap logic ---
+    if (
+      !autoScrollTriggeredRef.current.has("landing") &&
+      latest >= timeline.landing.opacity[1] &&
+      latest < timeline.active.landingEnd
+    ) {
+      performSnapTo(timeline.services.target, "landing", 1500);
+      return;
+    }
+
+    if (
+      !autoScrollTriggeredRef.current.has("services") &&
+      latest >= timeline.services.opacity[2] &&
+      latest < timeline.active.servicesEnd
+    ) {
+      performSnapTo(timeline.howWeWork.target, "services", 1500);
+      return;
+    }
+
+    if (
+      !autoScrollTriggeredRef.current.has("howwework") &&
+      latest >= timeline.howWeWork.opacity[2] &&
+      latest < timeline.active.howWeWorkEnd
+    ) {
+      performSnapTo(timeline.work.target, "howwework", 1500);
+      return;
+    }
+
+    const workToContactThreshold = timeline.work.exitY[0];
+    if (
+      !autoScrollTriggeredRef.current.has("work") &&
+      latest >= workToContactThreshold &&
+      latest < timeline.active.workEnd
+    ) {
+      performSnapTo(timeline.contact.target, "work", 1500);
+      return;
+    }
+  });
+
+  // Separate callback for idle nudge to reduce frequency of updates
+  useMotionValueEvent(scrollYProgress, "change", () => {
+    resetNudge();
+  });
+
+  // ─────────────────────────────────────────────
+  // Helper functions
+  // ─────────────────────────────────────────────
+
+  const handleLoadingComplete = useCallback(() => {
+    setLoadingDone(true);
+    log("Loading complete: ready to animate intro");
+  }, []);
+
+  const scrollToProgress = useCallback((progress: number): void => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    const scrollableDistance = container.scrollHeight - window.innerHeight;
+    const containerTop =
+      container.getBoundingClientRect().top + window.scrollY;
+
+    window.scrollTo({
+      top: containerTop + scrollableDistance * progress,
+      behavior: "smooth",
+    });
+  }, []);
+
+  const performSnapTo = useCallback(
+    (progress: number, key: string | null = null, duration = 900) => {
+      if (isAnimatingRef.current) {
+        log("performSnapTo: blocked - already animating");
+        return;
+      }
+
+      if (key) autoScrollTriggeredRef.current.add(key);
+
+      isAnimatingRef.current = true;
+      isProgrammaticScrollingRef.current = true;
+      isSnappingRef.current = true;
+
+      scrollToProgress(progress);
+
+      const clear = () => {
+        isAnimatingRef.current = false;
+        isProgrammaticScrollingRef.current = false;
+        isSnappingRef.current = false;
+        log("performSnapTo: end");
+      };
+
+      const t = window.setTimeout(clear, duration);
+
+      return () => {
+        clear();
+        clearTimeout(t);
+      };
+    },
+    [scrollToProgress]
+  );
+
+  const handleEnterClick = useCallback((): void => {
+    if (autoScrollTriggeredRef.current.has("intro-enter")) return;
+    const enterTarget =
+      viewportMode === "mobile"
+        ? timeline.intro.enterTargetMobile
+        : timeline.intro.enterTargetDesktop;
+    performSnapTo(enterTarget, "intro-enter", 1500);
+  }, [performSnapTo, timeline.intro, viewportMode]);
+
+  const resetNudge = useCallback(() => {
+    setShowNudge(false);
+
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+
+    idleTimerRef.current = setTimeout(() => {
+      if (activeSegment !== "contact") {
+        setShowNudge(true);
+        log("showNudge -> true");
+      }
+    }, 2000);
+  }, [activeSegment]);
+
+  useEffect(() => {
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, []);
+
+  const handleNavigate = useCallback(
+    (target: NavigateTarget) => {
+      if (target === "team") {
+        router.push("/team");
+        return;
+      }
+
+      const progressMap: Record<Exclude<NavigateTarget, "team">, number> = {
+        home: timeline.landing.target,
+        services: timeline.services.target,
+        howwework: timeline.howWeWork.target,
+        contact: timeline.contact.target,
+      };
+
+      log("handleNavigate ->", target);
+      performSnapTo(progressMap[target], `nav-${target}`, 1200);
+    },
+    [performSnapTo, timeline]
+  );
+
+  // ─────────────────────────────────────────────
+  // Optimized wheel/touch handlers
+  // ─────────────────────────────────────────────
+
+  useEffect(() => {
+    let lastWheel = 0;
+    const throttle = 150; // ms
+
+    const onWheel = (e: WheelEvent) => {
+      if (isAnimatingRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      const now = performance.now();
+      if (now - lastWheel < throttle) return;
+      lastWheel = now;
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (isAnimatingRef.current) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    // Use capture phase for better event handling
+    window.addEventListener("wheel", onWheel, {
+      passive: false,
+      capture: true,
+    });
+    window.addEventListener("touchstart", onTouchStart, {
+      passive: false,
+      capture: true,
+    });
+
+    return () => {
+      window.removeEventListener("wheel", onWheel, true);
+      window.removeEventListener("touchstart", onTouchStart, true);
+    };
+  }, []);
+
+  // ─────────────────────────────────────────────
+  // Memoized motion transforms
+  // ─────────────────────────────────────────────
+
+  const isMobile = viewportMode === "mobile";
+  const isDesktop = viewportMode === "desktop" || viewportMode === "wide";
+
+  // Intro transforms
+  const leftRotate = useTransform(scrollYProgress, timeline.intro.rotate, [
+    0, -78,
+  ]);
+  const rightRotate = useTransform(scrollYProgress, timeline.intro.rotate, [
+    0, 78,
+  ]);
+  const windowScale = useTransform(
+    scrollYProgress,
+    timeline.intro.zoom,
+    [1, isMobile ? 2.35 : 2.1]
+  );
+  const windowOpacity = useTransform(
+    scrollYProgress,
+    timeline.intro.zoom,
+    [1, 0]
+  );
+  const frameOpacity = useTransform(
+    scrollYProgress,
+    timeline.intro.frame,
+    [1, 0]
+  );
+  const scrollTextOpacity = useTransform(
+    scrollYProgress,
+    timeline.intro.scrollText,
+    [1, 0]
+  );
+  const windowExitX = useTransform(
+    scrollYProgress,
+    timeline.intro.exitX,
+    ["0vw", isMobile ? "-220vw" : "-180vw"]
+  );
+
+  // Landing transforms
+  const landingOpacity = useTransform(
+    scrollYProgress,
+    timeline.landing.opacity,
+    [0, 1, 1, 0]
+  );
+  const landingY = useTransform(scrollYProgress, timeline.landing.y, [
+    "120vh",
+    "0vh",
+  ]);
+  const landingExitX = useTransform(
+    scrollYProgress,
+    timeline.landing.exitX,
+    ["0vw", isMobile ? "-170vw" : "-140vw"]
+  );
+
+  // Services transforms
+  const servicesOpacity = useTransform(
+    scrollYProgress,
+    timeline.services.opacity,
+    [0, 1, 1, 0]
+  );
+  const servicesY = useTransform(
+    scrollYProgress,
+    timeline.services.y,
+    [isMobile ? "60vh" : "40vh", "0vh"]
+  );
+  const servicesExitY = useTransform(
+    scrollYProgress,
+    timeline.services.exitY,
+    ["0vh", isMobile ? "-85vh" : "-60vh"]
+  );
+
+  // How We Work transforms
+  const howWeWorkOpacity = useTransform(
+    scrollYProgress,
+    timeline.howWeWork.opacity,
+    [0, 1, 1, 0]
+  );
+  const howWeWorkY = useTransform(scrollYProgress, timeline.howWeWork.y, [
+    "55vh",
+    "0vh",
+  ]);
+  const howWeWorkExitY = useTransform(
+    scrollYProgress,
+    timeline.howWeWork.exitY,
+    ["0vh", "-55vh"]
+  );
+
+  // Work transforms
+  const workX = useTransform(
+    scrollYProgress,
+    timeline.work.x,
+    [isMobile ? "120vw" : "100vw", "0vw"]
+  );
+  const workOpacity = useTransform(scrollYProgress, timeline.work.opacity, [
+    0, 1, 1, 0,
+  ]);
+  const workHeadingY = useTransform(
+    scrollYProgress,
+    timeline.work.headingY,
+    ["0vh", isMobile ? "-24vh" : "-30vh"]
+  );
+  const workHeadingScale = useTransform(
+    scrollYProgress,
+    timeline.work.headingScale,
+    [1, isMobile ? 0.85 : 0.75]
+  );
+  const workHeadingX = useTransform(
+    scrollYProgress,
+    timeline.work.headingX,
+    ["0vw", isMobile ? "-8vw" : "-12vw"]
+  );
+  const workCarouselOpacity = useTransform(
+    scrollYProgress,
+    timeline.work.carouselOpacity,
+    [0, 1]
+  );
+  const workCarouselX = useTransform(
+    scrollYProgress,
+    timeline.work.carouselX,
+    [isMobile ? "40vw" : "60vw", "0vw"]
+  );
+  const workExitY = useTransform(scrollYProgress, timeline.work.exitY, [
+    "0vh",
+    "-80vh",
+  ]);
+
+  // Contact transforms
+  const contactOpacity = useTransform(scrollYProgress, timeline.contact.opacity, [
+    0, 1, 1,
+  ]);
+  const contactY = useTransform(scrollYProgress, timeline.contact.y, [
+    "60vh",
+    "0vh",
+    "0vh",
+  ]);
+
+  return (
+    <div ref={containerRef} className="relative bg-black">
+      {!loadingDone && (
+        <LoadingScreen onLoadingComplete={handleLoadingComplete} />
+      )}
+
+      {showNavbar && (
+        <Navbar
+          activeSegment={activeSegment}
+          onNavigate={handleNavigate}
+          showNudge={showNudge}
+        />
+      )}
+
+      {loadingDone && (
+        <motion.section
+          style={{
+            opacity: windowOpacity,
+            x: windowExitX,
+          }}
+          className="relative w-full h-screen flex items-center justify-center will-change-transform"
+        >
+          <WelcomeWindow
+            onEnter={handleEnterClick}
+            leftRotate={leftRotate}
+            rightRotate={rightRotate}
+            windowScale={windowScale}
+            frameOpacity={frameOpacity}
+            scrollTextOpacity={scrollTextOpacity}
+          />
+        </motion.section>
+      )}
+
+      <motion.section
+        style={{
+          opacity: landingOpacity,
+          y: landingY,
+          x: landingExitX,
+        }}
+        className="relative w-full min-h-screen flex items-center justify-center will-change-transform"
+      >
+        <StudioLanding />
+      </motion.section>
+
+      <motion.section
+        style={{
+          opacity: servicesOpacity,
+          y: servicesY,
+          marginBottom: servicesExitY,
+        }}
+        className="relative w-full min-h-screen flex items-center justify-center will-change-transform"
+      >
+        <ServicesSection />
+      </motion.section>
+
+      <motion.section
+        style={{
+          opacity: howWeWorkOpacity,
+          y: howWeWorkY,
+          marginBottom: howWeWorkExitY,
+        }}
+        className="relative w-full min-h-screen flex items-center justify-center will-change-transform"
+      >
+        <HowWeWork />
+      </motion.section>
+
+      <motion.section
+        style={{
+          opacity: workOpacity,
+          x: workX,
+          marginBottom: workExitY,
+        }}
+        className="relative w-full min-h-screen flex items-center justify-center will-change-transform"
+      >
+        <div className="w-full">
+          <motion.h2
+            style={{
+              y: workHeadingY,
+              scale: workHeadingScale,
+              x: workHeadingX,
+            }}
+            className="text-4xl font-bold mb-8 will-change-transform"
+          >
+            Our Work
+          </motion.h2>
+          <motion.div
+            style={{
+              opacity: workCarouselOpacity,
+              x: workCarouselX,
+            }}
+            className="will-change-transform"
+          >
+            <SelectedWork />
+          </motion.div>
+        </div>
+      </motion.section>
+
+      <motion.section
+        style={{
+          opacity: contactOpacity,
+          y: contactY,
+        }}
+        className="relative w-full min-h-screen flex items-center justify-center will-change-transform"
+      >
+        <ContactSection />
+      </motion.section>
+    </div>
+  );
+}
