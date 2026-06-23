@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -18,7 +18,9 @@ import {
   FaHome,
 } from "react-icons/fa";
 
-// TYPES
+// ─────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────
 
 type Step = {
   id: number;
@@ -38,7 +40,9 @@ type HowWeWorkProps = {
   howWeWorkExitY: MotionValue<string>;
 };
 
-// DATA
+// ─────────────────────────────────────────────
+// Data
+// ─────────────────────────────────────────────
 
 const STEPS: Step[] = [
   {
@@ -47,58 +51,56 @@ const STEPS: Step[] = [
     phase: "Discovery",
     title: "Initial Design Consultation",
     description:
-      "We begin with a structured briefing session, understanding your vision, spatial requirements, budget parameters, and timeline.",
+      "We begin with a structured briefing session — understanding your vision, spatial requirements, budget parameters, and timeline.",
     icon: FaRegComments,
   },
-
   {
     id: 2,
     number: "02",
     phase: "Proposal",
-    title: "Design Proposal And Agreement",
+    title: "Design Proposal & Agreement",
     description:
-      "We present drawings, material schedules, and a detailed cost estimate before confirming the agreement.",
+      "We present drawings, material schedules, and a detailed estimate before formal agreement and project confirmation.",
     payment: "5%",
-    paymentLabel: "Retainer to confirm project",
+    paymentLabel: "Retainer",
     icon: FaFileSignature,
   },
-
   {
     id: 3,
     number: "03",
     phase: "Execution",
-    title: "Construction And Project Execution",
+    title: "Construction & Project Execution",
     description:
-      "Procurement, contractor scheduling, and quality control are managed throughout the execution process.",
+      "Procurement, contractor scheduling, supervision, and quality checks are handled through phased execution.",
     payment: "60%",
-    paymentLabel: "Progressive milestone payment",
+    paymentLabel: "Milestone",
     icon: FaHardHat,
   },
-
   {
     id: 4,
     number: "04",
     phase: "Completion",
-    title: "Final Installations And Handover",
+    title: "Final Installations & Handover",
     description:
-      "All finishes, fixtures, and furnishings are inspected before final handover.",
+      "Final finishes, inspections, snagging walkthroughs, and handover are completed before project closure.",
     payment: "100%",
-    paymentLabel: "Final balance on handover",
+    paymentLabel: "Final",
     icon: FaClipboardCheck,
   },
-
   {
     id: 5,
     number: "05",
     phase: "Occupation",
-    title: "Move In And Enjoy",
+    title: "Move In & Enjoy",
     description:
-      "Your space is completed with aftercare support and warranty documentation.",
+      "Warranty documents, care guides, supplier contacts, and aftercare support are provided post completion.",
     icon: FaHome,
   },
 ];
 
-// STEP CARD
+// ─────────────────────────────────────────────
+// Step Card
+// ─────────────────────────────────────────────
 
 function StepCard({
   step,
@@ -111,238 +113,203 @@ function StepCard({
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   const inView = useInView(ref, {
     once: true,
-    margin: "-5%",
+    margin: "-10%",
   });
 
   const Icon = step.icon;
 
   return (
-    <motion.article
+    <article
       ref={ref}
-      initial={{
-        opacity: 0,
-        x: 24,
-      }}
-      animate={
-        inView
-          ? {
-              opacity: 1,
-              x: 0,
-            }
-          : {
-              opacity: 0,
-              x: 24,
-            }
-      }
-      transition={{
-        duration: 0.55,
-        delay: index * 0.08,
-      }}
-      className="relative pl-[72px]"
+      className="relative pl-[72px] md:pl-[88px]"
     >
       {!isLast && (
         <div
-          className="absolute left-[24px] top-[72px]"
-          style={{
-            width: "1px",
-            height: "calc(100% - 24px)",
-            background:
-              "linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.08))",
-          }}
+          className="
+            absolute
+            left-[23px]
+            md:left-[30px]
+            top-[62px]
+            bottom-0
+            w-px
+            bg-black/20
+          "
         />
       )}
 
       <motion.div
-        animate={{
-          borderColor: expanded
-            ? "rgba(0,0,0,0.75)"
-            : "rgba(0,0,0,0.28)",
-
-          background: expanded
-            ? "rgba(0,0,0,0.06)"
-            : "rgba(255,255,255,0.35)",
-        }}
+        initial={{ opacity: 0, x: 28 }}
+        animate={inView ? { opacity: 1, x: 0 } : {}}
         transition={{
-          duration: 0.25,
-        }}
-        className="absolute left-0 top-[18px] z-10 flex items-center justify-center rounded-full"
-        style={{
-          width: 48,
-          height: 48,
-          border: "1px solid rgba(0,0,0,0.28)",
+          duration: 0.7,
+          delay: index * 0.08,
         }}
       >
-        <Icon className="h-[42%] w-[42%]" />
-      </motion.div>
-
-      <button
-        type="button"
-        aria-expanded={expanded}
-        onClick={() => setExpanded((prev) => !prev)}
-        className="relative z-10 block w-full text-left"
-        style={{
-          padding: "18px 0",
-        }}
-      >
-        <header className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span
-              className="font-mono uppercase tracking-[0.28em]"
-              style={{
-                fontSize: "clamp(7px,0.65vw,9px)",
-              }}
-            >
-              Phase {step.number} - {step.phase}
-            </span>
-
-            {step.payment && (
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  scale: 0.9,
-                }}
-                animate={
-                  inView
-                    ? {
-                        opacity: 1,
-                        scale: 1,
-                      }
-                    : {
-                        opacity: 0,
-                        scale: 0.9,
-                      }
-                }
-                transition={{
-                  duration: 0.25,
-                  delay: 0.15,
-                }}
-                style={{
-                  background: "rgba(0,0,0,0.04)",
-                  border: "0.5px solid rgba(0,0,0,0.25)",
-                  borderRadius: 2,
-                  padding: "4px 10px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <span
-                  className="font-mono"
-                  style={{
-                    fontSize: "clamp(9px,0.75vw,11px)",
-                    fontWeight: 600,
-                  }}
-                >
-                  {step.payment}
-                </span>
-
-                <span
-                  className="font-mono"
-                  style={{
-                    fontSize: "clamp(6px,0.55vw,7px)",
-                    letterSpacing: "0.14em",
-                  }}
-                >
-                  {step.paymentLabel?.toUpperCase()}
-                </span>
-              </motion.div>
-            )}
-          </div>
-
-          <h3
-            className="font-serif leading-snug"
-            style={{
-              fontSize: "clamp(20px,2vw,30px)",
-            }}
-          >
-            {step.title}
-          </h3>
-
-          <motion.div
-            animate={{
-              scaleX: expanded ? 1 : 0.2,
-              opacity: expanded ? 0.6 : 0.25,
-            }}
-            transition={{
-              duration: 0.3,
-            }}
-            style={{
-              transformOrigin: "left",
-              height: "1px",
-              width: "100px",
-              background:
-                "linear-gradient(90deg,#000,rgba(0,0,0,0.3),transparent)",
-            }}
-          />
-
-          <AnimatePresence initial={false}>
-            {expanded && (
-              <motion.div
-                key="description"
-                initial={{
-                  opacity: 0,
-                  scaleY: 0.92,
-                }}
-                animate={{
-                  opacity: 1,
-                  scaleY: 1,
-                }}
-                exit={{
-                  opacity: 0,
-                  scaleY: 0.92,
-                }}
-                transition={{
-                  duration: 0.22,
-                }}
-                style={{
-                  overflow: "hidden",
-                  transformOrigin: "top",
-                }}
-              >
-                <p
-                  style={{
-                    fontSize: "clamp(12px,0.95vw,14px)",
-                    lineHeight: 1.8,
-                    paddingTop: 6,
-                  }}
-                >
-                  {step.description}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <span
-            className="font-mono"
-            style={{
-              fontSize: "clamp(8px,0.65vw,9px)",
-              letterSpacing: "0.24em",
-              opacity: 0.7,
-            }}
-          >
-            {expanded ? "- COLLAPSE" : "+ EXPAND"}
-          </span>
-        </header>
-      </button>
-
-      {!isLast && (
+        {/* Icon */}
         <div
-          style={{
-            height: "0.5px",
-            background:
-              "linear-gradient(90deg,rgba(0,0,0,0.16),rgba(0,0,0,0.05),transparent)",
-          }}
-        />
-      )}
-    </motion.article>
+          className="
+            absolute
+            left-0
+            top-4
+            z-10
+            flex
+            h-12
+            w-12
+            items-center
+            justify-center
+            rounded-full
+            border
+            border-black/20
+            bg-[#f5f2eb]
+            md:h-14
+            md:w-14
+          "
+        >
+          <Icon className="h-5 w-5 text-black" />
+        </div>
+
+        {/* Button */}
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          className="
+            w-full
+            cursor-pointer
+            py-5
+            text-left
+          "
+        >
+          <div className="flex flex-col gap-3">
+            {/* Top Row */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span
+                className="
+                  font-mono
+                  text-[10px]
+                  uppercase
+                  tracking-[0.28em]
+                  text-black/70
+                "
+              >
+                Phase {step.number} — {step.phase}
+              </span>
+
+              {step.payment && (
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    border
+                    border-black/15
+                    bg-black/[0.03]
+                    px-3
+                    py-1
+                  "
+                >
+                  <span className="font-mono text-[10px] font-semibold tracking-[0.12em]">
+                    {step.payment}
+                  </span>
+
+                  <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-black/60">
+                    {step.paymentLabel}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Title */}
+            <h3
+              className="
+                font-serif
+                text-[22px]
+                leading-snug
+                text-black
+                md:text-[30px]
+              "
+            >
+              {step.title}
+            </h3>
+
+            {/* Line */}
+            <motion.div
+              animate={{
+                scaleX: expanded ? 1 : 0.3,
+                opacity: expanded ? 0.7 : 0.25,
+              }}
+              transition={{ duration: 0.35 }}
+              className="h-px origin-left bg-black"
+              style={{
+                width: "90px",
+              }}
+            />
+
+            {/* Expandable */}
+            <AnimatePresence initial={false}>
+              {expanded && (
+                <motion.div
+                  initial={{
+                    opacity: 0,
+                    height: 0,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    height: "auto",
+                  }}
+                  exit={{
+                    opacity: 0,
+                    height: 0,
+                  }}
+                  transition={{
+                    duration: 0.35,
+                  }}
+                  className="overflow-hidden"
+                >
+                  <p
+                    className="
+                      max-w-[640px]
+                      pt-2
+                      text-[13px]
+                      leading-[1.9]
+                      text-black/75
+                    "
+                  >
+                    {step.description}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Expand Label */}
+            <span
+              className="
+                font-mono
+                text-[9px]
+                uppercase
+                tracking-[0.28em]
+                text-black/55
+              "
+            >
+              {expanded ? "— Collapse" : "+ Expand"}
+            </span>
+          </div>
+        </button>
+
+        {!isLast && (
+          <div className="h-px bg-gradient-to-r from-black/15 to-transparent" />
+        )}
+      </motion.div>
+    </article>
   );
 }
 
-// MAIN COMPONENT
+// ─────────────────────────────────────────────
+// Main Component
+// ─────────────────────────────────────────────
 
 export default function HowWeWork({
   isActive,
@@ -350,99 +317,117 @@ export default function HowWeWork({
   howWeWorkY,
   howWeWorkExitY,
 }: HowWeWorkProps) {
-  const headingRef = useRef<HTMLElement>(null);
+  const headingRef = useRef<HTMLDivElement>(null);
 
   const headingInView = useInView(headingRef, {
     once: true,
-    margin: "-6%",
+    margin: "-10%",
   });
+
+  // MOBILE DETECTION
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+
+    window.addEventListener("resize", checkMobile);
+
+    return () => {
+      window.removeEventListener("resize", checkMobile);
+    };
+  }, []);
 
   return (
     <motion.section
-      aria-labelledby="how-we-work-heading"
+      aria-hidden={!isActive}
+      className="
+        how-we-work-scroll
+        absolute
+        inset-0
+        z-[65]
+        overflow-y-auto
+        overflow-x-hidden
+        bg-[#f5f2eb]
+        [scrollbar-width:thin]
+      "
       style={{
         opacity: howWeWorkOpacity,
 
-        y: isActive ? howWeWorkExitY : howWeWorkY,
+        y: isMobile
+          ? 0
+          : isActive
+            ? howWeWorkExitY
+            : howWeWorkY,
 
-        position: "fixed",
-        inset: 0,
-
-        width: "100%",
-        height: "100dvh",
-
-        zIndex: 65,
-
-        background: "#f5f2eb",
-
-        overflowY: "auto",
-        overflowX: "hidden",
+        minHeight: "100vh",
 
         WebkitOverflowScrolling: "touch",
-        overscrollBehavior: "contain",
+
+        overscrollBehaviorY: "auto",
+
         touchAction: "pan-y",
 
-        willChange: "transform, opacity",
-        transform: "translateZ(0)",
-        backfaceVisibility: "hidden",
-
-        pointerEvents: isActive ? "auto" : "none",
+        pointerEvents: isActive
+          ? "auto"
+          : "none",
       }}
-      className="how-we-work-scroll"
-      aria-hidden={!isActive}
     >
-      <style jsx>{`
-        .how-we-work-scroll::-webkit-scrollbar {
-          width: 6px;
-        }
+      {/* GRID BG */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.03]">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={`h-${i}`}
+            className="absolute left-0 right-0 h-px bg-sky-500"
+            style={{
+              top: `${(i / 19) * 100}%`,
+            }}
+          />
+        ))}
 
-        .how-we-work-scroll::-webkit-scrollbar-track {
-          background: rgba(0, 0, 0, 0.04);
-        }
+        {Array.from({ length: 24 }).map((_, i) => (
+          <div
+            key={`v-${i}`}
+            className="absolute top-0 bottom-0 w-px bg-sky-500"
+            style={{
+              left: `${(i / 23) * 100}%`,
+            }}
+          />
+        ))}
+      </div>
 
-        .how-we-work-scroll::-webkit-scrollbar-thumb {
-          background: rgba(0, 0, 0, 0.35);
-          border-radius: 999px;
-        }
-
-        .how-we-work-scroll {
-          scrollbar-width: thin;
-          scrollbar-color:
-            rgba(0, 0, 0, 0.35)
-            rgba(0, 0, 0, 0.04);
-
-          contain: layout paint style;
-        }
-      `}</style>
-
-      <div
+      {/* CONTENT */}
+      <main
         className="
           relative
           z-10
           mx-auto
           grid
+          max-w-[1280px]
           grid-cols-1
+          gap-16
+          px-6
+          py-20
           lg:grid-cols-[0.42fr_0.58fr]
-          gap-[clamp(40px,6vw,100px)]
+          lg:px-12
         "
-        style={{
-          maxWidth: "1280px",
-          padding:
-            "clamp(56px,9vh,100px) clamp(24px,5vw,72px) clamp(40px,5vh,60px)",
-        }}
       >
+        {/* LEFT */}
         <aside
           ref={headingRef}
           className="
             self-start
             lg:sticky
-            lg:top-[120px]
+            lg:top-24
           "
         >
           <motion.div
             initial={{
               opacity: 0,
-              y: 18,
+              y: 24,
             }}
             animate={
               headingInView
@@ -453,110 +438,99 @@ export default function HowWeWork({
                 : {}
             }
             transition={{
-              duration: 0.6,
+              duration: 0.8,
             }}
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-5"
           >
             <div className="flex items-center gap-4">
               <span
-                className="font-mono uppercase tracking-[0.42em]"
-                style={{
-                  fontSize: "clamp(7px,0.62vw,9px)",
-                }}
+                className="
+                  font-mono
+                  text-[10px]
+                  uppercase
+                  tracking-[0.42em]
+                  text-black/60
+                "
               >
                 Process
               </span>
 
-              <div
-                style={{
-                  flex: 1,
-                  height: "1px",
-                  background:
-                    "linear-gradient(90deg,#000 0%,transparent 100%)",
-                }}
-              />
+              <div className="h-px flex-1 bg-gradient-to-r from-black to-transparent" />
             </div>
 
-            <h2
-              id="how-we-work-heading"
-              className="font-serif leading-none tracking-tight"
-              style={{
-                fontSize: "clamp(46px,7vw,104px)",
-              }}
-            >
-              How It
-              <br />
-              Works
-            </h2>
+            <header>
+              <h2
+                className="
+                  font-serif
+                  leading-none
+                  tracking-tight
+                  text-black
+                  text-[56px]
+                  md:text-[90px]
+                "
+              >
+                How It
+                <br />
+                Works
+              </h2>
+            </header>
 
-            <motion.p
-              initial={{
-                opacity: 0,
-              }}
-              animate={
-                headingInView
-                  ? {
-                      opacity: 1,
-                    }
-                  : {}
-              }
-              transition={{
-                duration: 0.6,
-                delay: 0.15,
-              }}
-              style={{
-                fontSize: "clamp(12px,0.95vw,14px)",
-                lineHeight: 1.8,
-                maxWidth: "420px",
-              }}
+            <p
+              className="
+                max-w-[420px]
+                text-[14px]
+                leading-[1.9]
+                text-black/70
+              "
             >
-              A transparent process designed to keep you informed and in
-              control from first meeting to final handover.
-            </motion.p>
+              A transparent phased process designed to keep you informed and in
+              control throughout the project lifecycle.
+            </p>
           </motion.div>
         </aside>
 
-        <main>
+        {/* RIGHT */}
+        <section className="relative pb-10">
           <div className="flex flex-col">
-            {STEPS.map((step, i) => (
+            {STEPS.map((step, index) => (
               <StepCard
                 key={step.id}
                 step={step}
-                index={i}
-                isLast={i === STEPS.length - 1}
+                index={index}
+                isLast={index === STEPS.length - 1}
               />
             ))}
           </div>
 
+          {/* FOOTNOTE */}
           <footer
-            className="mt-[clamp(18px,3vh,32px)] flex items-start gap-4"
-            style={{
-              borderTop: "0.5px solid rgba(0,0,0)",
-              paddingTop: "clamp(14px,2.5vh,24px)",
-            }}
+            className="
+              mt-8
+              flex
+              items-start
+              gap-4
+              border-t
+              border-black/15
+              pt-5
+            "
           >
-            <div
-              style={{
-                width: "24px",
-                height: "1px",
-                background: "#000",
-                marginTop: 8,
-                flexShrink: 0,
-              }}
-            />
+            <div className="mt-2 h-px w-6 bg-black" />
 
             <p
-              style={{
-                fontSize: "clamp(10px,0.8vw,11px)",
-                lineHeight: 1.75,
-              }}
+              className="
+                max-w-[640px]
+                text-[11px]
+                leading-[1.9]
+                text-black/65
+              "
             >
-              Payment milestones are aligned with verified project progress and
-              confirmed timelines.
+              Payment milestones are aligned with verified construction
+              progress. Timelines and deliverables are formally documented
+              before commencement.
             </p>
           </footer>
-        </main>
-      </div>
+        </section>
+      </main>
     </motion.section>
   );
-}
+    }
