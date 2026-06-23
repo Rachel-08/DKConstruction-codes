@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRef, useState } from "react";
@@ -52,7 +51,7 @@ const STEPS: Step[] = [
     phase: "Discovery",
     title: "Initial Design Consultation",
     description:
-      "We begin with a structured briefing session — understanding your vision, spatial requirements, budget parameters, and timeline.",
+      "We begin with a structured briefing session — understanding your vision, spatial requirements, budget parameters, and timeline. Our designer walks your site and establishes the design direction.",
     icon: FaRegComments,
   },
 
@@ -62,7 +61,7 @@ const STEPS: Step[] = [
     phase: "Proposal",
     title: "Design Proposal & Agreement",
     description:
-      "We present drawings, material schedules, and a detailed estimate. Upon approval, the agreement is signed.",
+      "We present drawings, material schedules, and a detailed cost estimate. Upon approval, a formal agreement is signed and your project slot is secured.",
     payment: "5%",
     paymentLabel: "Retainer to confirm project",
     icon: FaFileSignature,
@@ -74,7 +73,7 @@ const STEPS: Step[] = [
     phase: "Execution",
     title: "Construction & Project Execution",
     description:
-      "Groundwork begins. Procurement, contractor scheduling, and quality control are managed throughout execution.",
+      "Groundwork begins. Procurement, contractor scheduling, and quality control are managed throughout execution with regular progress updates.",
     payment: "60%",
     paymentLabel: "Progressive milestone payment",
     icon: FaHardHat,
@@ -86,7 +85,7 @@ const STEPS: Step[] = [
     phase: "Completion",
     title: "Final Installations & Handover",
     description:
-      "All finishes and fixtures are inspected before the final balance is settled and handover is completed.",
+      "All finishes, fixtures, and furnishings are inspected before the final balance is settled and handover is completed.",
     payment: "100%",
     paymentLabel: "Final balance on handover",
     icon: FaClipboardCheck,
@@ -98,7 +97,7 @@ const STEPS: Step[] = [
     phase: "Occupation",
     title: "Move In & Enjoy",
     description:
-      "Your space is complete with warranty documents, supplier contacts, and aftercare support.",
+      "Your space is complete with warranty documents, supplier contacts, care guides, and aftercare support.",
     icon: FaHome,
   },
 ];
@@ -130,11 +129,20 @@ function StepCard({
   return (
     <motion.article
       ref={ref}
-      initial={{ opacity: 0, x: 24 }}
+      initial={{
+        opacity: 0,
+        x: 24,
+      }}
       animate={
         inView
-          ? { opacity: 1, x: 0 }
-          : { opacity: 0, x: 24 }
+          ? {
+              opacity: 1,
+              x: 0,
+            }
+          : {
+              opacity: 0,
+              x: 24,
+            }
       }
       transition={{
         duration: 0.55,
@@ -143,7 +151,7 @@ function StepCard({
       }}
       className="relative pl-[72px]"
     >
-      {/* Vertical line */}
+      {/* Process Line */}
 
       {!isLast && (
         <div
@@ -171,7 +179,9 @@ function StepCard({
             ? "rgba(0,0,0,0.06)"
             : "rgba(255,255,255,0.35)",
         }}
-        transition={{ duration: 0.25 }}
+        transition={{
+          duration: 0.25,
+        }}
         className="absolute left-0 top-[18px] z-10 flex items-center justify-center rounded-full"
         style={{
           width: 48,
@@ -194,7 +204,7 @@ function StepCard({
         }}
       >
         <header className="flex flex-col gap-3">
-          {/* Top Row */}
+          {/* Top */}
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span
@@ -291,7 +301,7 @@ function StepCard({
             }}
           />
 
-          {/* Expand Content */}
+          {/* Expandable Content */}
 
           <AnimatePresence initial={false}>
             {expanded && (
@@ -330,7 +340,7 @@ function StepCard({
             )}
           </AnimatePresence>
 
-          {/* Expand Label */}
+          {/* Toggle Label */}
 
           <span
             className="font-mono"
@@ -344,6 +354,8 @@ function StepCard({
           </span>
         </header>
       </button>
+
+      {/* Bottom Divider */}
 
       {!isLast && (
         <div
@@ -367,6 +379,7 @@ export default function HowWeWork({
   isActive,
   howWeWorkOpacity,
   howWeWorkY,
+  howWeWorkExitY,
 }: HowWeWorkProps) {
   const headingRef = useRef<HTMLElement>(null);
 
@@ -375,31 +388,82 @@ export default function HowWeWork({
     margin: "-6%",
   });
 
-  if (!isActive) return null;
-
   return (
     <motion.section
       aria-labelledby="how-we-work-heading"
       style={{
         opacity: howWeWorkOpacity,
-        y: howWeWorkY,
 
-        position: "relative",
+        y: isActive
+          ? howWeWorkExitY
+          : howWeWorkY,
+
+        position: "fixed",
+        inset: 0,
+
         width: "100%",
-        minHeight: "100vh",
+        height: "100dvh",
+
+        zIndex: 65,
 
         background: "#f5f2eb",
 
+        // INNER SCROLL
+        overflowY: "auto",
         overflowX: "hidden",
+
+        // MOBILE FIXES
+        WebkitOverflowScrolling: "touch",
+        overscrollBehavior: "contain",
+        touchAction: "pan-y",
+
+        // PERFORMANCE
+        willChange: "transform, opacity",
+        transform: "translateZ(0)",
+        backfaceVisibility: "hidden",
+
+        // ACTIVE STATE
+        pointerEvents: isActive
+          ? "auto"
+          : "none",
       }}
-      className="relative"
+      className="how-we-work-scroll"
+      aria-hidden={!isActive}
     >
+      {/* Scrollbar */}
+
+      <style jsx>{`
+        .how-we-work-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .how-we-work-scroll::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.04);
+        }
+
+        .how-we-work-scroll::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.35);
+          border-radius: 999px;
+        }
+
+        .how-we-work-scroll {
+          scrollbar-width: thin;
+          scrollbar-color:
+            rgba(0, 0, 0, 0.35)
+            rgba(0, 0, 0, 0.04);
+
+          contain: layout paint style;
+        }
+      `}</style>
+
       {/* Background Grid */}
 
       <div
         aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
-        style={{ opacity: 0.025 }}
+        style={{
+          opacity: 0.025,
+        }}
       >
         {Array.from({ length: 20 }).map((_, i) => (
           <div
@@ -440,21 +504,32 @@ export default function HowWeWork({
         "
         style={{
           maxWidth: "1280px",
+
           padding:
             "clamp(56px,9vh,100px) clamp(24px,5vw,72px) clamp(40px,5vh,60px)",
         }}
       >
-        {/* Left */}
+        {/* Left Side */}
 
         <aside
           ref={headingRef}
-          className="self-start lg:sticky lg:top-[120px]"
+          className="
+            self-start
+            lg:sticky
+            lg:top-[120px]
+          "
         >
           <motion.div
-            initial={{ opacity: 0, y: 18 }}
+            initial={{
+              opacity: 0,
+              y: 18,
+            }}
             animate={
               headingInView
-                ? { opacity: 1, y: 0 }
+                ? {
+                    opacity: 1,
+                    y: 0,
+                  }
                 : {}
             }
             transition={{
@@ -462,6 +537,8 @@ export default function HowWeWork({
             }}
             className="flex flex-col gap-4"
           >
+            {/* Label */}
+
             <div className="flex items-center gap-4">
               <span
                 className="font-mono uppercase tracking-[0.42em]"
@@ -483,6 +560,8 @@ export default function HowWeWork({
               />
             </div>
 
+            {/* Heading */}
+
             <h2
               id="how-we-work-heading"
               className="font-serif leading-none tracking-tight"
@@ -495,11 +574,17 @@ export default function HowWeWork({
               Works
             </h2>
 
+            {/* Description */}
+
             <motion.p
-              initial={{ opacity: 0 }}
+              initial={{
+                opacity: 0,
+              }}
               animate={
                 headingInView
-                  ? { opacity: 1 }
+                  ? {
+                      opacity: 1,
+                    }
                   : {}
               }
               transition={{
@@ -518,7 +603,7 @@ export default function HowWeWork({
           </motion.div>
         </aside>
 
-        {/* Right */}
+        {/* Right Side */}
 
         <main>
           <div className="flex flex-col">
@@ -568,3 +653,4 @@ export default function HowWeWork({
     </motion.section>
   );
 }
+  
