@@ -241,10 +241,11 @@ function ProjectCard({
         delay: 0.2 + index * 0.07,
         ease: [0.22, 1, 0.36, 1],
       }}
-      onHoverStart={() => setHovered(true)}
+      // Disables mouse triggers completely on mobile sizes
+      onHoverStart={() => window.innerWidth >= 640 && setHovered(true)}
       onHoverEnd={() => setHovered(false)}
       onClick={onClick}
-      className="relative overflow-hidden cursor-pointer"
+      className="relative overflow-hidden w-full flex flex-col sm:cursor-pointer"
       style={{
         borderRadius: 4,
         border: "0.5px solid rgba(26,18,8,0.1)",
@@ -255,11 +256,8 @@ function ProjectCard({
         transition: "box-shadow 0.4s ease",
       }}
     >
-      {/* Image */}
-      <div
-        className="relative overflow-hidden"
-        style={{ height: "clamp(200px,32vh,320px)" }}
-      >
+      {/* ── Image viewport block ── */}
+      <div className="relative overflow-hidden" style={{ height: "clamp(220px,32vh,320px)" }}>
         <motion.img
           src={project.image}
           alt={project.title}
@@ -270,199 +268,106 @@ function ProjectCard({
           style={{ transformOrigin: "center" }}
         />
 
-        {/* Default blur overlay with centered text */}
+        {/* MEDIUM / LARGE ONLY: Initial blur text card overlay */}
         <motion.div
           animate={{ opacity: hovered ? 0 : 1 }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute inset-0 flex flex-col items-center justify-center gap-2"
+          className="hidden sm:flex absolute inset-0 flex-col items-center justify-center gap-2"
           style={{
             backdropFilter: "blur(10px) saturate(0.8)",
             WebkitBackdropFilter: "blur(10px) saturate(0.8)",
             background: "rgba(240,236,224,0.38)",
           }}
         >
-          <span
-            className="font-mono uppercase tracking-[0.32em]"
-            style={{
-              fontSize: "clamp(6px,0.58vw,8px)",
-              color: "rgba(26,18,8,0.45)",
-            }}
-          >
+          <span className="font-mono uppercase tracking-[0.32em]" style={{ fontSize: "clamp(6px,0.58vw,8px)", color: "rgba(26,18,8,0.45)" }}>
             {project.tags.join(" · ")}
           </span>
-          <h3
-            className="font-serif text-center leading-tight px-4"
-            style={{
-              fontSize: "clamp(16px,1.8vw,24px)",
-              color: "#1a1208",
-              letterSpacing: "-0.02em",
-            }}
-          >
+          <h3 className="font-serif text-center leading-tight px-4" style={{ fontSize: "clamp(16px,1.8vw,24px)", color: "#1a1208", letterSpacing: "-0.02em" }}>
             {project.title}
           </h3>
-          {/* Hover hint */}
-          <motion.span
-            animate={{ opacity: [0.3, 0.7, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="font-mono uppercase tracking-[0.28em] mt-1"
-            style={{
-              fontSize: "clamp(5px,0.5vw,7px)",
-              color: "rgba(200,160,80,0.7)",
-            }}
-          >
+          <motion.span animate={{ opacity: [0.3, 0.7, 0.3] }} transition={{ duration: 2, repeat: Infinity }} className="font-mono uppercase tracking-[0.28em] mt-1" style={{ fontSize: "clamp(5px,0.5vw,7px)", color: "rgba(200,160,80,0.7)" }}>
             Hover to reveal
           </motion.span>
         </motion.div>
 
-        {/* Hover — image reveals, text slides to bottom */}
+        {/* MEDIUM / LARGE ONLY: Interactive slide-up info sheet */}
         <motion.div
-          animate={{
-            opacity: hovered ? 1 : 0,
-            y: hovered ? 0 : 10,
-          }}
+          animate={{ opacity: hovered ? 1 : 0, y: hovered ? 0 : 10 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute bottom-0 left-0 right-0"
+          className="hidden sm:block absolute bottom-0 left-0 right-0"
           style={{
             padding: "clamp(10px,1.8vh,18px) clamp(12px,1.6vw,20px)",
-            background:
-              "linear-gradient(0deg,rgba(10,7,3,0.82) 0%,rgba(10,7,3,0.4) 70%,transparent 100%)",
+            background: "linear-gradient(0deg,rgba(10,7,3,0.82) 0%,rgba(10,7,3,0.4) 70%,transparent 100%)",
           }}
         >
           <div className="flex items-end justify-between gap-2">
             <div className="flex flex-col gap-1">
-              <span
-                className="font-mono uppercase tracking-[0.28em]"
-                style={{
-                  fontSize: "clamp(6px,0.55vw,7px)",
-                  color: "rgba(200,160,80,0.75)",
-                }}
-              >
+              <span className="font-mono uppercase tracking-[0.28em]" style={{ fontSize: "clamp(6px,0.55vw,7px)", color: "rgba(200,160,80,0.75)" }}>
                 {project.tags.join(" · ")}
               </span>
-              <h3
-                className="font-serif leading-tight"
-                style={{
-                  fontSize: "clamp(14px,1.6vw,22px)",
-                  color: "#f0e8d4",
-                  letterSpacing: "-0.02em",
-                }}
-              >
+              <h3 className="font-serif leading-tight" style={{ fontSize: "clamp(14px,1.6vw,22px)", color: "#f0e8d4", letterSpacing: "-0.02em" }}>
                 {project.title}
               </h3>
             </div>
-            {/* Click hint */}
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 1.6, repeat: Infinity }}
-              className="flex flex-col items-center gap-1 shrink-0"
-            >
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  border: "0.5px solid rgba(200,160,80,0.5)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+            <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.6, repeat: Infinity }} className="flex flex-col items-center gap-1 shrink-0">
+              <div style={{ width: 28, height: 28, borderRadius: "50%", border: "0.5px solid rgba(200,160,80,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <svg viewBox="0 0 12 12" fill="none" style={{ width: 10 }}>
-                  <line x1="6" y1="2" x2="6" y2="10"
-                    stroke="rgba(200,160,80,0.8)" strokeWidth="1" />
-                  <line x1="2" y1="6" x2="10" y2="6"
-                    stroke="rgba(200,160,80,0.8)" strokeWidth="1" />
+                  <line x1="6" y1="2" x2="6" y2="10" stroke="rgba(200,160,80,0.8)" strokeWidth="1" />
+                  <line x1="2" y1="6" x2="10" y2="6" stroke="rgba(200,160,80,0.8)" strokeWidth="1" />
                 </svg>
               </div>
-              <span
-                className="font-mono uppercase"
-                style={{
-                  fontSize: 5,
-                  color: "rgba(200,160,80,0.55)",
-                  letterSpacing: "0.2em",
-                }}
-              >
-                Open
-              </span>
+              <span className="font-mono uppercase" style={{ fontSize: 5, color: "rgba(200,160,80,0.55)", letterSpacing: "0.2em" }}>Open</span>
             </motion.div>
           </div>
         </motion.div>
 
-        {/* Top — index number */}
-        <div
-          className="absolute top-3 left-3 font-mono"
-          style={{
-            fontSize: "clamp(6px,0.55vw,8px)",
-            color: hovered ? "rgba(200,160,80,0.7)" : "rgba(26,18,8,0.35)",
-            letterSpacing: "0.3em",
-            transition: "color 0.3s",
-          }}
-        >
+        {/* Index counter */}
+        <div className="absolute top-3 left-3 font-mono" style={{ fontSize: "clamp(7px,0.55vw,8px)", color: hovered ? "rgba(200,160,80,0.7)" : "rgba(26,18,8,0.35)", letterSpacing: "0.3em", transition: "color 0.3s" }}>
           {String(project.id).padStart(2, "0")}
         </div>
 
-        {/* Top right — year */}
-        <div
-          className="absolute top-3 right-3 font-mono"
-          style={{
-            fontSize: "clamp(6px,0.55vw,8px)",
-            color: hovered ? "rgba(255,255,255,0.55)" : "rgba(26,18,8,0.3)",
-            letterSpacing: "0.25em",
-            transition: "color 0.3s",
-          }}
-        >
+        {/* Year stamp */}
+        <div className="absolute top-3 right-3 font-mono" style={{ fontSize: "clamp(7px,0.55vw,8px)", color: hovered ? "rgba(255,255,255,0.55)" : "rgba(26,18,8,0.35)", letterSpacing: "0.25em", transition: "color 0.3s" }}>
           {project.year}
         </div>
       </div>
 
-      {/* Card footer — below image */}
-      <div
-        className="flex items-center justify-between"
-        style={{
-          padding: "clamp(10px,1.6vh,16px) clamp(12px,1.6vw,20px)",
-          borderTop: "0.5px solid rgba(26,18,8,0.08)",
-        }}
-      >
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <span
-            className="font-serif truncate"
-            style={{
-              fontSize: "clamp(11px,1.1vw,15px)",
-              color: "#1a1208",
-              letterSpacing: "-0.01em",
-            }}
-          >
+      {/* ── Structural metadata details (Always shown below image) ── */}
+      <div className="flex flex-col gap-3 flex-1 justify-between" style={{ padding: "16px clamp(12px,1.6vw,20px)", borderTop: "0.5px solid rgba(26,18,8,0.08)" }}>
+        <div className="flex flex-col gap-1 min-w-0">
+          {/* Headline Title */}
+          <span className="font-serif block text-base sm:text-[13px] md:text-sm" style={{ color: "#1a1208", letterSpacing: "-0.01em" }}>
             {project.title}
           </span>
-          <span
-            className="font-mono truncate"
-            style={{
-              fontSize: "clamp(6px,0.55vw,8px)",
-              color: "rgba(26,18,8,0.38)",
-              letterSpacing: "0.2em",
-            }}
-          >
+          
+          {/* MOBILE ONLY: Inline tags list (since hover sheets are hidden) */}
+          <span className="font-mono block sm:hidden uppercase mt-1" style={{ fontSize: "9px", color: "rgba(200,160,80,0.85)", letterSpacing: "0.15em" }}>
+            Tags: {project.tags.join(" · ")}
+          </span>
+          
+          {/* Location & Dimension properties */}
+          <span className="font-mono block text-[10px] sm:text-[8px] mt-0.5" style={{ color: "rgba(26,18,8,0.5)", letterSpacing: "0.15em" }}>
             {project.location} · {project.area}
           </span>
         </div>
 
+        {/* MEDIUM / LARGE ONLY: Micro-interactive alignment directional arrow */}
         <motion.div
+          className="hidden sm:block self-end"
           animate={{ x: hovered ? 3 : 0, opacity: hovered ? 0.8 : 0.35 }}
           transition={{ duration: 0.3 }}
-          style={{ color: "rgba(200,160,80,0.7)", flexShrink: 0, marginLeft: 8 }}
+          style={{ color: "rgba(200,160,80,0.7)", flexShrink: 0 }}
         >
           <svg viewBox="0 0 14 10" fill="none" style={{ width: 12 }}>
-            <line x1="0" y1="5" x2="11" y2="5"
-              stroke="currentColor" strokeWidth="1" />
-            <polyline points="7,1 12,5 7,9"
-              stroke="currentColor" strokeWidth="1"
-              fill="none" strokeLinecap="round" />
+            <line x1="0" y1="5" x2="11" y2="5" stroke="currentColor" strokeWidth="1" />
+            <polyline points="7,1 12,5 7,9" stroke="currentColor" strokeWidth="1" fill="none" strokeLinecap="round" />
           </svg>
         </motion.div>
       </div>
     </motion.article>
   );
 }
+
 
 // ─────────────────────────────────────────────
 // Project Modal
@@ -725,15 +630,16 @@ fontFamily: "inherit",
 // ─────────────────────────────────────────────
 
 export default function CategoryPage() {
-  const params   = useParams();
-  const router   = useRouter();
+  const params = useParams();
+  const router = useRouter();
   const category = (params?.category as string) ?? "";
 
-  const meta     = CATEGORY_META[category];
+  const meta = CATEGORY_META[category];
   const projects = PROJECTS[category] ?? [];
 
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [pageReady,        setPageReady       ] = useState(false);
+  const [pageReady, setPageReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (!meta) {
@@ -744,6 +650,17 @@ export default function CategoryPage() {
     }
   }, [meta, router]);
 
+  // Handle responsive behavior programmatically for interactive elements
+  useEffect(() => {
+    const checkMobileView = () => {
+      // Mobile breakpoint targets screen widths below 640px (Tailwind sm)
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobileView();
+    window.addEventListener("resize", checkMobileView);
+    return () => window.removeEventListener("resize", checkMobileView);
+  }, []);
+
   if (!meta || !pageReady) {
     return <div style={{ background: "#f5f2eb", minHeight: "100vh" }} />;
   }
@@ -751,16 +668,14 @@ export default function CategoryPage() {
   return (
     <>
       <main style={{ background: "#f5f2eb", minHeight: "100vh" }}>
-
-        {/* ── Sticky header ── */}
+        {/* ── Sticky Header ── */}
         <motion.header
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="sticky top-0 z-50 flex items-center justify-between"
           style={{
-            padding:
-              "clamp(14px,2.2vh,22px) clamp(24px,5vw,72px)",
+            padding: "clamp(14px,2.2vh,22px) clamp(24px,5vw,72px)",
             borderBottom: "0.5px solid rgba(26,18,8,0.1)",
             background: "rgba(245,242,235,0.92)",
             backdropFilter: "blur(14px)",
@@ -784,215 +699,85 @@ export default function CategoryPage() {
             }}
           >
             <svg viewBox="0 0 14 10" fill="none" style={{ width: 12 }}>
-              <line x1="14" y1="5" x2="1" y2="5"
-                stroke="currentColor" strokeWidth="1" />
-              <polyline points="5,1 0,5 5,9"
-                stroke="currentColor" strokeWidth="1"
-                fill="none" strokeLinecap="round" />
+              <line x1="14" y1="5" x2="1" y2="5" stroke="currentColor" strokeWidth="1" />
+              <polyline points="5,1 0,5 5,9" stroke="currentColor" strokeWidth="1" fill="none" strokeLinecap="round" />
             </svg>
             Back
           </motion.button>
 
-          <span
-            className="font-serif"
-            style={{
-              fontSize: "clamp(11px,1vw,15px)",
-              color: "rgba(26,18,8,0.45)",
-              letterSpacing: "0.08em",
-            }}
-          >
-            Studio
+          <span className="font-serif" style={{ fontSize: "clamp(11px,1vw,15px)", color: "rgba(26,18,8,0.45)", letterSpacing: "0.08em" }}>
+            DK Construction & Consultancy
           </span>
 
-          <span
-            className="font-mono uppercase"
-            style={{
-              fontSize: "clamp(7px,0.62vw,9px)",
-              color: "rgba(200,160,80,0.6)",
-              letterSpacing: "0.38em",
-            }}
-          >
+          <span className="font-mono uppercase" style={{ fontSize: "clamp(7px,0.62vw,9px)", color: "rgba(200,160,80,0.6)", letterSpacing: "0.38em" }}>
             {meta.label}
           </span>
         </motion.header>
 
         {/* ── Hero ── */}
-        <section
-          style={{
-            padding:
-              "clamp(44px,8vh,88px) clamp(24px,5vw,72px) clamp(28px,5vh,56px)",
-            borderBottom: "0.5px solid rgba(26,18,8,0.08)",
-          }}
-        >
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <section style={{ padding: "clamp(44px,8vh,88px) clamp(24px,5vw,72px) clamp(28px,5vh,56px)", borderBottom: "0.5px solid rgba(26,18,8,0.08)" }}>
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
             <div className="flex flex-col gap-3 max-w-2xl">
-              <motion.div
-                initial={{ opacity: 0, x: -14 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.55 }}
-                className="flex items-center gap-3"
-              >
-                <span
-                  className="font-mono uppercase tracking-[0.4em]"
-                  style={{
-                    fontSize: "clamp(7px,0.62vw,9px)",
-                    color: "rgba(200,160,80,0.6)",
-                  }}
-                >
-                  Work
-                </span>
-                <div
-                  style={{
-                    width: "clamp(20px,2.5vw,36px)",
-                    height: "0.5px",
-                    background: "rgba(200,160,80,0.3)",
-                  }}
-                />
-                <span
-                  className="font-mono uppercase tracking-[0.4em]"
-                  style={{
-                    fontSize: "clamp(7px,0.62vw,9px)",
-                    color: "rgba(26,18,8,0.35)",
-                  }}
-                >
-                  {meta.label}
-                </span>
+              <motion.div initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55 }} className="flex items-center gap-3">
+                <span className="font-mono uppercase tracking-[0.4em]" style={{ fontSize: "clamp(7px,0.62vw,9px)", color: "rgba(200,160,80,0.6)" }}>Work</span>
+                <div style={{ width: "clamp(20px,2.5vw,36px)", height: "0.5px", background: "rgba(200,160,80,0.3)" }} />
+                <span className="font-mono uppercase tracking-[0.4em]" style={{ fontSize: "clamp(7px,0.62vw,9px)", color: "rgba(26,18,8,0.35)" }}>{meta.label}</span>
               </motion.div>
 
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="font-serif leading-none tracking-tight"
-                style={{
-                  fontSize: "clamp(36px,7vw,96px)",
-                  color: "#1a1208",
-                }}
-              >
+              <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.08, ease: [0.22, 1, 0.36, 1] }} className="font-serif leading-none tracking-tight" style={{ fontSize: "clamp(36px,7vw,96px)", color: "#1a1208" }}>
                 {meta.label}
               </motion.h1>
 
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.22 }}
-                className="font-serif italic"
-                style={{
-                  fontSize: "clamp(13px,1.2vw,18px)",
-                  color: "rgba(26,18,8,0.42)",
-                  lineHeight: 1.55,
-                }}
-              >
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.22 }} className="font-serif italic" style={{ fontSize: "clamp(13px,1.2vw,18px)", color: "rgba(26,18,8,0.42)", lineHeight: 1.55 }}>
                 {meta.tagline}
               </motion.p>
             </div>
 
             {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.55, delay: 0.3 }}
-              className="flex items-center gap-6 shrink-0"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.55, delay: 0.3 }} className="flex items-center gap-6 shrink-0">
               <div className="flex flex-col gap-1">
-                <span
-                  className="font-serif"
-                  style={{
-                    fontSize: "clamp(28px,4vw,52px)",
-                    color: "#1a1208",
-                    lineHeight: 1,
-                  }}
-                >
-                  {meta.stat}
-                </span>
-                <span
-                  className="font-mono uppercase tracking-[0.3em]"
-                  style={{
-                    fontSize: "clamp(6px,0.55vw,8px)",
-                    color: "rgba(200,160,80,0.55)",
-                  }}
-                >
-                  {meta.statLabel}
-                </span>
+                <span className="font-serif" style={{ fontSize: "clamp(28px,4vw,52px)", color: "#1a1208", lineHeight: 1 }}>{meta.stat}</span>
+                <span className="font-mono uppercase tracking-[0.3em]" style={{ fontSize: "clamp(6px,0.55vw,8px)", color: "rgba(200,160,80,0.55)" }}>{meta.statLabel}</span>
               </div>
-              <div
-                style={{
-                  width: "0.5px",
-                  height: 40,
-                  background: "rgba(26,18,8,0.1)",
-                }}
-              />
+              <div style={{ width: "0.5px", height: 40, background: "rgba(26,18,8,0.1)" }} />
               <div className="flex flex-col gap-1">
-                <span
-                  className="font-serif"
-                  style={{
-                    fontSize: "clamp(28px,4vw,52px)",
-                    color: "#1a1208",
-                    lineHeight: 1,
-                  }}
-                >
-                  {new Date().getFullYear() - 2018}+
-                </span>
-                <span
-                  className="font-mono uppercase tracking-[0.3em]"
-                  style={{
-                    fontSize: "clamp(6px,0.55vw,8px)",
-                    color: "rgba(200,160,80,0.55)",
-                  }}
-                >
-                  Years
-                </span>
+                <span className="font-serif" style={{ fontSize: "clamp(28px,4vw,52px)", color: "#1a1208", lineHeight: 1 }}>{new Date().getFullYear() - 2018}+</span>
+                <span className="font-mono uppercase tracking-[0.3em]" style={{ fontSize: "clamp(6px,0.55vw,8px)", color: "rgba(200,160,80,0.55)" }}>Years</span>
               </div>
             </motion.div>
           </div>
 
-          {/* Hover instruction */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.45 }}
-            className="font-mono uppercase mt-6"
-            style={{
-              fontSize: "clamp(6px,0.55vw,7px)",
-              color: "rgba(26,18,8,0.28)",
-              letterSpacing: "0.35em",
-            }}
-          >
+          {/* Guide hint: hidden on mobile, matches tablet & desktop layouts */}
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.45 }} className="hidden sm:block font-mono uppercase mt-6" style={{ fontSize: "clamp(6px,0.55vw,7px)", color: "rgba(26,18,8,0.28)", letterSpacing: "0.35em" }}>
             Hover to reveal · Click to explore
           </motion.p>
         </section>
 
-        {/* ── 3-column grid ── */}
-        <section
-          style={{
-            padding:
-              "clamp(32px,5vh,56px) clamp(24px,5vw,72px) clamp(64px,12vh,120px)",
-          }}
-        >
-          <div
-            className="grid gap-[clamp(12px,1.6vw,22px)]"
-            style={{ gridTemplateColumns: "repeat(3,1fr)" }}
-          >
+        {/* ── Responsive Project Grid ── */}
+        <section style={{ padding: "clamp(32px,5vh,56px) clamp(24px,5vw,72px) clamp(64px,12vh,120px)" }}>
+          {/* 
+            Responsive columns definitions:
+            - grid-cols-1: Mobile Layout (Vertical stacked timeline layout)
+            - sm:grid-cols-2: Medium Screens Layout (Tablets / small notebooks)
+            - lg:grid-cols-3: Large Desktop Layout (Original premium 3-column block architecture)
+          */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[clamp(16px,1.6vw,22px)]">
             {projects.map((project, i) => (
               <ProjectCard
                 key={project.id}
                 project={project}
                 index={i}
-                onClick={() => setSelectedProject(project)}
+                onClick={() => !isMobile && setSelectedProject(project)}
               />
             ))}
           </div>
         </section>
-
       </main>
 
-      {/* ── Project modal ── */}
+      {/* ── Conditional Project Modal ── */}
       <AnimatePresence>
-        {selectedProject && (
-          <ProjectModal
-            project={selectedProject}
-            onClose={() => setSelectedProject(null)}
-          />
+        {!isMobile && selectedProject && (
+          <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
         )}
       </AnimatePresence>
     </>
