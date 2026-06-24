@@ -22,11 +22,12 @@ type NavbarProps = {
 const NAV_ITEMS: {
   label: string;
   target: "home" | "howwework" | "team" | "contact";
+  href: string | null
 }[] = [
-  { label: "Home",        target: "home"      },
-  { label: "How We Work", target: "howwework" },
-  { label: "Team",        target: "team"       },
-  { label: "Contact",     target: "contact"    },
+  { label: "Home",        target: "home"      as const, href: null},
+  { label: "How We Work", target: "howwework" as const, href: null},
+  { label: "Team",        target: "team"       as const, href: "/team"},
+  { label: "Contact",     target: "contact"    as const, href: null},
 ];
 
 // ─────────────────────────────────────────────
@@ -38,6 +39,7 @@ export default function Navbar({
   onNavigate,
   activeSegment,
 }: NavbarProps) {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Close mobile menu on resize to desktop
@@ -55,8 +57,14 @@ export default function Navbar({
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  const handleNav = (target: "home" | "howwework" | "team" | "contact") => {
+  const handleNav = (target: "home" | "howwework" | "team" | "contact",
+    href: string | null
+  ) => {
     setMobileOpen(false);
+    if(href){
+      router.push(href);
+      return;
+    }
     onNavigate?.(target);
   };
 
@@ -82,18 +90,18 @@ export default function Navbar({
 
           {/* Logo */}
           <button
-            onClick={() => handleNav("home")}
-            className="font-serif text-xl italic tracking-tight md:text-2xl"
+            onClick={() => handleNav("home", null)}
+            className="font-serif text-xl tracking-tight md:text-2xl"
             style={{
               background: "none",
               border: "none",
               cursor: "pointer",
               color: "#1a1208",
-              fontFamily: "inherit",
+              // fontFamily: "font-serif cursive",
               padding: 0,
             }}
           >
-            Aurea Studio
+            DK Constructions
           </button>
 
           {/* Desktop nav */}
@@ -103,7 +111,7 @@ export default function Navbar({
               return (
                 <button
                   key={item.label}
-                  onClick={() => handleNav(item.target)}
+                  onClick={() => handleNav(item.target, item.href)}
                   className="group relative px-1"
                   style={{
                     background: "none",
@@ -117,12 +125,13 @@ export default function Navbar({
                   <span
                     className="relative z-10 font-mono uppercase transition-colors duration-300"
                     style={{
-                      fontSize: "clamp(8px,0.68vw,10px)",
-                      letterSpacing: "0.28em",
+                      fontSize: "clamp(8px,0.76vw,16px)",
+                      letterSpacing: "0.2em",
                       // ── HIGHLIGHT ── active = brass gold, inactive = dark muted
                       color: isActive
-                        ? "#c8a052"
-                        : "rgba(26,18,8,0.45)",
+                        ? "#000000"
+                        : "rgba(0,0,0,0.8)",
+                        fontWeight: isActive ? "bold" : "normal"
                     }}
                   >
                     {item.label}
@@ -227,7 +236,7 @@ export default function Navbar({
                       delay: i * 0.07,
                       ease: [0.22, 1, 0.36, 1],
                     }}
-                    onClick={() => handleNav(item.target)}
+                    onClick={() => handleNav(item.target, item.href)}
                     className="flex items-center justify-between py-5"
                     style={{
                       background: "none",
@@ -291,7 +300,7 @@ export default function Navbar({
                   letterSpacing: "0.4em",
                 }}
               >
-                Aurea Studio · Architecture & Design
+                DK Constructions · Architecture & Design
               </p>
             </div>
           </motion.div>
