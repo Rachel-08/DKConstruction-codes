@@ -1,0 +1,36 @@
+"use client";
+
+import Navbar from "@/components/mobile/MobileNavbar";
+
+import WelcomeWindow from "@/components/shared/WelcomeWindow";
+import StudioLanding from "@/components/shared/StudioLanding";
+
+import MobileServices from "@/components/mobile/MobileServices";
+import MobileHowWeWork from "@/components/mobile/MobileHowWeWork";
+import MobileSelectedWork from "@/components/mobile/MobileSelectedWork";
+
+import ContactSection from "@/components/shared/ContactSection";
+
+export default function MobileExperience() {
+  return (
+    <main className="bg-[#f5f2eb] text-black overflow-x-hidden">
+      <Navbar />
+
+      <header>
+        <WelcomeWindow />
+      </header>
+
+      <main>
+        <StudioLanding />
+
+        <MobileServices />
+
+        <MobileHowWeWork />
+
+        <MobileSelectedWork />
+
+        <ContactSection />
+      </main>
+    </main>
+  );
+}
