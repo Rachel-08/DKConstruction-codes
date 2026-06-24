@@ -1,0 +1,328 @@
+"use client";
+
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+import {
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "motion/react";
+
+import Navbar from "@/components/desktop/DesktopNavbar";
+
+import WelcomeWindow from "@/components/shared/WelcomeWindow";
+import StudioLanding from "@/components/shared/StudioLanding";
+
+import DesktopServices from "@/components/desktop/DesktopServices";
+import DesktopHowWeWork from "@/components/desktop/DesktopHowWeWork";
+import DesktopSelectedWork from "@/components/desktop/DesktopSelectedWork";
+
+import ContactSection from "@/components/shared/ContactSection";
+
+import LoadingScreen from "@/components/shared/LoadingScreen";
+
+// ─────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────
+
+const SECTION_COUNT = 5;
+
+const SECTION_PROGRESS = 1 / SECTION_COUNT;
+
+// ─────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────
+
+export default function DesktopScrollExperience() {
+  // ─────────────────────────────────────────────
+  // Refs
+  // ─────────────────────────────────────────────
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // ─────────────────────────────────────────────
+  // States
+  // ─────────────────────────────────────────────
+
+  const [loadingComplete, setLoadingComplete] = useState(false);
+
+  const [activeSection, setActiveSection] = useState(0);
+
+  // ─────────────────────────────────────────────
+  // Scroll
+  // ─────────────────────────────────────────────
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  // Smooth spring
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 90,
+    damping: 20,
+    mass: 0.3,
+  });
+
+  // ─────────────────────────────────────────────
+  // Section Progress
+  // ─────────────────────────────────────────────
+
+  const landingStart = 0;
+  const landingEnd = SECTION_PROGRESS;
+
+  const servicesStart = SECTION_PROGRESS;
+  const servicesEnd = SECTION_PROGRESS * 2;
+
+  const howStart = SECTION_PROGRESS * 2;
+  const howEnd = SECTION_PROGRESS * 3;
+
+  const workStart = SECTION_PROGRESS * 3;
+  const workEnd = SECTION_PROGRESS * 4;
+
+  const contactStart = SECTION_PROGRESS * 4;
+  const contactEnd = 1;
+
+  // ─────────────────────────────────────────────
+  // Landing
+  // ─────────────────────────────────────────────
+
+  const landingOpacity = useTransform(
+    smoothProgress,
+    [landingStart, landingEnd],
+    [1, 0]
+  );
+
+  const landingY = useTransform(
+    smoothProgress,
+    [landingStart, landingEnd],
+    ["0%", "-16%"]
+  );
+
+  // ─────────────────────────────────────────────
+  // Services
+  // ─────────────────────────────────────────────
+
+  const servicesOpacity = useTransform(
+    smoothProgress,
+    [servicesStart, servicesEnd],
+    [0, 1]
+  );
+
+  const servicesY = useTransform(
+    smoothProgress,
+    [servicesStart, servicesEnd],
+    ["10%", "0%"]
+  );
+
+  const servicesExitY = useTransform(
+    smoothProgress,
+    [servicesEnd, howStart],
+    ["0%", "-12%"]
+  );
+
+  // ─────────────────────────────────────────────
+  // How We Work
+  // ─────────────────────────────────────────────
+
+  const howOpacity = useTransform(
+    smoothProgress,
+    [howStart, howEnd],
+    [0, 1]
+  );
+
+  const howY = useTransform(
+    smoothProgress,
+    [howStart, howEnd],
+    ["10%", "0%"]
+  );
+
+  const howExitY = useTransform(
+    smoothProgress,
+    [howEnd, workStart],
+    ["0%", "-12%"]
+  );
+
+  // ─────────────────────────────────────────────
+  // Selected Work
+  // ─────────────────────────────────────────────
+
+  const workOpacity = useTransform(
+    smoothProgress,
+    [workStart, workEnd],
+    [0, 1]
+  );
+
+  const workY = useTransform(
+    smoothProgress,
+    [workStart, workEnd],
+    ["10%", "0%"]
+  );
+
+  const workExitY = useTransform(
+    smoothProgress,
+    [workEnd, contactStart],
+    ["0%", "-12%"]
+  );
+
+  // ─────────────────────────────────────────────
+  // Contact
+  // ─────────────────────────────────────────────
+
+  const contactOpacity = useTransform(
+    smoothProgress,
+    [contactStart, contactEnd],
+    [0, 1]
+  );
+
+  const contactY = useTransform(
+    smoothProgress,
+    [contactStart, contactEnd],
+    ["10%", "0%"]
+  );
+
+  // ─────────────────────────────────────────────
+  // Active Section Detection
+  // ─────────────────────────────────────────────
+
+  useMotionValueEvent(smoothProgress, "change", (latest) => {
+    if (latest < servicesStart) {
+      setActiveSection(0);
+    } else if (latest < howStart) {
+      setActiveSection(1);
+    } else if (latest < workStart) {
+      setActiveSection(2);
+    } else if (latest < contactStart) {
+      setActiveSection(3);
+    } else {
+      setActiveSection(4);
+    }
+  });
+
+  // ─────────────────────────────────────────────
+  // Lock body scroll during loading
+  // ─────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!loadingComplete) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [loadingComplete]);
+
+  // ─────────────────────────────────────────────
+  // Render
+  // ─────────────────────────────────────────────
+
+  return (
+    <>
+      {/* Loading */}
+      {!loadingComplete && (
+        <LoadingScreen
+          onComplete={() => setLoadingComplete(true)}
+        />
+      )}
+
+      {/* Main Experience */}
+      {loadingComplete && (
+        <>
+          {/* Navbar */}
+          <Navbar activeSection={activeSection} />
+
+          {/* Scroll Container */}
+          <main
+            ref={containerRef}
+            className="
+              relative
+              bg-[#f5f2eb]
+            "
+            style={{
+              height: `${SECTION_COUNT * 100}vh`,
+            }}
+          >
+            {/* Sticky Canvas */}
+            <div
+              className="
+                sticky
+                top-0
+                h-screen
+                overflow-hidden
+              "
+            >
+              {/* Welcome Window */}
+              <WelcomeWindow />
+
+              {/* Landing */}
+              <motion.section
+                aria-label="Studio Introduction"
+                style={{
+                  opacity: landingOpacity,
+                  y: landingY,
+                }}
+                className="
+                  absolute
+                  inset-0
+                  z-10
+                "
+              >
+                <StudioLanding />
+              </motion.section>
+
+              {/* Services */}
+              <DesktopServices
+                isActive={activeSection === 1}
+                servicesOpacity={servicesOpacity}
+                servicesY={servicesY}
+                servicesExitY={servicesExitY}
+              />
+
+              {/* How We Work */}
+              <DesktopHowWeWork
+                isActive={activeSection === 2}
+                howWeWorkOpacity={howOpacity}
+                howWeWorkY={howY}
+                howWeWorkExitY={howExitY}
+              />
+
+              {/* Selected Work */}
+              <DesktopSelectedWork
+                isActive={activeSection === 3}
+                selectedWorkOpacity={workOpacity}
+                selectedWorkY={workY}
+                selectedWorkExitY={workExitY}
+              />
+
+              {/* Contact */}
+              <motion.section
+                aria-label="Contact Section"
+                style={{
+                  opacity: contactOpacity,
+                  y: contactY,
+                }}
+                className="
+                  absolute
+                  inset-0
+                  z-[80]
+                "
+              >
+                <ContactSection />
+              </motion.section>
+            </div>
+          </main>
+        </>
+      )}
+    </>
+  );
+}
