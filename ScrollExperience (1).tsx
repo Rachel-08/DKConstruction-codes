@@ -10,14 +10,14 @@ import {
 
 import { useRouter } from "next/navigation";
 
-import LoadingScreen from "@/components/LoadingScreen";
-import Navbar from "@/components/Navbar";
-import WelcomeWindow from "@/components/WelcomeWindow";
-import StudioLanding from "@/components/StudioLanding";
-import ServicesSection from "@/components/ServiceSection";
-import SelectedWork from "@/components/SelectedWork";
-import HowWeWork from "@/components/About";
-import ContactSection from "@/components/Contact";
+import LoadingScreen from "@/components/common/LoadingScreen";
+import Navbar from "@/components/common/Navbar";
+import WelcomeWindow from "@/components/common/WelcomeWindow";
+import StudioLanding from "@/components/desktop/sections/StudioLanding";
+import ServicesSection from "@/components/desktop/sections/ServiceSection";
+import SelectedWork from "@/components/desktop/sections/SelectedWork";
+import HowWeWork from "@/components/desktop/sections/About";
+import ContactSection from "@/components/desktop/sections/Contact";
 
 // ─────────────────────────────────────────────
 // Types
@@ -152,72 +152,78 @@ function getTimeline(mode: ViewportMode): Timeline {
    */
   if (mode === "mobile") {
     return {
-      // Mobile sticky scroll only covers intro + landing.
-      // The remaining sections (services → contact) live in normal flow below.
-      // We keep scrollVh just large enough for the intro+landing animations.
-      scrollVh: 2400,
+      // Mobile sticky block covers ONLY the WelcomeWindow zoom/exit animation.
+      // ~300vh is enough — after that the user is in normal document flow.
+      // StudioLanding + all subsequent sections live below the sticky block.
+      scrollVh: 300,
 
       active: {
-        introEnd: 0.16,
-        landingEnd: 0.27,
-        servicesEnd: 0.47,
-        howWeWorkEnd: 0.61,
-        workEnd: 0.86,
+        // On mobile these thresholds only gate intro vs "past intro".
+        // Segments after landing are irrelevant to the sticky block.
+        introEnd: 0.55,
+        landingEnd: 1.0,
+        servicesEnd: 1.0,
+        howWeWorkEnd: 1.0,
+        workEnd: 1.0,
       },
 
       navbar: {
-        hideBefore: 0.18,
-        showStart: 0.18,
-        showEnd: 0.28,
+        // Show navbar as soon as intro window exits (progress ~0.6)
+        hideBefore: 0.0,
+        showStart: 0.0,
+        showEnd: 1.0,
       },
 
       intro: {
-        rotate: [0.0, 0.1],
-        frame: [0.04, 0.1],
-        zoom: [0.05, 0.15],
-        scrollText: [0.0, 0.05],
-        exitX: [0.21, 0.27],
-        enterTarget: 0.17,
-        enterTargetMobile: 0.20,
-        enterTargetDesktop: 0.17,
+        rotate: [0.0, 0.35],
+        frame: [0.05, 0.35],
+        zoom: [0.1, 0.5],
+        scrollText: [0.0, 0.1],
+        exitX: [0.55, 0.85],
+        enterTarget: 0.6,
+        enterTargetMobile: 0.6,
+        enterTargetDesktop: 0.6,
       },
 
+      // Landing is in normal flow on mobile — these values are unused but
+      // kept to satisfy the Timeline type.
       landing: {
-        opacity: [0.14, 0.18, 0.23, 0.27],
-        y: [0.14, 0.18],
-        exitX: [0.23, 0.27],
-        target: 0.19,
+        opacity: [0, 0, 1, 1],
+        y: [0, 0],
+        exitX: [0, 0],
+        target: 1.0,
       },
 
+      // Services–contact are unused on mobile (normal flow), kept for type.
       services: {
-        opacity: [0.25, 0.29, 0.43, 0.47],
-        y: [0.25, 0.3],
-        exitY: [0.43, 0.49],
-        target: 0.32,
+        opacity: [0, 0, 1, 1],
+        y: [0, 0],
+        exitY: [0, 0],
+        target: 1.0,
       },
 
       howWeWork: {
-        opacity: [0.47, 0.51, 0.57, 0.61],
-        y: [0.47, 0.51],
-        exitY: [0.57, 0.62],
-        target: 0.53,
+        opacity: [0, 0, 1, 1],
+        y: [0, 0],
+        exitY: [0, 0],
+        target: 1.0,
       },
 
       work: {
-        x: [0.59, 0.64],
-        opacity: [0.59, 0.64, 0.86, 0.89],
-        headingY: [0.61, 0.65],
-        headingScale: [0.63, 0.67],
-        headingX: [0.63, 0.67],
-        carouselOpacity: [0.65, 0.68],
-        carouselX: [0.69, 0.85],
-        exitY: [0.85, 0.89],
-        target: 0.66,
+        x: [0, 0],
+        opacity: [0, 0, 1, 1],
+        headingY: [0, 0],
+        headingScale: [1, 1],
+        headingX: [0, 0],
+        carouselOpacity: [0, 1],
+        carouselX: [0, 0],
+        exitY: [0, 0],
+        target: 1.0,
       },
 
       contact: {
-        opacity: [0.86, 0.9, 1.0],
-        y: [0.88, 0.9, 1.0],
+        opacity: [0, 1, 1],
+        y: [0, 0, 0],
         target: 1.0,
       },
     };
@@ -1054,28 +1060,45 @@ export default function ScrollExperience() {
       {isMobile ? (
         <div className="relative bg-[#f5f2eb]">
 
-          {/* Sticky intro+landing block — just tall enough for those animations */}
-          <section
+          {/*
+            ── MOBILE NAVBAR ──
+            Fixed at top, visible once loading is done.
+            Scrolls to section DOM ids since there's no scroll-progress nav.
+          */}
+          {loadingDone && (
+            <div className="fixed top-0 left-0 right-0 z-[200]">
+              <Navbar
+                showNavbar
+                activeSegment="home"
+                onNavigate={(target) => {
+                  if (target === "team") { router.push("/team"); return; }
+
+                  const idMap: Record<string, string> = {
+                    home: "mobile-landing",
+                    services: "mobile-services",
+                    howwework: "mobile-howwework",
+                    contact: "mobile-contact",
+                  };
+
+                  const el = document.getElementById(idMap[target] ?? "");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+              />
+            </div>
+          )}
+
+          {/*
+            ── STICKY WELCOME WINDOW ──
+            Only 300vh — just enough for the zoom + exit animation.
+            After scrolling past it the user lands directly on StudioLanding.
+          */}
+          {/* <section
             id="top"
             ref={containerRef}
-            className="relative bg-[#f5f2eb]"
+            className="relative"
             style={{ height: `${timeline.scrollVh}vh` }}
           >
             <div className="sticky top-0 h-svh overflow-hidden bg-[#f5f2eb]">
-              <Navbar
-                showNavbar={showNavbar}
-                activeSegment={
-                  activeSegment === "intro" ||
-                  activeSegment === "landing" ||
-                  activeSegment === "services" ||
-                  activeSegment === "work"
-                    ? "home"
-                    : activeSegment
-                }
-                onNavigate={handleNavigate}
-              />
-
-              {/* Segment 1 — Welcome Window */}
               <WelcomeWindow
                 isActive={isIntroActive}
                 leftRotate={leftRotate}
@@ -1087,70 +1110,57 @@ export default function ScrollExperience() {
                 scrollTextOpacity={scrollTextOpacity}
                 onEnterClick={handleEnterClick}
                 loadingComplete={loadingDone}
-              />
+              /> */}
 
-              {/* Segment 2 — Studio Landing (mobile: fade only, no exit slide) */}
-              <StudioLanding
-                isActive={isLandingActive}
-                landingOpacity={landingOpacity}
-                landingY={landingY}
-                landingExitX={landingExitX}
-                onNavigate={(target) => {
-                  if (target === "services") {
-                    handleNavigate("services");
-                  } else if (target === "contact") {
-                    handleNavigate("contact");
-                  } else if (target === "home") {
-                    handleNavigate("home");
-                  } else if (target === "team") {
-                    router.push("/team");
-                  }
-                }}
-              />
-
-              {/* Idle scroll nudge */}
-              {showNudge && (activeSegment === "intro" || activeSegment === "landing") && (
-                <div
-                  className="
-                    pointer-events-none absolute left-1/2 z-200
-                    flex -translate-x-1/2 flex-col items-center gap-1.5
-                    bottom-[calc(1.4rem+env(safe-area-inset-bottom))]
-                  "
-                >
+              {/* Idle nudge — only shown during intro */}
+              {/* {showNudge && activeSegment === "intro" && (
+                <div className="pointer-events-none absolute left-1/2 z-[200] flex -translate-x-1/2 flex-col items-center gap-1.5 bottom-[calc(1.4rem+env(safe-area-inset-bottom))]">
                   {[0, 1, 2].map((i) => (
                     <motion.div
                       key={i}
                       animate={{ opacity: [0.12, 0.55, 0.12], y: [0, 5, 0] }}
-                      transition={{
-                        duration: 1.4,
-                        repeat: Infinity,
-                        delay: i * 0.18,
-                        ease: "easeInOut",
-                      }}
+                      transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.18, ease: "easeInOut" }}
                     >
                       <svg viewBox="0 0 16 9" fill="none" className="h-3 w-4">
-                        <polyline
-                          points="1,1 8,8 15,1"
-                          stroke="rgba(200,160,80)"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
+                        <polyline points="1,1 8,8 15,1" stroke="rgba(200,160,80)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </motion.div>
                   ))}
-                  <span
-                    className="font-mono uppercase text-[9px] tracking-[0.28em]"
-                    style={{ color: "rgba(200,160,80)" }}
-                  >
+                  <span className="font-mono uppercase text-[9px] tracking-[0.28em]" style={{ color: "rgba(200,160,80)" }}>
                     Scroll
                   </span>
                 </div>
-              )}
-            </div>
-          </section>
+              )} */}
+            {/* </div>
+          </section> */}
 
-          {/* Normal-flow sections — no transforms, no absolute positioning */}
+          {/*
+            ── STUDIO LANDING — normal flow, no motion transforms ──
+            Appears immediately after the sticky WelcomeWindow ends.
+            isActive is always true so pointer-events are on.
+          */}
+          <div id="mobile-landing">
+            <StudioLanding
+              isActive
+              landingOpacity={1}
+              landingY={"0vh"}
+              landingExitX={"0vw"}
+              onNavigate={(target) => {
+                if (target === "team") { router.push("/team"); return; }
+                const idMap: Record<string, string> = {
+                  home: "mobile-landing",
+                  services: "mobile-services",
+                  howwework: "mobile-howwework",
+                  contact: "mobile-contact",
+                };
+                const el = document.getElementById(idMap[target] ?? "");
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+              }}
+            />
+          </div>
+
+          {/* Normal-flow sections */}
+          <div id="mobile-services">
           <ServicesSection
             isActive={isServicesActive}
             servicesOpacity={servicesOpacity}
@@ -1158,7 +1168,9 @@ export default function ScrollExperience() {
             servicesExitY={servicesExitY}
             isMobileFlow
           />
+          </div>
 
+          <div id="mobile-howwework">
           <HowWeWork
             isActive={isHowWeWorkActive}
             howWeWorkOpacity={howWeWorkOpacity}
@@ -1166,6 +1178,7 @@ export default function ScrollExperience() {
             howWeWorkExitY={howWeWorkExitY}
             isMobileFlow
           />
+          </div>
 
           <SelectedWork
             isActive={isWorkActive}
@@ -1180,12 +1193,14 @@ export default function ScrollExperience() {
             isMobileFlow
           />
 
+          <div id="mobile-contact">
           <ContactSection
             isActive={isContactActive}
             contactOpacity={contactOpacity}
             contactY={contactY}
             isMobileFlow
           />
+          </div>
         </div>
 
       ) : (
