@@ -10,14 +10,14 @@ import {
 
 import { useRouter } from "next/navigation";
 
-import LoadingScreen from "@/components/LoadingScreen";
-import Navbar from "@/components/Navbar";
-import WelcomeWindow from "@/components/WelcomeWindow";
-import StudioLanding from "@/components/StudioLanding";
-import ServicesSection from "@/components/ServiceSection";
-import SelectedWork from "@/components/SelectedWork";
-import HowWeWork from "@/components/About";
-import ContactSection from "@/components/Contact";
+import LoadingScreen from "@/components/common/LoadingScreen";
+import Navbar from "@/components/common/Navbar";
+import WelcomeWindow from "@/components/common/WelcomeWindow";
+import StudioLanding from "@/components/desktop/sections/StudioLanding";
+import ServicesSection from "@/components/desktop/sections/ServiceSection";
+import SelectedWork from "@/components/desktop/sections/SelectedWork";
+import HowWeWork from "@/components/desktop/sections/About";
+import ContactSection from "@/components/desktop/sections/Contact";
 
 // ─────────────────────────────────────────────
 // Types
