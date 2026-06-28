@@ -85,11 +85,10 @@ function CategoryCard({
         ease: [0.22, 1, 0.36, 1],
       }}
       onClick={onClick}
-      className="group snap-start min-w-[78vw] shrink-0 cursor-pointer md:w-[38vw]"
-      whileTap={{ scale: 0.98 }}
+      className="group w-[76vw] shrink-0 cursor-pointer md:w-[38vw]"
     >
       {/* Image container */}
-      <div className="relative h-[46vh] overflow-hidden rounded-xl md:h-[52vh]">
+      <div className="relative h-[48vh] overflow-hidden rounded-[4px] md:h-[52vh]">
         <motion.img
           src={category.image}
           alt={category.label}
@@ -218,9 +217,11 @@ export default function SelectedWork({
   return (
     <motion.section
       id="work"
-      style={{ x: workX, opacity: workOpacity, y: workExitY, zIndex: isActive ? 1 : 0 }}
-      className={`absolute inset-0 overflow-hidden bg-[#f5f2eb] px-4 pb-6 pt-4 sm:px-6 sm:pb-8 ${
-        isActive ? "pointer-events-auto" : "pointer-events-none"
+      style={{ x: workX, opacity: workOpacity, y: workExitY }}
+      className={`absolute inset-0 overflow-hidden bg-[#f5f2eb] px-6 ${
+        isActive
+          ? "z-[90] pointer-events-auto"
+          : "z-[10] pointer-events-none"
       }`}
     >
       {/* Heading */}
@@ -231,7 +232,7 @@ export default function SelectedWork({
           x: workHeadingX,
           transformOrigin: "left top",
         }}
-        className="pointer-events-none absolute left-1/2 top-16 z-45 max-w-5xl -translate-x-1/2 md:top-1/2 md:-translate-y-1/2 md:max-w-5xl max-w-[90vw]"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-[45] max-w-5xl -translate-x-1/2 -translate-y-1/2"
       >
         <p
           className="font-mono uppercase tracking-[0.4em]"
@@ -242,7 +243,7 @@ export default function SelectedWork({
         >
           Selected Work
         </p>
-        <h2 className="mt-5 max-w-3xl font-serif text-[clamp(1.8rem,6vw,2.8rem)] md:text-[clamp(4.4rem,7vw,5.5rem)] tracking-tighter leading-tight">
+        <h2 className="mt-5 max-w-3xl font-serif text-5xl tracking-[-0.05em] md:text-7xl">
           Projects shaped with light, proportion and timeless form.
         </h2>
         <div className="mt-10 h-[0.5px] w-full bg-black/20" />
@@ -250,12 +251,8 @@ export default function SelectedWork({
 
       {/* Category carousel */}
       <motion.div
-        className="pointer-events-auto absolute bottom-0 left-0 z-60 flex snap-x snap-mandatory overflow-x-auto gap-4 px-4 pb-8 sm:gap-6 sm:px-6 md:bottom-16 md:px-10 md:pb-0 w-full"
-        style={{
-          x: carouselX,
-          opacity: carouselOpacity,
-          WebkitOverflowScrolling: "touch",
-        }}
+        style={{ x: carouselX, opacity: carouselOpacity }}
+        className="pointer-events-auto absolute bottom-14 left-0 z-[60] flex gap-8 px-6 md:bottom-16 md:px-10"
       >
         {CATEGORIES.map((cat, i) => (
           <CategoryCard
