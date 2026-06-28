@@ -1,0 +1,745 @@
+"use client";
+
+import { motion, type MotionValue } from "motion/react";
+
+type WelcomeWindowProps = {
+  isActive: boolean;
+  leftRotate: MotionValue<number>;
+  rightRotate: MotionValue<number>;
+  windowScale: MotionValue<number>;
+  windowOpacity: MotionValue<number>;
+  windowExitX: MotionValue<string>;
+  frameOpacity: MotionValue<number>;
+  scrollTextOpacity: MotionValue<number>;
+  onEnterClick: () => void;
+  /** Passed by ScrollExperience once the loading screen has finished. */
+  loadingComplete?: boolean;
+};
+
+export default function WelcomeWindow({
+  isActive,
+  leftRotate,
+  rightRotate,
+  windowScale,
+  windowOpacity,
+  windowExitX,
+  frameOpacity,
+  scrollTextOpacity,
+  onEnterClick,
+  loadingComplete: _loadingComplete,
+}: WelcomeWindowProps) {
+  return (
+    <section
+      className={`absolute inset-0 z-[80] ${
+        isActive ? "pointer-events-auto" : "pointer-events-none"
+      }`}
+    >
+      <motion.div
+        role="button"
+        tabIndex={isActive ? 0 : -1}
+        aria-label="Enter website"
+        onClick={onEnterClick}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onEnterClick();
+          }
+        }}
+        style={{
+          scale: windowScale,
+          opacity: windowOpacity,
+          x: windowExitX,
+        }}
+        className="absolute inset-0 cursor-pointer overflow-hidden outline-none"
+      >
+        {/* ── WALL ─────────────────────────────────────────────────────── */}
+        {/* Base warm plaster colour matching the mockup's sandy-beige #c4b49a */}
+        <div className="absolute inset-0" style={{ background: "#c2b29a" }}>
+
+          {/* Fine stucco / plaster grain – tiny noise dots */}
+          <div
+            className="absolute inset-0"
+            style={{
+              opacity: 0.18,
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")",
+              backgroundSize: "200px 200px",
+            }}
+          />
+
+          {/* Broad warm luminosity – lamp glow radiating from upper-right quadrant */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 58% at 68% 28%, rgba(255,218,140,0.38) 0%, rgba(240,195,110,0.18) 38%, transparent 72%)",
+            }}
+          />
+
+          {/* Subtle left-side deepening (less light) */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(100deg, rgba(0,0,0,0.1) 0%, transparent 40%)",
+            }}
+          />
+
+          {/* Very faint vertical streaks – plaster unevenness */}
+          <div
+            className="absolute inset-0"
+            style={{
+              opacity: 0.06,
+              backgroundImage:
+                "repeating-linear-gradient(92deg, transparent, transparent 38px, rgba(0,0,0,0.4) 39px, transparent 40px)",
+            }}
+          />
+
+          {/* Floor strip – slightly darker slab, same tone */}
+          <div
+            className="absolute bottom-0 left-0 w-full"
+            style={{ height: 52, background: "#8a7e6e" }}
+          />
+
+          {/* Wall-floor seam */}
+          <div
+            className="absolute left-0 w-full"
+            style={{
+              bottom: 52,
+              height: 1,
+              background: "rgba(0,0,0,0.22)",
+              boxShadow: "0 1px 0 rgba(255,255,255,0.14)",
+            }}
+          />
+
+          {/* Floor tile – one vertical joint toward right-center */}
+          <div
+            className="absolute bottom-0"
+            style={{
+              left: "34%",
+              width: 1,
+              height: 52,
+              background: "rgba(0,0,0,0.18)",
+              boxShadow: "1px 0 0 rgba(255,255,255,0.1)",
+            }}
+          />
+
+          {/* Floor subtle grain */}
+          <div
+            className="absolute bottom-0 left-0 w-full"
+            style={{
+              height: 52,
+              opacity: 0.12,
+              backgroundImage:
+                "linear-gradient(90deg, rgba(255,255,255,0.15), transparent 30%, rgba(0,0,0,0.15))",
+            }}
+          />
+        </div>
+
+        {/* ── MAIN LAYOUT ───────────────────────────────────────────────── */}
+        <div className="relative z-10 grid h-full w-full grid-cols-1 items-center px-6 py-8 md:grid-cols-[46%_54%] md:px-[8vw] lg:px-[11vw]">
+
+          {/* ── LEFT: WINDOW ─────────────────────────────────────────────── */}
+          <div className="flex h-full items-center justify-center md:justify-start">
+            <div
+              className="relative"
+              style={{
+                height: "78vh",
+                width: "clamp(220px, 26vw, 340px)",
+                perspective: "1400px",
+              }}
+            >
+              {/* WALL RECESS / REVEAL
+                  The window sits inside a plastered reveal (like a jamb).
+                  Top + sides are darker (shadow); bottom sill catches light.
+              */}
+              <div
+                className="absolute"
+                style={{
+                  /* extend beyond the glass on all sides to form the jamb */
+                  inset: "-28px -20px -22px -20px",
+                  /* same base plaster colour, slightly deeper */
+                  background: "#b0a08a",
+                  /* deep inset shadow on top/left; soft highlight on right */
+                  boxShadow:
+                    "inset 18px 22px 38px rgba(0,0,0,0.28), inset -6px -8px 18px rgba(255,255,255,0.1)",
+                  borderRadius: 2,
+                }}
+              >
+                {/* Matching stucco grain inside the reveal */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    opacity: 0.14,
+                    backgroundImage:
+                      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")",
+                    backgroundSize: "200px 200px",
+                  }}
+                />
+
+                {/* Left jamb edge – darkest shadow strip */}
+                <div
+                  className="absolute left-0 top-0 h-full"
+                  style={{
+                    width: 16,
+                    background:
+                      "linear-gradient(to right, rgba(0,0,0,0.22), transparent)",
+                  }}
+                />
+                {/* Right jamb edge – slight highlight */}
+                <div
+                  className="absolute right-0 top-0 h-full"
+                  style={{
+                    width: 16,
+                    background:
+                      "linear-gradient(to left, rgba(255,255,255,0.09), transparent)",
+                  }}
+                />
+                {/* Top jamb – deep shadow */}
+                <div
+                  className="absolute left-0 top-0 w-full"
+                  style={{
+                    height: 22,
+                    background:
+                      "linear-gradient(to bottom, rgba(0,0,0,0.24), transparent)",
+                  }}
+                />
+                {/* Bottom sill reveal – light catch */}
+                <div
+                  className="absolute bottom-0 left-0 w-full"
+                  style={{
+                    height: 16,
+                    background:
+                      "linear-gradient(to top, rgba(255,255,255,0.12), transparent)",
+                  }}
+                />
+              </div>
+
+              {/* WINDOW CONTACT SHADOW on floor */}
+              <div
+                className="absolute -inset-x-4 -bottom-6 rounded-full"
+                style={{
+                  height: 36,
+                  background: "rgba(0,0,0,0.3)",
+                  filter: "blur(18px)",
+                }}
+              />
+
+              {/* ── WINDOW FRAME + GLASS ─────────────────────────────────── */}
+              <div
+                className="relative h-full w-full overflow-hidden"
+                style={{
+                  background: "#0e0d0b",
+                  boxShadow:
+                    "0 32px 64px rgba(0,0,0,0.48), 0 2px 0 rgba(255,255,255,0.07) inset",
+                }}
+              >
+                {/* Scene through glass */}
+                <motion.img
+                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1800&auto=format&fit=crop"
+                  alt="Architecture view"
+                  draggable={false}
+                  className="absolute inset-0 h-full w-full select-none object-cover"
+                />
+
+                {/* Glass tint + depth overlays */}
+                <div className="absolute inset-0" style={{ background: "rgba(215,195,161,0.1)" }} />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, rgba(255,255,255,0.18) 0%, transparent 40%, rgba(0,0,0,0.26) 100%)",
+                  }}
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: "linear-gradient(135deg, transparent 60%, rgba(255,255,255,0.08))" }}
+                />
+                {/* Specular sheen on glass */}
+                <div
+                  className="absolute top-0 h-full"
+                  style={{
+                    left: "10%",
+                    width: "16%",
+                    transform: "skewX(-12deg)",
+                    background: "rgba(255,255,255,0.07)",
+                    filter: "blur(1px)",
+                  }}
+                />
+
+                {/* OUTER FRAME – thick dark aluminium / steel profile */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute inset-0 z-20"
+                  style={{
+                    border: "14px solid #0e0d0b",
+                    boxShadow:
+                      "inset 0 0 0 1px rgba(255,255,255,0.07), inset 0 0 0 6px rgba(0,0,0,0.36), inset 0 0 22px rgba(0,0,0,0.52)",
+                  }}
+                />
+
+                {/* INNER BEAD / STOP profile */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute z-[22]"
+                  style={{
+                    inset: 18,
+                    border: "5px solid #181512",
+                    boxShadow:
+                      "0 0 0 1px rgba(255,255,255,0.06), inset 0 0 0 1px rgba(0,0,0,0.6)",
+                  }}
+                />
+
+                {/* Glass perimeter reveal */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute z-[23]"
+                  style={{
+                    inset: 28,
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    boxShadow: "inset 0 0 14px rgba(0,0,0,0.32)",
+                  }}
+                />
+
+                {/* VERTICAL CENTRE MUNTIN */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute z-[25]"
+                  style={{
+                    left: "50%",
+                    top: 14,
+                    height: "calc(100% - 28px)",
+                    width: 5,
+                    transform: "translateX(-50%)",
+                    background: "#12100e",
+                    boxShadow:
+                      "1px 0 0 rgba(255,255,255,0.07), -1px 0 0 rgba(0,0,0,0.65), 0 0 8px rgba(0,0,0,0.35)",
+                    borderRadius: 2,
+                  }}
+                />
+
+                {/* HORIZONTAL MUNTIN – upper (30%) */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute z-[25]"
+                  style={{
+                    left: 14,
+                    top: "30%",
+                    width: "calc(100% - 28px)",
+                    height: 5,
+                    background: "#12100e",
+                    boxShadow:
+                      "0 1px 0 rgba(255,255,255,0.07), 0 -1px 0 rgba(0,0,0,0.65), 0 0 8px rgba(0,0,0,0.32)",
+                    borderRadius: 2,
+                  }}
+                />
+
+                {/* HORIZONTAL MUNTIN – lower (78%) */}
+                <motion.div
+                  style={{ opacity: frameOpacity }}
+                  className="pointer-events-none absolute z-[25]"
+                  style={{
+                    left: 14,
+                    top: "78%",
+                    width: "calc(100% - 28px)",
+                    height: 5,
+                    background: "#12100e",
+                    boxShadow:
+                      "0 1px 0 rgba(255,255,255,0.07), 0 -1px 0 rgba(0,0,0,0.65), 0 0 8px rgba(0,0,0,0.32)",
+                    borderRadius: 2,
+                  }}
+                />
+
+                {/* LEFT PANEL */}
+                <motion.div
+                  style={{ rotateY: leftRotate, transformOrigin: "left center", opacity: frameOpacity }}
+                  className="pointer-events-none absolute left-0 top-0 z-[30] h-full w-1/2"
+                  style={{
+                    borderRight: "4px solid #12100e",
+                    background: "rgba(12,11,9,0.07)",
+                    backdropFilter: "blur(1.5px)",
+                    boxShadow: "inset -8px 0 18px rgba(0,0,0,0.16)",
+                  }}
+                >
+                  <div
+                    className="absolute"
+                    style={{
+                      inset: 18,
+                      border: "1px solid rgba(255,255,255,0.09)",
+                      boxShadow: "inset 0 0 8px rgba(0,0,0,0.24)",
+                    }}
+                  />
+                  <div
+                    className="absolute left-[18px] right-0"
+                    style={{ top: "30%", height: 4, background: "#12100e", borderRadius: 2 }}
+                  />
+                  <div
+                    className="absolute left-[18px] right-0"
+                    style={{ top: "78%", height: 4, background: "#12100e", borderRadius: 2 }}
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(to right, rgba(255,255,255,0.07), transparent 60%, rgba(0,0,0,0.12))",
+                    }}
+                  />
+                </motion.div>
+
+                {/* RIGHT PANEL */}
+                <motion.div
+                  style={{ rotateY: rightRotate, transformOrigin: "right center", opacity: frameOpacity }}
+                  className="pointer-events-none absolute right-0 top-0 z-[30] h-full w-1/2"
+                  style={{
+                    borderLeft: "4px solid #12100e",
+                    background: "rgba(12,11,9,0.07)",
+                    backdropFilter: "blur(1.5px)",
+                    boxShadow: "inset 8px 0 18px rgba(0,0,0,0.16)",
+                  }}
+                >
+                  <div
+                    className="absolute"
+                    style={{
+                      inset: 18,
+                      border: "1px solid rgba(255,255,255,0.09)",
+                      boxShadow: "inset 0 0 8px rgba(0,0,0,0.24)",
+                    }}
+                  />
+                  <div
+                    className="absolute left-0 right-[18px]"
+                    style={{ top: "30%", height: 4, background: "#12100e", borderRadius: 2 }}
+                  />
+                  <div
+                    className="absolute left-0 right-[18px]"
+                    style={{ top: "78%", height: 4, background: "#12100e", borderRadius: 2 }}
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(to left, rgba(255,255,255,0.07), transparent 60%, rgba(0,0,0,0.12))",
+                    }}
+                  />
+                </motion.div>
+              </div>
+
+              {/* WINDOW SILL – projecting stone ledge */}
+              {/* Top sill face (light-catching horizontal surface) */}
+              <div
+                className="absolute left-1/2"
+                style={{
+                  bottom: -10,
+                  width: "114%",
+                  height: 10,
+                  transform: "translateX(-50%)",
+                  background: "#a8997f",
+                  boxShadow:
+                    "0 1px 0 rgba(255,255,255,0.26) inset, 0 -1px 0 rgba(0,0,0,0.18) inset",
+                }}
+              />
+              {/* Sill front face – darker vertical drop */}
+              <div
+                className="absolute left-1/2"
+                style={{
+                  bottom: -22,
+                  width: "120%",
+                  height: 12,
+                  transform: "translateX(-50%)",
+                  background: "#665d4f",
+                  boxShadow:
+                    "0 4px 12px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.1) inset",
+                }}
+              />
+            </div>
+          </div>
+
+          {/* ── RIGHT: CONTENT + LAMP ────────────────────────────────────── */}
+          <div className="relative hidden h-full items-center md:flex">
+
+            {/* ── PENDANT LAMP ──────────────────────────────────────────── */}
+            {/* Cord / wire from ceiling */}
+            <div
+              className="absolute"
+              style={{
+                left: "43%",
+                top: 0,
+                height: "30vh",
+                width: 1,
+                background: "rgba(28,22,14,0.7)",
+                boxShadow: "1px 0 0 rgba(255,255,255,0.07)",
+              }}
+            />
+
+            {/* Lamp assembly positioned so bottom is at ~30vh from top */}
+            <div
+              className="absolute"
+              style={{
+                left: "43%",
+                top: "30vh",
+                transform: "translateX(-50%)",
+                /* shade is 110px tall, 140px wide at base */
+                width: 140,
+              }}
+            >
+              {/* ── Ceiling canopy / cord grip (tiny cylinder at top) ── */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: -14,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 18,
+                  height: 14,
+                  borderRadius: "3px 3px 6px 6px",
+                  background:
+                    "linear-gradient(to bottom, #2a221a, #1c1610)",
+                  boxShadow:
+                    "0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
+                }}
+              />
+
+              {/* ── SHADE body – truncated cone / frustum ── */}
+              {/* Using a clip-path trapezoid. Narrow at top, wide at bottom. */}
+              <div
+                style={{
+                  position: "relative",
+                  height: 108,
+                  width: 140,
+                  /* Trapezoid: 32% narrow top, 100% wide bottom */
+                  clipPath: "polygon(27% 0%, 73% 0%, 100% 100%, 0% 100%)",
+                  /*
+                    Metal finish:
+                    - Left edge catches a little warm reflected light
+                    - Centre-left has a subtle vertical highlight streak
+                    - Right and interior are dark burnished metal
+                    - Bottom opening glows warm
+                  */
+                  background:
+                    "linear-gradient(108deg, #1e1710 0%, #4a3420 16%, #7a5c38 30%, #6b4e30 42%, #3a2a1c 58%, #1a1310 78%, #100d09 100%)",
+                  boxShadow:
+                    "inset 6px 0 18px rgba(255,210,150,0.12), inset -12px 0 20px rgba(0,0,0,0.5), 0 16px 48px rgba(0,0,0,0.38)",
+                }}
+              >
+                {/* Vertical specular highlight – left-of-centre */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "34%",
+                    top: "10%",
+                    width: 14,
+                    height: "72%",
+                    background:
+                      "linear-gradient(to bottom, rgba(255,255,255,0.18), rgba(255,255,255,0.06) 60%, transparent)",
+                    transform: "skewX(6deg)",
+                    filter: "blur(2px)",
+                    borderRadius: 8,
+                  }}
+                />
+                {/* Warm inner glow bleeding from bottom opening */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "78%",
+                    height: 22,
+                    background:
+                      "radial-gradient(ellipse at center bottom, rgba(255,210,110,0.65) 0%, rgba(200,150,60,0.3) 55%, transparent 100%)",
+                    filter: "blur(3px)",
+                  }}
+                />
+              </div>
+
+              {/* ── Top rim – thin ring visible above shade ── */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 46,
+                  height: 10,
+                  borderRadius: "4px 4px 2px 2px",
+                  background:
+                    "linear-gradient(to bottom, #353028, #201a14)",
+                  boxShadow:
+                    "0 1px 0 rgba(255,255,255,0.14) inset, 0 4px 8px rgba(0,0,0,0.42)",
+                }}
+              />
+
+              {/* ── Bottom rim – thick ring at shade opening ── */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 132,
+                  height: 10,
+                  borderRadius: "0 0 5px 5px",
+                  background:
+                    "linear-gradient(to bottom, #2e2318, #1a1310)",
+                  boxShadow:
+                    "0 1px 0 rgba(255,220,160,0.22) inset, 0 6px 16px rgba(0,0,0,0.36)",
+                  border: "1px solid rgba(0,0,0,0.28)",
+                }}
+              />
+            </div>
+
+            {/* ── LIGHT CAST ON WALL ──────────────────────────────────── */}
+            {/* Primary wide halo */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                left: "43%",
+                top: "28vh",
+                width: "48vw",
+                height: "46vh",
+                transform: "translateX(-50%)",
+                background:
+                  "radial-gradient(ellipse at 50% 8%, rgba(252,210,120,0.38) 0%, rgba(245,195,100,0.2) 28%, rgba(230,180,80,0.08) 55%, transparent 78%)",
+                filter: "blur(4px)",
+                pointerEvents: "none",
+              }}
+            />
+            {/* Tighter hot-spot directly below lamp */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                left: "43%",
+                top: "34vh",
+                width: "28vw",
+                height: "26vh",
+                transform: "translateX(-50%)",
+                background:
+                  "radial-gradient(ellipse at 50% 0%, rgba(255,220,140,0.28) 0%, rgba(240,195,100,0.14) 45%, transparent 75%)",
+                filter: "blur(2px)",
+                pointerEvents: "none",
+              }}
+            />
+
+            {/* ── TEXT CONTENT ───────────────────────────────────────── */}
+            <div
+              className="relative text-[#2d2a24]"
+              style={{ marginLeft: "5vw", maxWidth: 610, paddingTop: "8vh" }}
+            >
+              <p
+                style={{
+                  marginBottom: 28,
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: "0.52em",
+                  textTransform: "uppercase",
+                  color: "rgba(63,58,49,0.7)",
+                }}
+              >
+                Architecture Studio
+              </p>
+
+              <h1
+                style={{
+                  maxWidth: 600,
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  fontSize: "clamp(48px, 5.5vw, 88px)",
+                  fontWeight: 400,
+                  lineHeight: 0.92,
+                  letterSpacing: "-0.055em",
+                  color: "#2f2b25",
+                }}
+              >
+                DK Construction
+                <br />& Consultancy
+              </h1>
+
+              <p
+                style={{
+                  marginTop: 28,
+                  fontSize: 15,
+                  letterSpacing: "-0.02em",
+                  color: "rgba(63,58,49,0.7)",
+                }}
+              >
+                Architecture · Interiors · Construction Consultancy
+              </p>
+
+              <div style={{ marginTop: 44 }}>
+                <p
+                  style={{
+                    marginBottom: 20,
+                    fontSize: 14,
+                    color: "rgba(63,58,49,0.7)",
+                  }}
+                >
+                  Designing refined spaces with,
+                </p>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {["Clarity", "Function", "Purpose"].map((word) => (
+                    <div
+                      key={word}
+                      style={{ display: "flex", alignItems: "center", gap: 24 }}
+                    >
+                      <span
+                        style={{
+                          minWidth: 150,
+                          fontFamily: "Georgia, 'Times New Roman', serif",
+                          fontSize: 38,
+                          fontStyle: "italic",
+                          lineHeight: 1,
+                          letterSpacing: "-0.05em",
+                          color: "rgba(56,51,43,0.85)",
+                        }}
+                      >
+                        {word}
+                      </span>
+                      <span
+                        style={{
+                          flex: 1,
+                          height: 1,
+                          background: "rgba(93,84,71,0.2)",
+                        }}
+                      />
+                      <span
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: "50%",
+                          background: "rgba(47,43,37,0.8)",
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <motion.p
+                style={{ opacity: scrollTextOpacity }}
+                className="mt-11 w-fit border-b border-[#3f3a31]/25 pb-2 text-[13px] tracking-[-0.02em] text-[#2f2b25]/70"
+              >
+                Click to enter
+              </motion.p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── MOBILE TEXT ─────────────────────────────────────────────── */}
+        <div className="absolute bottom-10 left-1/2 z-20 w-full -translate-x-1/2 px-6 text-center md:hidden">
+          <p className="text-[10px] font-medium uppercase tracking-[0.42em] text-[#2f2b25]/70">
+            Architecture Studio
+          </p>
+          <h1 className="mt-3 font-serif text-[34px] leading-[0.95] tracking-[-0.05em] text-[#2f2b25]">
+            DK Construction
+            <br />& Consultancy
+          </h1>
+          <motion.p
+            style={{ opacity: scrollTextOpacity }}
+            className="mt-5 text-[12px] text-[#2f2b25]/70"
+          >
+            Scroll to enter
+          </motion.p>
+        </div>
+      </motion.div>
+    </section>
+  );
+}
