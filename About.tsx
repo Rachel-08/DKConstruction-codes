@@ -38,6 +38,8 @@ type HowWeWorkProps = {
   howWeWorkOpacity: MotionValue<number>;
   howWeWorkY: MotionValue<string>;
   howWeWorkExitY: MotionValue<string>;
+  /** When true the section renders in normal document flow (mobile layout). */
+  isMobileFlow?: boolean;
 };
 
 // ─────────────────────────────────────────────
@@ -99,7 +101,7 @@ const STEPS: Step[] = [
 ];
 
 // ─────────────────────────────────────────────
-// Step Card
+// Step Card — shared between mobile and desktop
 // ─────────────────────────────────────────────
 
 function StepCard({
@@ -308,6 +310,76 @@ function StepCard({
 }
 
 // ─────────────────────────────────────────────
+// Mobile normal-flow layout
+// ─────────────────────────────────────────────
+
+function MobileHowWeWorkFlow() {
+  const headingRef = useRef<HTMLDivElement>(null);
+  const headingInView = useInView(headingRef, { once: true, margin: "-8%" });
+
+  return (
+    <section className="bg-[#f5f2eb]">
+      <div className="mx-auto max-w-[640px] px-5 py-14">
+        {/* Header */}
+        <div ref={headingRef} className="mb-10 flex flex-col gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={headingInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="flex items-center gap-4"
+          >
+            <span className="font-mono text-[10px] uppercase tracking-[0.42em] text-black/60">
+              Process
+            </span>
+            <div className="h-px flex-1 bg-gradient-to-r from-black to-transparent" />
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={headingInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            className="font-serif text-[52px] leading-none tracking-tight text-black"
+          >
+            How It
+            <br />
+            Works
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={headingInView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.6, delay: 0.18 }}
+            className="text-[13px] leading-[1.9] text-black/65"
+          >
+            A transparent phased process designed to keep you informed and in control throughout the project lifecycle.
+          </motion.p>
+        </div>
+
+        {/* Steps */}
+        <div className="relative flex flex-col">
+          {STEPS.map((step, index) => (
+            <StepCard
+              key={step.id}
+              step={step}
+              index={index}
+              isLast={index === STEPS.length - 1}
+            />
+          ))}
+        </div>
+
+        {/* Footnote */}
+        <footer className="mt-8 flex items-start gap-4 border-t border-black/15 pt-5">
+          <div className="mt-2 h-px w-6 bg-black" />
+          <p className="max-w-[640px] text-[11px] leading-[1.9] text-black/65">
+            Payment milestones are aligned with verified construction progress. Timelines and deliverables are formally documented before commencement.
+          </p>
+        </footer>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────
 
@@ -316,6 +388,7 @@ export default function HowWeWork({
   howWeWorkOpacity,
   howWeWorkY,
   howWeWorkExitY,
+  isMobileFlow = false,
 }: HowWeWorkProps) {
   const headingRef = useRef<HTMLDivElement>(null);
 
@@ -324,7 +397,7 @@ export default function HowWeWork({
     margin: "-10%",
   });
 
-  // MOBILE DETECTION
+  // MOBILE DETECTION (for desktop scroll-driven render only)
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -341,6 +414,12 @@ export default function HowWeWork({
     };
   }, []);
 
+  // ── Mobile normal-flow render ──
+  if (isMobileFlow) {
+    return <MobileHowWeWorkFlow />;
+  }
+
+  // ── Desktop / tablet scroll-driven render (unchanged) ──
   return (
     <motion.section
       aria-hidden={!isActive}
